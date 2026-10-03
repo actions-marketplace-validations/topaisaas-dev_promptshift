@@ -136,11 +136,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-zero-state',
         category: 'growth',
-        title: 'Compteurs réinitialisés — Prêt pour le lancement en production',
-        description: "Le moteur d'analytics souverain 100% en RAM est actif. Dès la première visite ou conversion sur le site, les métriques s'afficheront ici en direct.",
+        title: 'Telemetry Reset — Ready for Production Launch',
+        description: 'The sovereign in-RAM analytics engine is active. As soon as visitors test or convert projects, live metrics will stream here in real time.',
         impact: 'medium',
-        metricGrounding: '0 conversion enregistrée. Compteurs propres à zéro.',
-        actionableStep: 'Effectuez un premier test de conversion ou partagez votre lien pour voir les métriques remonter en temps réel.',
+        metricGrounding: '0 conversions recorded. Clean zero-state.',
+        actionableStep: 'Perform a test migration or share your link to observe live incoming telemetry.',
       });
     }
 
@@ -156,11 +156,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-dominant-target',
         category: 'marketing',
-        title: `Accentuer le marketing sur ${formattedName} (${topPct}% de vos conversions)`,
-        description: `La majorité de vos utilisateurs cherchent à exporter leurs projets vers ${formattedName}. Mettre en avant ce modèle dans vos titres et posts LinkedIn maximisera votre taux de clic.`,
+        title: `Focus Marketing on ${formattedName} (${topPct}% of conversions)`,
+        description: `The majority of your users migrate their AI setups to ${formattedName}. Highlighting this target ecosystem in headers and social posts will maximize CTR.`,
         impact: 'high',
-        metricGrounding: `${targets[0][1]} / ${summary.totalConversions} conversions ciblent ${topTgt.toUpperCase()}.`,
-        actionableStep: `Placez un badge "Optimized for ${formattedName}" bien visible au-dessus de la zone d'upload.`,
+        metricGrounding: `${targets[0][1]} / ${summary.totalConversions} conversions target ${topTgt.toUpperCase()}.`,
+        actionableStep: `Feature an "Optimized for ${formattedName}" badge prominently near the upload portal.`,
       });
     }
 
@@ -173,11 +173,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-freemium-balance',
         category: 'pricing',
-        title: `Seuil Freemium à 5 fichiers : ${paidRatio}% de conversion vers le paiement`,
-        description: `La barrière actuelle (≤ 5 fichiers gratuit) touche ${under5} petits projets et incite ${over5} projets plus ambitieux à passer sur le Single Pass ou l'abonnement Pro.`,
+        title: `Freemium 5-File Threshold: ${paidRatio}% conversion into paid tiers`,
+        description: `The current threshold (≤ 5 files free) covers ${under5} small projects while encouraging ${over5} larger repositories to upgrade to Pro.`,
         impact: paidRatio > 30 ? 'high' : 'medium',
-        metricGrounding: `${over5} projets dépassent la limite gratuite de 5 fichiers (${paidRatio}% d'incitation à l'achat).`,
-        actionableStep: `Conservez ce seuil de 5 fichiers : il offre une excellente découverte sans cannibaliser les revenus de migration de gros projets.`,
+        metricGrounding: `${over5} projects exceed the 5-file free starter limit (${paidRatio}% upgrade incentive).`,
+        actionableStep: `Keep the 5-file free threshold: it delivers frictionless onboarding while protecting upgrade conversions on real-world projects.`,
       });
     }
 
@@ -186,11 +186,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-security-shield',
         category: 'security',
-        title: `Protection des Secrets : ${summary.totalSecretsSanitized} clés d'API interceptées`,
-        description: `Le sanitisateur en RAM bloque activement la fuite de secrets sensibles dans les bundles générés. C'est l'argument numéro un pour rassurer les CTOs et les startups.`,
+        title: `Secrets Sanitization Shield: ${summary.totalSecretsSanitized} API credentials intercepted`,
+        description: `The sovereign in-RAM sanitizer prevents private credentials from leaking into exported bundles. This is a major trust factor for engineering leads and CTOs.`,
         impact: 'critical',
-        metricGrounding: `${summary.totalSecretsSanitized} credentials (OpenAI, AWS, Anthropic, HuggingFace) ont été automatiquement masqués en mémoire.`,
-        actionableStep: `Mentionnez sur LinkedIn : "PromptShift a déjà sanitisé plus de ${Math.max(12, summary.totalSecretsSanitized)} clés API en RAM avec zéro rétention de données".`,
+        metricGrounding: `${summary.totalSecretsSanitized} credentials (OpenAI, AWS, Anthropic, HuggingFace) were automatically masked in memory.`,
+        actionableStep: `Share on LinkedIn: "PromptShift has already sanitized over ${Math.max(12, summary.totalSecretsSanitized)} API credentials in volatile memory with zero data retention."`,
       });
     }
 
@@ -200,11 +200,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-international-currency',
         category: 'growth',
-        title: `Portée Internationale active (${currencies.map(([c]) => c).join(', ')})`,
-        description: `L'auto-détection de géolocalisation IP et la conversion automatique des montants éliminent la friction de paiement pour les développeurs hors zone EUR/USD.`,
+        title: `Active Global Reach (${currencies.map(([c]) => c).join(', ')})`,
+        description: `Automated IP geolocation and local currency formatting remove checkout friction for developers across regions.`,
         impact: 'medium',
-        metricGrounding: `Des conversions ont été initiées dans ${currencies.length} devises distinctes.`,
-        actionableStep: `Continuez d'adapter les factures PDF dans la devise locale de l'acheteur pour faciliter les notes de frais en entreprise.`,
+        metricGrounding: `Conversions initiated across ${currencies.length} distinct currencies.`,
+        actionableStep: `Continue issuing clean PDF receipts in the buyer's local currency to streamline expense reporting.`,
       });
     }
 
@@ -213,11 +213,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-vip-virality',
         category: 'ux',
-        title: `Viralité des Développeurs Amis (${summary.vipConversions} pass VIP activés)`,
-        description: `Les codes promotionnels (DEVVIP, FRIENDS) génèrent une excellente adoption bouche-à-oreille et fidélisent vos bêta-testeurs.`,
+        title: `Developer Community Virality (${summary.vipConversions} VIP passes activated)`,
+        description: `Promotional codes (DEVVIP, FRIENDS) foster peer word-of-mouth and reward early adopters.`,
         impact: 'high',
-        metricGrounding: `${summary.vipConversions} projets migrés gratuitement grâce à vos codes promo partenaires.`,
-        actionableStep: `Proposez à vos amis développeurs satisfaits de partager un tweet ou un avis LinkedIn sur leur gain de temps.`,
+        metricGrounding: `${summary.vipConversions} projects migrated via partner developer promo codes.`,
+        actionableStep: `Invite verified developer peers to share a quick testimonial on LinkedIn or X about the time saved.`,
       });
     }
 
@@ -235,7 +235,7 @@ export class AnalyticsAggregator {
     if (period === 'today') {
       for (let i = 7; i >= 0; i--) {
         const hour = (now.getHours() - i * 3 + 24) % 24;
-        const label = `${hour}h00`;
+        const label = `${hour.toString().padStart(2, '0')}:00`;
         const binEvents = events.filter((e) => {
           const d = new Date(e.timestamp);
           return Math.abs(d.getHours() - hour) <= 1;
@@ -249,7 +249,7 @@ export class AnalyticsAggregator {
     } else {
       for (let i = days - 1; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        const dayLabel = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' });
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' });
         const dateStr = d.toISOString().split('T')[0];
 
         const dayEvents = events.filter((e) => e.timestamp.startsWith(dateStr));

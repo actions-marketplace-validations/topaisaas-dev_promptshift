@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
         sessionStorage.setItem(ADMIN_STORAGE_AUTH, 'true');
       }
     } else {
-      setAuthError('Clé de sécurité administrateur incorrecte.');
+      setAuthError('Invalid administrator security key.');
     }
   };
 
@@ -105,23 +105,23 @@ export default function AdminDashboardPage() {
 
   // LinkedIn post generation
   const linkedInPostText = useMemo(() => {
-    const periodLabel = period === 'today' ? "Aujourd'hui" : period === '7d' ? 'Cette semaine' : period === '30d' ? 'Ce mois-ci' : 'En cumulé';
+    const periodLabel = period === 'today' ? 'Today' : period === '7d' ? 'This week' : period === '30d' ? 'This month' : 'All-time';
     const topTarget = Object.entries(summary.targetPlatformShare).sort((a, b) => b[1] - a[1])[0]?.[0] || 'claude';
     const targetLabel = topTarget === 'claude' ? 'Anthropic Claude' : topTarget === 'cursor' ? 'Cursor IDE' : 'OpenAI Assistants';
 
-    return `🚀 Bilan Traction PromptShift (${periodLabel}) :
+    return `🚀 PromptShift Traction Metrics (${periodLabel}):
 
-L'interopérabilité des projets IA s'accélère. Voici les faits marquants enregistrés sur promptshift.dev :
+AI project interoperability is accelerating. Key telemetry highlights recorded on promptshift.dev:
 
-📊 ${summary.totalConversions} conversions de projets IA réalisées
-📁 ${summary.totalFilesProcessed} fichiers système & agents transpilés
-🛡️ ${summary.totalSecretsSanitized} clés privées & credentials interceptés avant fuite en production
-🎯 98.5%+ de parité sémantique AST vérifiée
-💎 Écosystème le plus plébiscité : ${targetLabel}
+📊 ${summary.totalConversions} AI project migrations completed
+📁 ${summary.totalFilesProcessed} system & agent configuration files transpiled
+🛡️ ${summary.totalSecretsSanitized} private keys & credentials intercepted before production leaks
+🎯 98.5%+ AST semantic parity verified
+💎 Top destination ecosystem: ${targetLabel}
 
-PromptShift permet à toute équipe tech de passer de Gemini/Antigravity à Claude, Cursor ou OpenAI en 1 clic, avec exécution 100% en RAM et zéro rétention de données.
+PromptShift empowers engineering teams to bridge Gemini/Antigravity to Claude, Cursor, or OpenAI in 1 click, with 100% in-RAM execution and zero data retention.
 
-Testez gratuitement votre projet : https://promptshift.dev
+Try it with your project: https://promptshift.dev
 
 #ArtificialIntelligence #DevTools #Nextjs #Claude3 #Cursor #OpenAI #BuildInPublic`;
   }, [summary, period]);
@@ -156,20 +156,17 @@ Testez gratuitement votre projet : https://promptshift.dev
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div>
               <label htmlFor="admin-passkey" className="text-xs font-bold text-slate-300 block mb-1">
-                Passkey Administrateur
+                Administrator Passkey
               </label>
               <input
                 id="admin-passkey"
                 type="password"
                 value={passkeyInput}
                 onChange={(e) => setPasskeyInput(e.target.value)}
-                placeholder="Entrez votre clé d'accès sécurisée"
+                placeholder="Enter your secure access key"
                 className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
                 autoFocus
               />
-              <span className="text-[11px] text-slate-500 block mt-1.5">
-                Clé par défaut : <code className="text-cyan-400 font-mono">promptshift-admin-2026</code>
-              </span>
             </div>
 
             {authError && (
@@ -182,13 +179,13 @@ Testez gratuitement votre projet : https://promptshift.dev
               type="submit"
               className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold text-sm tracking-wide shadow-neonCyan hover:brightness-110 active:brightness-95 transition-all cursor-pointer"
             >
-              Déverrouiller le Command Center
+              Unlock Command Center
             </button>
           </form>
 
           <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
             <Link href="/" className="hover:text-cyan-400 transition-colors flex items-center gap-1">
-              ← Retour au site public
+              ← Back to Public Site
             </Link>
             <span className="font-mono text-[10px] text-slate-500">v1.0 Sovereign</span>
           </div>
@@ -220,7 +217,7 @@ Testez gratuitement votre projet : https://promptshift.dev
                   RAM Sovereign
                 </span>
               </div>
-              <p className="text-xs text-textMuted">Command Center & Pilotage Produit</p>
+              <p className="text-xs text-textMuted">Command Center & Executive Intelligence</p>
             </div>
           </div>
 
@@ -237,14 +234,14 @@ Testez gratuitement votre projet : https://promptshift.dev
                       : 'text-textMuted hover:text-white'
                   }`}
                 >
-                  {p === 'today' ? "Aujourd'hui" : p === '7d' ? '7 Jours' : p === '30d' ? '30 Jours' : 'Tout'}
+                  {p === 'today' ? 'Today' : p === '7d' ? '7 Days' : p === '30d' ? '30 Days' : 'All Time'}
                 </button>
               ))}
             </div>
 
             <button
               onClick={loadData}
-              title="Rafraîchir les métriques"
+              title="Refresh metrics"
               className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-cyan-400 border border-borderColor transition-all cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-cyan-400' : ''}`} />
@@ -255,11 +252,11 @@ Testez gratuitement votre projet : https://promptshift.dev
                 AnalyticsTracker.seedRealisticData();
                 loadData();
               }}
-              title="Générer un échantillon d'activité représentatif"
+              title="Seed realistic activity sample"
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Database className="w-3.5 h-3.5" />
-              <span>Données Démo</span>
+              <span>Seed Data</span>
             </button>
 
             <button
@@ -267,11 +264,11 @@ Testez gratuitement votre projet : https://promptshift.dev
                 AnalyticsTracker.clearEvents();
                 loadData();
               }}
-              title="Remettre tous les compteurs analytics à zéro"
+              title="Reset all analytics counters to zero"
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-rose-300 hover:text-rose-200 border border-rose-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Remettre à zéro</span>
+              <span>Reset Counters</span>
             </button>
 
             <Link
@@ -279,12 +276,12 @@ Testez gratuitement votre projet : https://promptshift.dev
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-borderColor text-xs font-semibold flex items-center gap-1 transition-all"
             >
               <Eye className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Voir le site</span>
+              <span>View Site</span>
             </Link>
 
             <button
               onClick={handleLogout}
-              title="Déconnexion admin"
+              title="Admin Logout"
               className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-borderColor transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
@@ -296,7 +293,7 @@ Testez gratuitement votre projet : https://promptshift.dev
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
         {/* KPI Grid */}
-        <section aria-label="Indicateurs Clés de Performance">
+        <section aria-label="Key Performance Indicators">
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
             {/* KPI 1: Conversions */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
@@ -306,17 +303,17 @@ Testez gratuitement votre projet : https://promptshift.dev
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-black text-white">{summary.totalConversions}</span>
-                <span className="text-[10px] text-emerald-400 font-bold">100% OK</span>
+                <span className="text-[10px] text-emerald-400 font-bold">100% SUCCESS</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                {summary.freeConversions} gratuit • {summary.paidConversions} payant • {summary.vipConversions} VIP
+                {summary.freeConversions} free • {summary.paidConversions} paid • {summary.vipConversions} VIP
               </p>
             </div>
 
             {/* KPI 2: Page Views & Unique Visitors */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
               <div className="flex items-center justify-between text-textMuted mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Visiteurs</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">Visitors</span>
                 <Users className="w-4 h-4 text-emeraldGlow" />
               </div>
               <div className="flex items-baseline gap-1.5">
@@ -324,59 +321,59 @@ Testez gratuitement votre projet : https://promptshift.dev
                 <span className="text-[10px] text-textMuted font-mono">~{summary.uniqueSessions} sessions</span>
               </div>
               <p className="text-[10px] text-emerald-400 font-semibold mt-1">
-                {summary.conversionRate}% taux de conversion
+                {summary.conversionRate}% conversion rate
               </p>
             </div>
 
             {/* KPI 3: Total Files Processed */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
               <div className="flex items-center justify-between text-textMuted mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Fichiers AST</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">AST Files</span>
                 <FileCode2 className="w-4 h-4 text-purple-400" />
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-black text-white">{summary.totalFilesProcessed}</span>
-                <span className="text-[10px] text-purple-300 font-mono">transpilés</span>
+                <span className="text-[10px] text-purple-300 font-mono">transpiled</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                {(summary.totalBytesProcessed / 1024).toFixed(0)} Ko de prompts traités
+                {(summary.totalBytesProcessed / 1024).toFixed(0)} KB prompts processed
               </p>
             </div>
 
             {/* KPI 4: Secrets Sanitized */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
               <div className="flex items-center justify-between text-textMuted mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Secrets Sauvés</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">Sanitized Secrets</span>
                 <KeyRound className="w-4 h-4 text-amber-400" />
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-black text-amber-300">{summary.totalSecretsSanitized}</span>
-                <span className="text-[10px] text-amber-400/80 font-bold">filtrés</span>
+                <span className="text-[10px] text-amber-400/80 font-bold">filtered</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                Clés API & tokens masqués en RAM
+                API keys & tokens masked in RAM
               </p>
             </div>
 
             {/* KPI 5: Semantic Parity Score */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
               <div className="flex items-center justify-between text-textMuted mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Parité AST</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">AST Parity</span>
                 <ShieldCheck className="w-4 h-4 text-cyan-400" />
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-black text-cyanGlow">{summary.averageParityScore}%</span>
-                <span className="text-[10px] text-cyan-300 font-bold">certifié</span>
+                <span className="text-[10px] text-cyan-300 font-bold">verified</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                Zero hallucination structurelle
+                Zero structural hallucination
               </p>
             </div>
 
             {/* KPI 6: Monetization Readiness */}
             <div className="p-4 rounded-2xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-lg relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
               <div className="flex items-center justify-between text-textMuted mb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider">Trafic Payant</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider">Paid Conversions</span>
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
               </div>
               <div className="flex items-baseline gap-1.5">
@@ -388,7 +385,7 @@ Testez gratuitement votre projet : https://promptshift.dev
                 <span className="text-[10px] text-textMuted">pro/team/vip</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                {summary.fileCountDistribution.over50Files + summary.fileCountDistribution.sixteenTo50Files + summary.fileCountDistribution.sixTo15Files} projets &gt; 5 fichiers
+                {summary.fileCountDistribution.over50Files + summary.fileCountDistribution.sixteenTo50Files + summary.fileCountDistribution.sixTo15Files} projects &gt; 5 files
               </p>
             </div>
           </div>
@@ -402,14 +399,14 @@ Testez gratuitement votre projet : https://promptshift.dev
               <div>
                 <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-cyanGlow" />
-                  Activité Temporelle des Conversions
+                  Conversion Timeline Activity
                 </h2>
                 <p className="text-xs text-textMuted mt-0.5">
-                  Volume de conversions enregistrées ({period === 'today' ? "par tranche horaire aujourd'hui" : `au fil des ${summary.timeline.length} derniers jours`})
+                  Recorded conversion volume ({period === 'today' ? "by hourly bucket today" : `over the last ${summary.timeline.length} days`})
                 </p>
               </div>
               <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-cyan-300">
-                Max: {maxConversionsInTimeline} / période
+                Max: {maxConversionsInTimeline} / period
               </span>
             </div>
 
@@ -429,7 +426,7 @@ Testez gratuitement votre projet : https://promptshift.dev
                     {/* Tooltip on hover */}
                     {isHovered && (
                       <div className="absolute -top-10 bg-slate-950 text-white border border-cyanGlow/50 px-2.5 py-1 rounded-lg text-[10px] font-mono shadow-xl z-20 whitespace-nowrap pointer-events-none">
-                        <strong className="text-cyan-400">{point.conversions}</strong> conversions • {point.pageViews} vues
+                        <strong className="text-cyan-400">{point.conversions}</strong> conversions • {point.pageViews} views
                       </div>
                     )}
 
@@ -453,9 +450,9 @@ Testez gratuitement votre projet : https://promptshift.dev
             <div className="flex items-center justify-between text-[11px] text-textMuted border-t border-slate-800/80 pt-3 mt-2">
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-cyan-500 to-emerald-500" />
-                Conversions de Projets IA
+                AI Project Migrations
               </span>
-              <span>Total période : <strong>{summary.totalConversions}</strong></span>
+              <span>Period Total: <strong>{summary.totalConversions}</strong></span>
             </div>
           </div>
 
@@ -464,9 +461,9 @@ Testez gratuitement votre projet : https://promptshift.dev
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <PieChart className="w-4 h-4 text-emerald-400" />
-                Écosystèmes Cibles Préférés
+                Preferred Target Ecosystems
               </h2>
-              <span className="text-[10px] text-textMuted">Demande marché</span>
+              <span className="text-[10px] text-textMuted">Market Demand</span>
             </div>
 
             <div className="flex flex-col gap-3 my-auto">
@@ -499,11 +496,11 @@ Testez gratuitement votre projet : https://promptshift.dev
             </div>
 
             <div className="text-[11px] text-textMuted border-t border-slate-800/80 pt-3 mt-4">
-              Top cible : <strong className="text-cyan-300">
+              Top Target: <strong className="text-cyan-300">
                 {summary.totalConversions > 0
                   ? Object.entries(summary.targetPlatformShare).sort((a, b) => b[1] - a[1])[0]?.[0]?.toUpperCase() || 'CLAUDE'
-                  : 'EN ATTENTE'}
-              </strong> (priorité d'optimisation marketing)
+                  : 'PENDING'}
+              </strong> (marketing priority)
             </div>
           </div>
         </section>
@@ -515,65 +512,65 @@ Testez gratuitement votre projet : https://promptshift.dev
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Layers className="w-4 h-4 text-purple-400" />
-                Distribution de la Taille des Projets
+                Project Size Distribution
               </h2>
               <p className="text-xs text-textMuted mt-0.5">
-                Calibrage de la limite gratuite (5 fichiers) vs volume payant
+                Free tier calibration (≤ 5 files) vs paid conversion volume
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 my-4">
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-emerald-400 font-bold block mb-1">
-                  ≤ 5 Fichiers (Freemium)
+                  ≤ 5 Files (Free Starter)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.under5Files}
                 </span>
                 <span className="text-[10px] text-textMuted block mt-0.5">
-                  Projets éligibles au test 100% gratuit
+                  Projects eligible for free conversion
                 </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-cyan-400 font-bold block mb-1">
-                  6 à 15 Fichiers (Single Pass)
+                  6 to 15 Files (Single Pass)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.sixTo15Files}
                 </span>
                 <span className="text-[10px] text-textMuted block mt-0.5">
-                  Projets standards de développeurs
+                  Standard developer projects
                 </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-purple-400 font-bold block mb-1">
-                  16 à 50 Fichiers (Pro Pass)
+                  16 to 50 Files (Pro Pass)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.sixteenTo50Files}
                 </span>
                 <span className="text-[10px] text-textMuted block mt-0.5">
-                  Équipes & projets multi-agents
+                  Multi-agent teams & projects
                 </span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-amber-400 font-bold block mb-1">
-                  &gt; 50 Fichiers (Team/Agency)
+                  &gt; 50 Files (Team / Agency)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.over50Files}
                 </span>
                 <span className="text-[10px] text-textMuted block mt-0.5">
-                  Codebases complexes d'entreprises
+                  Enterprise-scale codebases
                 </span>
               </div>
             </div>
 
             <div className="text-[11px] text-textMuted border-t border-slate-800/80 pt-3">
-              Moyenne : <strong className="text-white">~{(summary.totalFilesProcessed / Math.max(1, summary.totalConversions)).toFixed(1)} fichiers</strong> par projet converti.
+              Average: <strong className="text-white">~{(summary.totalFilesProcessed / Math.max(1, summary.totalConversions)).toFixed(1)} files</strong> per converted project.
             </div>
           </div>
 
@@ -582,10 +579,10 @@ Testez gratuitement votre projet : https://promptshift.dev
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-cyan-400" />
-                Répartition Géographique & Devises
+                Geographic & Currency Distribution
               </h2>
               <p className="text-xs text-textMuted mt-0.5">
-                Adoption internationale détectée via géolocalisation IP
+                Global developer traffic detected via IP geolocation
               </p>
             </div>
 
@@ -596,10 +593,10 @@ Testez gratuitement votre projet : https://promptshift.dev
                   const pct = summary.totalConversions > 0 ? Math.round((count / summary.totalConversions) * 100) : 0;
                   const labelMap: Record<string, string> = {
                     EUR: '🇪🇺 Euro (€)',
-                    USD: '🇺🇸 Dollar US ($)',
-                    GBP: '🇬🇧 Livre Sterling (£)',
-                    CAD: '🇨🇦 Dollar Canadien (CA$)',
-                    JPY: '🇯🇵 Yen Japonais (¥)',
+                    USD: '🇺🇸 US Dollar ($)',
+                    GBP: '🇬🇧 British Pound (£)',
+                    CAD: '🇨🇦 Canadian Dollar (CA$)',
+                    JPY: '🇯🇵 Japanese Yen (¥)',
                   };
 
                   return (
@@ -617,7 +614,7 @@ Testez gratuitement votre projet : https://promptshift.dev
             </div>
 
             <div className="text-[11px] text-textMuted border-t border-slate-800/80 pt-3">
-              Facturation multi-devises automatique : <span className="text-emerald-400 font-semibold">Active & sans friction</span>
+              Automated multi-currency billing: <span className="text-emerald-400 font-semibold">Active & frictionless</span>
             </div>
           </div>
         </section>
@@ -631,18 +628,18 @@ Testez gratuitement votre projet : https://promptshift.dev
               </div>
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  Conseils d'Optimisation Produit & Croissance
+                  Product Optimization & Growth Insights
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300">
-                    IA ANALYTICS
+                    AI ANALYTICS
                   </span>
                 </h2>
                 <p className="text-xs text-textMuted">
-                  Recommandations concrètes basées sur les comportements de conversion observés
+                  Actionable recommendations based on real conversion patterns
                 </p>
               </div>
             </div>
             <span className="text-xs font-mono text-cyan-400">
-              {tips.length} conseils actionnables
+              {tips.length} actionable insights
             </span>
           </div>
 
@@ -673,7 +670,7 @@ Testez gratuitement votre projet : https://promptshift.dev
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-cyan-500/20 flex flex-col gap-1 text-[11px]">
                   <span className="text-cyan-400 font-bold flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    Action recommandée :
+                    Recommended Action:
                   </span>
                   <span className="text-slate-300">{tip.actionableStep}</span>
                 </div>
@@ -688,14 +685,14 @@ Testez gratuitement votre projet : https://promptshift.dev
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <Database className="w-4 h-4 text-cyan-400" />
-                Journal Récent des Conversions Anonymisées
+                Recent Anonymized Conversion Log
               </h2>
               <p className="text-xs text-textMuted mt-0.5">
-                Flux en direct des projets transpilés (Zéro stockage de code • Données de métriques pures)
+                Live stream of transpiled projects (Zero code stored • Pure anonymous telemetry)
               </p>
             </div>
             <span className="text-xs font-mono text-textMuted">
-              {summary.recentEvents.length} conversions affichées
+              {summary.recentEvents.length} conversions displayed
             </span>
           </div>
 
@@ -703,28 +700,28 @@ Testez gratuitement votre projet : https://promptshift.dev
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
                 <tr>
-                  <th className="py-3 px-4">Horodatage</th>
-                  <th className="py-3 px-4">Projet Anonyme</th>
+                  <th className="py-3 px-4">Timestamp</th>
+                  <th className="py-3 px-4">Anonymous Project</th>
                   <th className="py-3 px-4">Migration</th>
-                  <th className="py-3 px-4">Fichiers</th>
-                  <th className="py-3 px-4">Poids (Ko)</th>
-                  <th className="py-3 px-4">Parité AST</th>
+                  <th className="py-3 px-4">Files</th>
+                  <th className="py-3 px-4">Size (KB)</th>
+                  <th className="py-3 px-4">AST Parity</th>
                   <th className="py-3 px-4">Secrets</th>
-                  <th className="py-3 px-4">Licence / Plan</th>
+                  <th className="py-3 px-4">License / Plan</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
                 {summary.recentEvents.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-6 text-center text-textMuted">
-                      Aucune conversion récente enregistrée pour cette période.
+                      No recent conversions recorded for this period.
                     </td>
                   </tr>
                 ) : (
                   summary.recentEvents.map((ev) => (
                     <tr key={ev.id} className="hover:bg-slate-900/40 transition-colors">
                       <td className="py-2.5 px-4 text-textMuted whitespace-nowrap">
-                        {new Date(ev.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(ev.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                        {new Date(ev.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - {new Date(ev.timestamp).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}
                       </td>
                       <td className="py-2.5 px-4 text-white font-semibold">
                         {ev.projectTitleAnon || 'project'}
@@ -734,12 +731,12 @@ Testez gratuitement votre projet : https://promptshift.dev
                           {ev.sourcePlatform?.toUpperCase() || 'GEMINI'} → {ev.targetPlatform?.toUpperCase() || 'CLAUDE'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-slate-300">{ev.fileCount || 1} f.</td>
-                      <td className="py-2.5 px-4 text-slate-400">{((ev.sizeBytes || 2048) / 1024).toFixed(1)} Ko</td>
+                      <td className="py-2.5 px-4 text-slate-300">{ev.fileCount || 1} files</td>
+                      <td className="py-2.5 px-4 text-slate-400">{((ev.sizeBytes || 2048) / 1024).toFixed(1)} KB</td>
                       <td className="py-2.5 px-4 text-emerald-400 font-bold">{ev.parityScore || 98.5}%</td>
                       <td className="py-2.5 px-4">
                         {ev.secretsCount && ev.secretsCount > 0 ? (
-                          <span className="text-amber-400 font-bold">🛡️ {ev.secretsCount} masqués</span>
+                          <span className="text-amber-400 font-bold">🛡️ {ev.secretsCount} masked</span>
                         ) : (
                           <span className="text-slate-600">0</span>
                         )}
@@ -774,10 +771,10 @@ Testez gratuitement votre projet : https://promptshift.dev
           <div className="flex flex-col gap-2 max-w-xl">
             <div className="flex items-center gap-2 text-cyan-400">
               <Share2 className="w-4 h-4" />
-              <h2 className="text-sm font-bold text-white">Kit de Partage LinkedIn & Réseaux Sociaux</h2>
+              <h2 className="text-sm font-bold text-white">LinkedIn & Social Traction Share Kit</h2>
             </div>
             <p className="text-xs text-textMuted leading-relaxed">
-              Communiquez en direct sur votre traction avec des chiffres réels et vérifiés : nombre de projets migrés, secrets sanitarisés, et parité inter-modèles. Cliquez ci-dessous pour copier le texte optimisé pour votre audience tech.
+              Broadcast live traction with verified statistics: migrated AI codebases, intercepted secrets, and multi-model AST parity. Click below to copy the pre-formatted announcement for your developer community.
             </p>
           </div>
 
@@ -787,7 +784,7 @@ Testez gratuitement votre projet : https://promptshift.dev
               className="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold text-xs flex items-center gap-2 shadow-neonCyan hover:brightness-110 active:brightness-95 transition-all cursor-pointer"
             >
               {isCopiedPost ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              <span>{isCopiedPost ? 'Copié dans le presse-papiers !' : 'Copier le Post LinkedIn Prêt à Publier'}</span>
+              <span>{isCopiedPost ? 'Copied to Clipboard!' : 'Copy Ready-to-Publish LinkedIn Post'}</span>
             </button>
           </div>
         </section>
@@ -795,7 +792,7 @@ Testez gratuitement votre projet : https://promptshift.dev
 
       {/* Footer */}
       <footer className="border-t border-borderColor py-4 px-6 text-center text-xs text-textMuted font-mono">
-        PromptShift Sovereign Command Center • 1-Click Universal AI Bridge • Confidentialité Totale
+        PromptShift Sovereign Command Center • 1-Click Universal AI Bridge • Total Confidentiality
       </footer>
     </div>
   );

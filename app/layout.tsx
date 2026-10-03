@@ -125,7 +125,7 @@ const jsonLdSchemas = [
         },
         {
           '@type': 'Offer',
-          name: 'Pass Pro (Open Beta)',
+          name: 'Pro Developer (Open Beta)',
           price: '0',
           priceCurrency: 'USD',
           description: 'Unlimited files and full multi-ecosystem bundle offered 100% free during public beta.',
@@ -180,7 +180,7 @@ const jsonLdSchemas = [
         name: 'How does the Free Public Beta work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'During the public beta phase, projects with up to 5 files are converted instantly with zero sign-up required (Free Starter). Larger multi-file projects unlock the full Pass Pro tier at 0 € by simply saving a developer email, with zero payment or credit card required.',
+          text: 'During the public beta phase, projects with up to 5 files are converted instantly with zero sign-up required (Free Starter). Larger multi-file projects unlock the full Pro Developer tier for free by simply saving a developer email, with zero payment or credit card required.',
         },
       },
       {
@@ -228,8 +228,6 @@ export default function RootLayout({
             <span>Zero Server Storage (In-RAM Only)</span>
             <span className="hidden sm:inline">•</span>
             <span>Local Browser Sandbox (No Tracking Cookies)</span>
-            <span className="hidden sm:inline">•</span>
-            <span>Direct IBAN & PayPal Ready</span>
           </div>
         </footer>
       </body>

@@ -30,16 +30,16 @@ export const MONETIZATION_CONFIG: MonetizationConfig = {
 
   // Branding & copy for Free Beta phase
   betaName: 'PromptShift Open Beta',
-  betaBadge: 'BÊTA PUBLIQUE • PRO OFFERT',
-  betaHeadline: 'Le Convertisseur Universel de Projets IA — 100% Gratuit en Bêta Ouverte',
-  betaNotice: 'PromptShift est actuellement en bêta publique ouverte. Le Pass Pro est offert à tous les développeurs early adopters.',
+  betaBadge: 'OPEN PUBLIC BETA • FREE PRO PASS',
+  betaHeadline: 'Universal AI Project Transpiler — Free During Open Public Beta',
+  betaNotice: 'PromptShift is currently in open public beta. The Pro Pass is complimentary for all early adopter developers.',
 
   // Pro tier options during beta
   allowProDuringBeta: true,
   requireEmailForProBeta: true,
 
   // Transition to paid roadmap notice
-  betaExpirationNotice: "Votre statut de Membre Fondateur Bêta vous garantit un accès complet sans frais pendant toute la phase de test public.",
+  betaExpirationNotice: 'Your Beta Founding Member status guarantees complete, unrestricted access at zero cost throughout the entire public test phase.',
 };
 
 export class MonetizationManager {

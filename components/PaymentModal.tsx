@@ -221,7 +221,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const handleBetaProActivation = () => {
     const finalEmail = customerEmail.trim();
     if (!finalEmail || !finalEmail.includes('@') || !finalEmail.includes('.')) {
-      setEmailError('Veuillez renseigner une adresse email valide pour activer votre Pass Pro.');
+      setEmailError('Please enter a valid email address to activate your Free Pro Pass.');
       return;
     }
     setEmailError('');
@@ -230,7 +230,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       ClientVault.enrollBetaPro(finalEmail);
       setIsProcessing(false);
       handlePaymentSuccess(
-        'Pass Pro Bêta (Early Adopter 100% Offert)',
+        'Pro Beta Pass (Early Adopter Free Access)',
         'BETA-' + Math.random().toString(36).substring(2, 8).toUpperCase()
       );
     }, 400);
@@ -267,7 +267,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePaymentSuccess = async (
-    method: 'PayPal' | 'Debit / Credit Card' | 'Credit Card (Direct IBAN)' | 'VIP Promo Pass (100% OFF)' | 'Pass Pro Bêta (Early Adopter 100% Offert)' = 'PayPal',
+    method: 'PayPal' | 'Debit / Credit Card' | 'VIP Promo Pass (100% OFF)' | 'Pro Beta Pass (Early Adopter Free Access)' = 'PayPal',
     orderId: string = 'PAYID-' + Math.random().toString(36).substring(2, 10).toUpperCase()
   ) => {
     setIsPaid(true);
@@ -373,7 +373,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             {isFreePromo
               ? 'VIP Developer Access Unlocked'
               : isFreeBeta
-              ? 'Pass Pro Développeur — Bêta Publique'
+              ? 'Pro Developer Pass — Public Beta'
               : selectedPlan === 'team'
               ? 'Unlock Team & Agency Pass'
               : selectedPlan === 'pro'
@@ -384,7 +384,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             {isFreePromo
               ? '100% Free peer access granted via promo code. Zero payment required.'
               : isFreeBeta
-              ? 'Accès Pro 100% offert aux early adopters pendant la bêta. Renseignez simplement votre email.'
+              ? '100% Free Pro access for early adopters during public beta. Simply enter your developer email.'
               : selectedPlan === 'team'
               ? 'Full team license with CI/CD GitHub & GitLab sync, SOC-2 DPA, and unlimited migrations.'
               : selectedPlan === 'pro'
@@ -412,7 +412,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       : 'text-textMuted hover:text-white'
                   }`}
                 >
-                  {isFreeBeta ? 'Starter (≤ 5 fichiers)' : `Single (${CurrencyManager.getTierPrice('single', currency).formatted})`}
+                  {isFreeBeta ? 'Starter (≤ 5 files)' : `Single (${CurrencyManager.getTierPrice('single', currency).formatted})`}
                 </button>
 
                 <button
@@ -425,9 +425,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       : 'text-textMuted hover:text-white'
                   }`}
                 >
-                  {isFreeBeta ? 'Pass Pro (Offert en Bêta)' : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
+                  {isFreeBeta ? 'Pass Pro (Free in Beta)' : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
                   <span className="absolute -top-2.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-400 text-black uppercase tracking-wider shadow-md z-10 pointer-events-none">
-                    {isFreeBeta ? '★ 100% Offert' : '★ Popular'}
+                    {isFreeBeta ? '★ 100% Free' : '★ Popular'}
                   </span>
                 </button>
 
@@ -459,10 +459,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-bold text-white">
                     {selectedPlan === 'single'
-                      ? (isFreeBeta ? 'Starter Sans Inscription' : 'Pay-As-You-Go Pass')
+                      ? (isFreeBeta ? 'Free Starter (No Signup)' : 'Pay-As-You-Go Pass')
                       : selectedPlan === 'pro'
-                      ? (isFreeBeta ? 'Pass Pro Développeur (Bêta)' : 'Pro Developer Subscription')
-                      : (isFreeBeta ? 'Team & Agency (Inclus en Bêta)' : 'Team & Agency Pass')}
+                      ? (isFreeBeta ? 'Pro Developer Pass (Beta)' : 'Pro Developer Subscription')
+                      : (isFreeBeta ? 'Team & Agency (Included in Beta)' : 'Team & Agency Pass')}
                   </span>
                   {selectedPlan === 'pro' && (
                     <Sparkles className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
@@ -473,10 +473,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
                 <p className="text-[11px] text-textMuted mt-0.5 max-w-[270px] min-h-[32px] flex items-center">
                   {selectedPlan === 'single'
-                    ? (isFreeBeta ? 'Jusqu\'à 5 fichiers par projet sans créer de compte ni renseigner de carte.' : 'Single project migration. Zero subscription. Full secret redactor.')
+                    ? (isFreeBeta ? 'Up to 5 files per project without creating an account or entering card details.' : 'Single project migration. Zero subscription. Full secret redactor.')
                     : selectedPlan === 'pro'
-                    ? (isFreeBeta ? 'Projets illimités (> 5 fichiers), Token CLI, tous les boucliers de sécurité en RAM.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
-                    : (isFreeBeta ? 'Multi-fichiers, export complet, synchronisation CI/CD inclus pendant la bêta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
+                    ? (isFreeBeta ? 'Unlimited projects (> 5 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
+                    : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
                 </p>
               </div>
 
@@ -486,7 +486,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </span>
                 <span className="text-[10px] text-textMuted block min-h-[14px] mt-0.5">
                   {isFreePromo || isFreeBeta
-                    ? 'Offert en Bêta'
+                    ? 'Free in Beta'
                     : selectedPlan === 'single'
                     ? 'one-time'
                     : `/ month (${currency})`}
@@ -545,7 +545,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <label htmlFor="dev-email-input" className="text-[11px] font-bold text-textMuted flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isFreeBeta ? 'Email développeur (pour activer le Pass Pro Bêta)' : 'Email (for Customer Portal & Invoices)'}</span>
+                  <span>{isFreeBeta ? 'Developer Email (to activate Free Pro Pass)' : 'Email (for Customer Portal & Invoices)'}</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 font-medium">Sovereign Vault Linked</span>
               </label>
@@ -560,7 +560,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && isFreeBeta) handleBetaProActivation();
                 }}
-                placeholder="votre-email@developpeur.com"
+                placeholder="your-email@developer.com"
                 className={`w-full px-3 py-2 rounded-xl bg-slate-900 border ${
                   emailError ? 'border-red-500' : 'border-borderColor'
                 } text-xs text-white placeholder-textMuted focus:outline-none focus:border-cyan-400 transition-colors font-mono`}
@@ -588,12 +588,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   type="button"
                   onClick={handleBetaProActivation}
                   disabled={isProcessing}
-                  aria-label="Activer mon Pass Pro Gratuit (0 €)"
+                  aria-label="Claim Free Pro Pass ($0.00)"
                   className="w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonCyan hover:brightness-105 active:brightness-95 transition-all cursor-pointer select-none"
                 >
                   <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
                   <span>
-                    {isProcessing ? 'Activation du Pass Pro...' : 'Activer mon Pass Pro Gratuit (0 €)'}
+                    {isProcessing ? 'Activating Pro Pass...' : 'Claim Free Pro Pass (0 €)'}
                   </span>
                 </button>
               ) : (
@@ -646,7 +646,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {isFreePromo
                   ? 'VIP Developer Pass Activated!'
                   : isFreeBeta
-                  ? 'Pass Pro Bêta Activé (100% Offert) !'
+                  ? 'Free Beta Pro Pass Activated!'
                   : selectedPlan === 'team'
                   ? 'Team & Agency Pass Activated!'
                   : selectedPlan === 'pro'
@@ -657,7 +657,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 {isFreePromo
                   ? `Thank you for testing PromptShift! Your full VIP access and bundle are linked to ${customerEmail.trim() || 'your Sovereign Client Vault'}.`
                   : isFreeBeta
-                  ? `Félicitations ! Votre Pass Pro Early Adopter est activé et lié à ${customerEmail.trim() || 'votre Sovereign Client Vault'}. Téléchargez votre projet et profitez de l'accès Pro sans restriction.`
+                  ? `Congratulations! Your Early Adopter Pro Pass is active and linked to ${customerEmail.trim() || 'your Sovereign Client Vault'}. Download your project bundle and enjoy unrestricted Pro access.`
                   : selectedPlan === 'team'
                   ? `5 team seats, CI/CD auto-sync, and unlimited project exports are now unlocked for ${customerEmail.trim() || 'your organization'}.`
                   : selectedPlan === 'pro'

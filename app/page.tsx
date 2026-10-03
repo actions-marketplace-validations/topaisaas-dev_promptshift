@@ -268,7 +268,7 @@ export default function HomePage() {
             {isVip
               ? 'VIP DEV PASS ACTIVE • 100% FREE FULL CODEBASES'
               : isFreeBeta
-              ? 'BÊTA PUBLIQUE OUVERTE • PASS PRO 100% OFFERT (AVEC EMAIL)'
+              ? 'OPEN PUBLIC BETA • FREE PRO PASS AVAILABLE'
               : `FREE FOR UP TO 5 FILES • ${CurrencyManager.getTierPrice('single', currency).formatted} FULL REPOSITORIES`}
           </span>
         </div>
@@ -284,13 +284,6 @@ export default function HomePage() {
         <p className="text-sm sm:text-base text-textMuted max-w-2xl leading-relaxed">
           The sovereign, zero-retention bridge for AI coding assistants. Preserve 100% of your rules, master prompts,
           tools, and autonomy directives with verified semantic fidelity.
-          <span className="text-emerald-400 font-semibold block mt-1.5">
-            {isVip
-              ? 'VIP Developer Access: 100% Free for unlimited repositories & all file counts.'
-              : isFreeBeta
-              ? '100% Gratuit jusqu\'à 5 fichiers sans inscription • Débloquez l\'accès Pro illimité en renseignant simplement votre email.'
-              : `100% Free for projects up to 5 files • ${CurrencyManager.getTierPrice('single', currency).formatted} one-time pass for full codebases.`}
-          </span>
         </p>
       </section>
 
@@ -468,23 +461,14 @@ export default function HomePage() {
         initialPlan={paymentPlan}
       />
 
-      {/* Discreet Footer with Admin Command Center link */}
-      <footer className="w-full max-w-6xl mx-auto px-6 py-10 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted mt-12">
+      {/* Footer */}
+      <footer className="w-full max-w-6xl mx-auto px-6 py-10 border-t border-slate-800/80 flex items-center justify-center gap-4 text-xs text-textMuted mt-12">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-slate-300">PromptShift.dev</span>
           <span>•</span>
           <span>Universal 1-Click AI Agent Bridge</span>
           <span>•</span>
           <span>Zero Server Logs</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin"
-            className="hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyan-500/30"
-          >
-            <Lock className="w-3 h-3 text-slate-400" />
-            <span>Admin Command Center</span>
-          </Link>
         </div>
       </footer>
     </div>
