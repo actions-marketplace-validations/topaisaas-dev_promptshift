@@ -9,10 +9,16 @@ import { MonetizationManager } from '@/lib/config/monetizationConfig';
 interface PricingSectionProps {
   onSelectPlan: (plan: 'single' | 'pro' | 'team') => void;
   onStartFree: () => void;
+  onSelectPro?: () => void;
   hasProject?: boolean;
 }
 
-export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, onStartFree, hasProject = false }) => {
+export const PricingSection: React.FC<PricingSectionProps> = ({
+  onSelectPlan,
+  onStartFree,
+  onSelectPro,
+  hasProject = false,
+}) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
@@ -194,7 +200,11 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
             <button
               onClick={() => {
                 if (!hasProject) {
-                  onStartFree();
+                  if (onSelectPro) {
+                    onSelectPro();
+                  } else {
+                    onStartFree();
+                  }
                 } else {
                   onSelectPlan('pro');
                 }

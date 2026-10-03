@@ -24,6 +24,8 @@ interface DiffInspectorProps {
   result: TranspileResult;
   fileCount?: number;
   isFree?: boolean;
+  hasProAccess?: boolean;
+  isSlicedStarter?: boolean;
   onFreeDownload?: () => void;
   activeFile?: {
     name: string;
@@ -42,6 +44,8 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
   result,
   fileCount = 1,
   isFree = false,
+  hasProAccess = false,
+  isSlicedStarter = false,
   onFreeDownload,
   activeFile,
   onExportRequest,
@@ -257,21 +261,47 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
         </div>
       </div>
 
-      {/* Bottom Action Footer with Agent Simulation & Free Tier Detection */}
+      {/* Sliced Free Starter Notice if applicable */}
+      {isSlicedStarter && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            <span>
+              <strong>Free Starter Active:</strong> Converted the 5 core instruction &amp; rule files. Extra files were excluded to keep conversion 100% instant with zero email.
+            </span>
+          </div>
+          <button
+            onClick={onExportRequest}
+            className="text-[11px] font-bold text-cyan-300 hover:text-white underline flex-shrink-0 cursor-pointer"
+          >
+            Need all files? Unlock Free Pro Pass →
+          </button>
+        </div>
+      )}
+
+      {/* Bottom Action Footer with Agent Directives Output & Plan Details */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-cardBg border border-borderColor shadow-lg">
         <div className="flex flex-col gap-1 max-w-xl">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-              Agent Simulation Preview ({result.targetPlatform.toUpperCase()})
+              Agent Directives Output ({result.targetPlatform.toUpperCase()})
             </span>
-            {isFree ? (
+            {isSlicedStarter ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                FREE TIER (≤ 5 FILES)
+                FREE STARTER (5 CORE FILES)
+              </span>
+            ) : isFree && !hasProAccess ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                FREE STARTER (NO EMAIL REQUIRED)
               </span>
             ) : isVip ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                 <Gift className="w-3 h-3 text-emerald-400" />
                 <span>VIP PASS ACTIVE (100% FREE)</span>
+              </span>
+            ) : hasProAccess ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                PRO PASS UNLOCKED ({fileCount} FILES)
               </span>
             ) : MonetizationManager.isFreeBeta() ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
@@ -284,21 +314,23 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
             )}
           </div>
           <p className="text-xs text-textMuted italic">
-            "Hello! I am your dedicated pair programmer, configured with strict {result.targetPlatform} directives and proactive execution."
+            &ldquo;Ready to execute with strict {result.targetPlatform} directives and verified parity.&rdquo;
           </p>
         </div>
 
-        {isFree || isVip ? (
+        {isFree || isVip || hasProAccess ? (
           <button
             onClick={onFreeDownload}
-            aria-label={`Download full free bundle of ${fileCount} files`}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-black text-sm tracking-wide shadow-neonEmerald hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none transition-all"
+            aria-label={`Download bundle of ${fileCount} files`}
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-black text-sm tracking-wide shadow-neonEmerald hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
             <span>
               {isVip
                 ? `Download VIP Bundle (100% FREE • ${fileCount} Files)`
-                : `Download Free Bundle (${fileCount}/5 Files)`}
+                : hasProAccess && fileCount > 5
+                ? `Download Pro Bundle (${fileCount} Files)`
+                : `Download Free Bundle (${fileCount} ${fileCount === 1 ? 'File' : 'Files'})`}
             </span>
           </button>
         ) : MonetizationManager.isFreeBeta() ? (

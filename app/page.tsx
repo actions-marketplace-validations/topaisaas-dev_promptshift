@@ -21,6 +21,8 @@ import JSZip from 'jszip';
 
 export default function HomePage() {
   const isFreeBeta = MonetizationManager.isFreeBeta();
+  const [uploadMode, setUploadMode] = useState<'starter' | 'pro'>('starter');
+  const [isSlicedStarter, setIsSlicedStarter] = useState(false);
   const [project, setProject] = useState<CanonicalProject | null>(null);
   const [transpileResult, setTranspileResult] = useState<TranspileResult | null>(null);
   const [currentTargetPlatform, setCurrentTargetPlatform] = useState<'claude' | 'openai' | 'cursor' | 'gemini'>('claude');
@@ -74,13 +76,15 @@ export default function HomePage() {
 
   const totalFileCount = project ? project.knowledge_base.length + project.rules.length + 1 : 0;
   const hasProAccess = isVip || activePlan === 'pro' || activePlan === 'team';
-  const isFreeTier = hasProAccess || totalFileCount <= MonetizationManager.getFreeLimit();
+  const isFreeTier = hasProAccess || totalFileCount <= MonetizationManager.getFreeLimit() || isSlicedStarter;
 
   const handleProjectReady = async (
     loadedProject: CanonicalProject,
-    targetPlatform: 'claude' | 'openai' | 'cursor' | 'gemini'
+    targetPlatform: 'claude' | 'openai' | 'cursor' | 'gemini',
+    slicedStarter: boolean = false
   ) => {
     setProject(loadedProject);
+    setIsSlicedStarter(slicedStarter);
     setCurrentTargetPlatform(targetPlatform);
     setSelectedFileItem(null);
 
@@ -295,9 +299,14 @@ export default function HomePage() {
           setProject(null);
           setTranspileResult(null);
           setSelectedFileItem(null);
+          setIsSlicedStarter(false);
         }}
       >
-        <Dropzone onProjectReady={handleProjectReady} />
+        <Dropzone
+          onProjectReady={handleProjectReady}
+          activeMode={uploadMode}
+          onModeChange={(mode) => setUploadMode(mode)}
+        />
       </ErrorBoundary>
 
       {/* Live Diff & Tree Inspector if project is loaded */}
@@ -357,6 +366,8 @@ export default function HomePage() {
                   result={transpileResult}
                   fileCount={totalFileCount}
                   isFree={isFreeTier}
+                  hasProAccess={hasProAccess}
+                  isSlicedStarter={isSlicedStarter}
                   onFreeDownload={handleFreeDownload}
                   activeFile={selectedFileItem || undefined}
                   onExportRequest={() => {
@@ -450,7 +461,22 @@ export default function HomePage() {
           setIsPaymentModalOpen(true);
         }}
         onStartFree={() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setUploadMode('starter');
+          const dropzoneEl = document.getElementById('dropzone');
+          if (dropzoneEl) {
+            dropzoneEl.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+        onSelectPro={() => {
+          setUploadMode('pro');
+          const dropzoneEl = document.getElementById('dropzone');
+          if (dropzoneEl) {
+            dropzoneEl.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         }}
       />
 
