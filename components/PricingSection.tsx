@@ -9,9 +9,10 @@ import { MonetizationManager } from '@/lib/config/monetizationConfig';
 interface PricingSectionProps {
   onSelectPlan: (plan: 'single' | 'pro' | 'team') => void;
   onStartFree: () => void;
+  hasProject?: boolean;
 }
 
-export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, onStartFree }) => {
+export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, onStartFree, hasProject = false }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
@@ -52,16 +53,16 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
       <div className="text-center flex flex-col items-center gap-3">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold tracking-wide">
           <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{isFreeBeta ? 'OPEN PUBLIC BETA • FREE PRO PASS AVAILABLE' : 'TRANSPARENT PRICING & SUBSCRIPTIONS'}</span>
+          <span>{isFreeBeta ? 'OPEN PUBLIC BETA • 100% FREE PLANS' : 'TRANSPARENT PRICING & SUBSCRIPTIONS'}</span>
         </div>
 
         <h2 id="pricing-heading" className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-          {isFreeBeta ? 'Enjoy 100% Free Public Beta Access' : 'Flexible Pricing for Solo Devs & Engineering Teams'}
+          {isFreeBeta ? '100% Free Public Beta Plans' : 'Flexible Pricing for Solo Devs & Engineering Teams'}
         </h2>
 
         <p className="text-xs sm:text-sm text-textMuted max-w-xl leading-relaxed">
           {isFreeBeta
-            ? 'Test PromptShift freely with zero commitment. Pro Developer access is 100% complimentary during the open public beta.'
+            ? 'Test PromptShift freely with zero commitment. Free Starter requires zero account, and Pro Developer access is 100% complimentary during the open public beta.'
             : 'From free small conversions to single repository passes, unlimited Pro subscriptions, and team CI/CD sync.'}
         </p>
 
@@ -95,19 +96,66 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
         )}
       </div>
 
-      {/* Grid: 1 focused Pro Developer card at 0 € in Beta mode, or 4 distinct tiers in Commercial Paid mode */}
+      {/* Grid: 2 balanced cards in Free Beta mode (Free Starter + Pro Developer), or 4 distinct tiers in Commercial Paid mode */}
       {isFreeBeta ? (
-        <div className="max-w-xl mx-auto w-full">
-          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-cyan-950/40 via-cardBg to-cardBg border-2 border-cyanGlow/50 flex flex-col justify-between shadow-2xl relative">
+        <div className="max-w-4xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* Plan 1: Free Starter */}
+          <div className="p-8 rounded-3xl bg-cardBg border border-borderColor flex flex-col justify-between shadow-xl hover:border-slate-700 transition-all">
+            <div className="flex flex-col gap-5">
+              <div>
+                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Free Starter</span>
+                <div className="flex items-baseline gap-1 mt-2">
+                  <span className="text-4xl font-black text-white">{CurrencyManager.formatZero(currency)}</span>
+                  <span className="text-xs text-textMuted">/ forever (no email required)</span>
+                </div>
+                <p className="text-xs text-textMuted mt-2 leading-relaxed">
+                  Ideal for small projects, rule files, and single prompt tests. No email, account or credit card required.
+                </p>
+              </div>
+
+              <div className="border-t border-borderColor pt-4 flex flex-col gap-3 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Up to <strong>5 files</strong> per project</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Pre-flight diff & AST inspector</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>1-Click clean ZIP download</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>In-RAM basic secret check</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>Zero account, email or card needed</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onStartFree}
+              className="w-full mt-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {activePlan === 'free' ? 'Current Plan (Start Free)' : 'Start Free (≤ 5 files)'}
+            </button>
+          </div>
+
+          {/* Plan 2: Pro Developer (Beta Access) */}
+          <div className="p-8 rounded-3xl bg-gradient-to-b from-cyan-950/40 via-cardBg to-cardBg border-2 border-cyanGlow/50 flex flex-col justify-between shadow-2xl relative">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-black text-[10px] font-black uppercase tracking-wider shadow-neonCyan">
               ★ Open Public Beta — 100% Free
             </div>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
               <div>
                 <span className="text-xs font-extrabold text-cyan-300 uppercase tracking-wider">Pro Developer (Beta Access)</span>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-5xl font-black text-white">{CurrencyManager.formatZero(currency)}</span>
+                  <span className="text-4xl font-black text-white">{CurrencyManager.formatZero(currency)}</span>
                   <span className="text-xs text-textMuted">/ free with developer email</span>
                 </div>
                 <p className="text-xs text-textMuted mt-2 leading-relaxed">
@@ -115,14 +163,14 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
                 </p>
               </div>
 
-              <div className="border-t border-borderColor pt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-white">
+              <div className="border-t border-borderColor pt-4 flex flex-col gap-3 text-xs text-white">
                 <div className="flex items-center gap-2.5 font-medium">
                   <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                  <span><strong>Unlimited project exports</strong></span>
+                  <span><strong>Unlimited project exports</strong> (&gt; 5 files)</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>All 4 formats: <strong>Claude, OpenAI, Cursor & Gemini</strong></span>
+                  <span>All 4: <strong>Claude, OpenAI, Cursor & Gemini</strong></span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -144,11 +192,19 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
             </div>
 
             <button
-              onClick={() => onSelectPlan('pro')}
-              className="w-full mt-8 py-3.5 rounded-xl font-black text-xs bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black shadow-neonCyan hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              onClick={() => {
+                if (!hasProject) {
+                  onStartFree();
+                } else {
+                  onSelectPlan('pro');
+                }
+              }}
+              className="w-full mt-8 py-3 rounded-xl font-black text-xs bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black shadow-neonCyan hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
             >
               {activePlan === 'pro'
                 ? 'Pro Pass Active (Beta Member)'
+                : !hasProject
+                ? `Upload Project to Claim Pro Pass (${CurrencyManager.formatZero(currency)})`
                 : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
             </button>
           </div>

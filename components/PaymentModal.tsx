@@ -16,6 +16,8 @@ import {
   Tag,
   Mail,
   Share2,
+  AlertTriangle,
+  UploadCloud,
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { ClientVault, VaultInvoice } from '@/lib/storage/clientVault';
@@ -215,14 +217,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   if (!isOpen) return null;
 
   const tierPriceInfo = CurrencyManager.getTierPrice(selectedPlan, currency, 'monthly');
+  const hasProject = Boolean(zipBase64 && zipBase64.trim().length > 0);
+  const isEmailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(customerEmail.trim());
   const isFreePromo = appliedPromo?.discountPercent === 100;
   const currentAmount = isFreeBeta || isFreePromo ? '0.00' : tierPriceInfo.raw.toFixed(currency === 'JPY' ? 0 : 2);
   const displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : isFreePromo ? 'FREE' : tierPriceInfo.formatted;
 
   const handleBetaProActivation = () => {
+    if (!hasProject) {
+      setEmailError('Please upload your project in the converter first before claiming your Pro Pass.');
+      return;
+    }
     const finalEmail = customerEmail.trim();
-    if (!finalEmail || !finalEmail.includes('@') || !finalEmail.includes('.')) {
-      setEmailError('Please enter a valid email address to activate your Free Pro Pass.');
+    if (!isEmailValid) {
+      setEmailError('A valid developer email is strictly required to activate your Free Pro Pass.');
       return;
     }
     setEmailError('');
@@ -456,6 +464,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             {/* Scrollable / Interactive Form Body - Frozen & Motionless */}
             <div className="flex-1 min-h-0 flex flex-col justify-between overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] pr-1 my-1 gap-2.5 focus:outline-none">
+              {!hasProject && isFreeBeta && (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-300 text-left">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-400 mt-0.5" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-bold">No project uploaded yet</span>
+                    <span className="text-[11px] text-amber-200/80">
+                      You must upload your project folder or .zip in the converter first before claiming and downloading your Free Pro Pass bundle.
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Selected Plan Details Card - Constant Height */}
             <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950/80 border border-borderColor min-h-[78px]">
               <div>
@@ -548,7 +568,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <label htmlFor="dev-email-input" className="text-[11px] font-bold text-textMuted flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isFreeBeta ? 'Developer Email (to activate Free Pro Pass)' : 'Email (for Customer Portal & Invoices)'}</span>
+                  <span>{isFreeBeta ? 'Developer Email (Required to activate Free Pro Pass) *' : 'Email (for Customer Portal & Invoices)'}</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 font-medium">Sovereign Vault Linked</span>
               </label>
@@ -561,7 +581,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   if (emailError) setEmailError('');
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && isFreeBeta) handleBetaProActivation();
+                  if (e.key === 'Enter' && isFreeBeta && isEmailValid && hasProject) handleBetaProActivation();
                 }}
                 placeholder="your-email@developer.com"
                 className={`w-full px-3 py-2 rounded-xl bg-slate-900 border ${
@@ -587,18 +607,44 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </button>
               ) : isFreeBeta ? (
                 /* Free Beta Pro Activation Button */
-                <button
-                  type="button"
-                  onClick={handleBetaProActivation}
-                  disabled={isProcessing}
-                  aria-label="Claim Free Pro Pass ($0.00)"
-                  className="w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonCyan hover:brightness-105 active:brightness-95 transition-all cursor-pointer select-none"
-                >
-                  <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
-                  <span>
-                    {isProcessing ? 'Activating Pro Pass...' : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
-                  </span>
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={handleBetaProActivation}
+                    disabled={!isEmailValid || !hasProject || isProcessing}
+                    aria-label={`Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
+                    className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all select-none ${
+                      !isEmailValid || !hasProject || isProcessing
+                        ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none'
+                        : 'bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black shadow-neonCyan hover:brightness-105 active:brightness-95 cursor-pointer'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
+                    <span>
+                      {isProcessing
+                        ? 'Activating Pro Pass...'
+                        : !hasProject
+                        ? 'Upload Project First to Activate'
+                        : !isEmailValid
+                        ? 'Enter Developer Email to Unlock'
+                        : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
+                    </span>
+                  </button>
+
+                  {!hasProject && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <UploadCloud className="w-4 h-4 text-cyan-400" />
+                      <span>Upload Project First in Converter</span>
+                    </button>
+                  )}
+                </div>
               ) : (
                 <>
                   {/* 1. Official Single PayPal Button with Rock-Solid Fallback & State Handler */}

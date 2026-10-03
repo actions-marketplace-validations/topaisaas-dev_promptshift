@@ -360,7 +360,7 @@ export default function HomePage() {
                   onFreeDownload={handleFreeDownload}
                   activeFile={selectedFileItem || undefined}
                   onExportRequest={() => {
-                    setPaymentPlan('single');
+                    setPaymentPlan(isFreeBeta ? 'pro' : 'single');
                     setIsPaymentModalOpen(true);
                   }}
                 />
@@ -444,6 +444,7 @@ export default function HomePage() {
 
       {/* Dedicated Pricing & Subscription Section */}
       <PricingSection
+        hasProject={Boolean(project && zipBase64)}
         onSelectPlan={(plan) => {
           setPaymentPlan(plan);
           setIsPaymentModalOpen(true);

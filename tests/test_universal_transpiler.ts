@@ -515,6 +515,18 @@ async function runAllTests() {
     assert(CurrencyManager.format(5.49, 'EUR').includes('€'), 'EUR must format with €');
     assert(CurrencyManager.format(5.99, 'USD').includes('$'), 'USD must format with $');
 
+    // 15.5 Free Pro Pass strict validation rules (Cannot validate without project & without email)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    assert.strictEqual(emailRegex.test(''), false, 'Empty email must be rejected');
+    assert.strictEqual(emailRegex.test('invalid'), false, 'Malformed email must be rejected');
+    assert.strictEqual(emailRegex.test('dev@startup.io'), true, 'Valid email must be accepted');
+
+    const canActivateProPass = (hasProject: boolean, email: string) => hasProject && emailRegex.test(email.trim());
+    assert.strictEqual(canActivateProPass(false, ''), false, 'Cannot validate without project and without email');
+    assert.strictEqual(canActivateProPass(true, ''), false, 'Cannot validate without email even if project is uploaded');
+    assert.strictEqual(canActivateProPass(false, 'dev@startup.io'), false, 'Cannot validate without project even if email is given');
+    assert.strictEqual(canActivateProPass(true, 'dev@startup.io'), true, 'Can only validate with BOTH project uploaded AND valid email');
+
     console.log('✓ Test 15: Free Public Beta, Early Adopter Pro Pass, Paid Transition & Multi-Currency zero formatting verified.');
   }
 

@@ -13,10 +13,12 @@ import {
   FileCode,
   Eye,
   Gift,
+  Zap,
 } from 'lucide-react';
 import { TranspileResult } from '@/lib/converter/universalTranspiler';
 import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
 import { PromoManager } from '@/lib/promo/promoManager';
+import { MonetizationManager } from '@/lib/config/monetizationConfig';
 
 interface DiffInspectorProps {
   result: TranspileResult;
@@ -271,6 +273,10 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
                 <Gift className="w-3 h-3 text-emerald-400" />
                 <span>VIP PASS ACTIVE (100% FREE)</span>
               </span>
+            ) : MonetizationManager.isFreeBeta() ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                PRO BETA ACCESS ({fileCount} FILES • {CurrencyManager.formatZero(currency)})
+              </span>
             ) : (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                 PRO REPOSITORY ({fileCount} FILES)
@@ -295,11 +301,20 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
                 : `Download Free Bundle (${fileCount}/5 Files)`}
             </span>
           </button>
+        ) : MonetizationManager.isFreeBeta() ? (
+          <button
+            onClick={onExportRequest}
+            aria-label={`Claim Free Pro Pass for ${fileCount} files`}
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 text-black font-black text-sm tracking-wide shadow-neonCyan hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all cursor-pointer"
+          >
+            <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
+            <span>Claim Free Pro Bundle ({fileCount} Files • {CurrencyManager.formatZero(currency)})</span>
+          </button>
         ) : (
           <button
             onClick={onExportRequest}
             aria-label={`Export complete repository bundle for ${CurrencyManager.getTierPrice('single', currency).formatted}`}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold text-sm tracking-wide shadow-neonCyan hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all"
+            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold text-sm tracking-wide shadow-neonCyan hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
             <span>Export 1-Click Bundle ({CurrencyManager.getTierPrice('single', currency).formatted})</span>
