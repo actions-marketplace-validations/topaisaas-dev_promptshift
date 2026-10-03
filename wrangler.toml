@@ -1,0 +1,14 @@
+name = "promptshift"
+main = ".open-next/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+account_id = "c2f6458a58ca3c80c5d0c3359baaa3cb"
+
+[vars]
+NEXT_PUBLIC_APP_NAME = "PromptShift"
+NEXT_PUBLIC_APP_URL = "https://promptshift.dev"
+PAYPAL_MODE = "sandbox"
+
+[[r2_buckets]]
+binding = "UPLOADS_BUCKET"
+bucket_name = "promptshift-ephemeral-uploads"

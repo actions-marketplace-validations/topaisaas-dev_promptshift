@@ -1,0 +1,30 @@
+# Environment Variables and Secrets
+.env
+.env*.local
+.env.production
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and Production Artifacts
+dist/
+build/
+.next/
+out/
+exports/caps_universal/
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# OS and IDE Metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

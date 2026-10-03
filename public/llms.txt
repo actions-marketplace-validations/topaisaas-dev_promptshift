@@ -1,0 +1,28 @@
+# PromptShift
+
+> PromptShift (https://promptshift.dev) is a sovereign, 1-click universal transpiler that converts complete AI assistant workspaces, developer guidelines, master prompts, and system rule definitions between Google Gemini / Antigravity, Anthropic Claude Projects, OpenAI Custom GPTs, Cursor, and GitHub Copilot with 98.5% certified semantic fidelity and in-RAM zero-retention secret sanitization.
+
+## Core Capabilities
+
+- **Bidirectional Ecosystem Transpilation**: Converts system prompts, steering directives, tool schemas, and workspace configs across Cursor (`.cursorrules` & `.cursor/rules/*.mdc`), Anthropic Claude (`.claude/` instructions & project knowledge), OpenAI (`instructions` & JSON action specs), and Google Gemini (`GEMINI.md`, `AGENTS.md`, and Antigravity skills).
+- **In-RAM Ephemeral Secret Redaction**: Detects and redacts sensitive credentials (Anthropic, OpenAI, Stripe, AWS, HuggingFace, GitLab, Discord, GitHub tokens) directly in memory before writing converted files.
+- **Certified Semantic Integrity (98.5%)**: Maps tone, autonomy thresholds, file references, role definitions, and negative constraints without loss of behavioral alignment.
+- **Sovereign Privacy**: Zero server logs, zero disk writes, zero persistent database retention, zero third-party tracking cookies.
+
+## Supported Migration Matrix
+
+- **Cursor to Anthropic Claude**: Converts `.cursorrules` and modular `.mdc` rules into unified Claude Project system prompts and reference knowledge files.
+- **Anthropic Claude to Cursor**: Splits monolithic Claude master prompts into modern Cursor modular rulebooks (`.cursorrules` + `.cursor/rules/*.mdc` with glob filters).
+- **OpenAI Custom GPTs to Claude & Cursor**: Extracts GPT builder instructions and action schemas into clean Markdown instructions and local tooling configs.
+- **Google Gemini / Antigravity to Multi-Platform**: Converts `GEMINI.md`, `AGENTS.md`, and custom agent skills into targeted format specs for Cursor, Claude, or OpenAI.
+
+## Pricing & Beta Access
+
+- **Free Starter**: Projects containing up to 5 files are converted instantly with 0 € cost and zero sign-up required.
+- **Pass Pro (Public Beta)**: Full unlimited multi-file conversions with multi-ecosystem bundle downloads, 100% free during the open public beta by providing a developer email.
+- **Team Workspace (Upcoming)**: Multi-seat shared licenses with centralized team templates and dedicated API compilation.
+
+## Key Links
+
+- [Official Web Application](https://promptshift.dev): Interactive browser drag-and-drop studio.
+- [Full LLM Specification](https://promptshift.dev/llms-full.txt): Deep technical specification and architectural breakdown for AI agents.

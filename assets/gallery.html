@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PromptShift (promptshift.dev) — Galerie Assets & Mockups</title>
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --card-bg: #0f141f;
+      --border-color: #1e293b;
+      --cyan-glow: #00f0ff;
+      --emerald-glow: #10b981;
+      --text-muted: #94a3b8;
+      --text-bright: #f8fafc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-bright); padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+    .container { width: 100%; max-width: 1200px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+    .logo-title { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, var(--cyan-glow), var(--emerald-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .domain-badge { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--emerald-glow); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+    
+    h2 { font-size: 20px; margin: 30px 0 20px 0; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+    h2::before { content: ""; display: inline-block; width: 4px; height: 20px; background: var(--cyan-glow); border-radius: 2px; }
+
+    .grid-logos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 50px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 240, 255, 0.15); border-color: #334155; }
+    .card img { width: 100%; height: auto; display: block; }
+    .card-body { padding: 15px; }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: #f1f5f9; }
+    .card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    .grid-mockups { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; }
+    .mockup-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; }
+    .mockup-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid var(--border-color); }
+    .mockup-body { padding: 20px; }
+    .mockup-title { font-size: 16px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
+    .mockup-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    
+    footer { margin-top: 60px; text-align: center; color: var(--text-muted); font-size: 13px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="logo-title">PromptShift <span style="font-size: 16px; color: var(--text-muted); font-weight: 400; -webkit-text-fill-color: initial;">Brand Assets & UI Mockups</span></div>
+      <div class="domain-badge">🌐 promptshift.dev</div>
+    </header>
+
+    <h2>1. Les 5 Concepts de Logos pour PromptShift</h2>
+    <div class="grid-logos">
+      
+      <div class="card">
+        <img src="logos/logo_1_monogram.jpg" alt="Logo 1 Monogramme PS">
+        <div class="card-body">
+          <div class="card-title">Concept 1 : Monogramme PS</div>
+          <div class="card-desc">Lettres P & S fusionnées avec flèche ascendante. Idéal pour favicon et icône d'application.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="logos/logo_2_chevrons.jpg" alt="Logo 2 Chevrons Néon">
+        <div class="card-body">
+          <div class="card-title">Concept 2 : Double Chevrons</div>
+          <div class="card-desc">Chevrons vectoriels néon avec branding promptshift.dev. Parfait pour le header du site.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="logos/logo_3_terminal.jpg" alt="Logo 3 Terminal Onde">
+        <div class="card-body">
+          <div class="card-title">Concept 3 : Terminal Prompt >_</div>
+          <div class="card-desc">Curseur de commande se transformant en onde neurale. Look résolument axé développeurs.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="logos/logo_4_nexus.jpg" alt="Logo 4 Nexus Triple Noeuds">
+        <div class="card-body">
+          <div class="card-title">Concept 4 : Nexus Triple Nœuds</div>
+          <div class="card-desc">Gemini, Claude et OpenAI interconnectés au cœur PromptShift. Démontre l'interopérabilité.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="logos/logo_5_shiftkey.jpg" alt="Logo 5 Shift Titane">
+        <div class="card-body">
+          <div class="card-title">Concept 5 : Touche Shift Titane</div>
+          <div class="card-desc">Métal brossé haute précision et liseré cyan. Image de marque épurée et luxueuse.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <h2>2. Les Maquettes d'Interface Utilisateur (UI Screens)</h2>
+    <div class="grid-mockups">
+
+      <div class="mockup-card">
+        <img src="mockups/mockup_1_landing_hero.jpg" alt="Landing Page Hero">
+        <div class="mockup-body">
+          <div class="mockup-title">Écran A : La Landing Page SaaS Haute Conversion</div>
+          <div class="mockup-desc">Dropzone intelligente 1-clic pour dossiers complets et zips, badges de compatibilité des modèles et indicateurs de confiance Zero-Retention.</div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <img src="mockups/mockup_2_project_tree_diff.jpg" alt="Project Tree Diff Multi-Files">
+        <div class="mockup-body">
+          <div class="mockup-title">Écran B : Explorateur Arborescent Multi-Fichiers (50+ Fichiers)</div>
+          <div class="mockup-desc">Arborescence sémantique complète (Master Prompt, Rules, Tool Specs, Knowledge) avec sélection intelligente automatique.</div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <img src="mockups/mockup_3_diff_inspector.jpg" alt="Pre-Flight Diff Inspector Side-by-Side">
+        <div class="mockup-body">
+          <div class="mockup-title">Écran C : Le Deep Pre-Flight Diff Inspector Side-by-Side</div>
+          <div class="mockup-desc">Comparaison split-screen (Markdown hiérarchique vs XML strict), audit de parité sémantique 98.5% et simulation en direct de la réponse de l'agent.</div>
+        </div>
+      </div>
+
+      <div class="mockup-card">
+        <img src="mockups/mockup_4_upload_tracker.jpg" alt="Upload Progress Tracker TUS">
+        <div class="mockup-body">
+          <div class="mockup-title">Écran D : Modal d'Upload Résilient & Tracking TUS</div>
+          <div class="mockup-desc">Élagage client en RAM (2.5 Go réduits à 12 Mo en 80ms), streaming par blocs TUS avec reprise automatique en cas de coupure réseau.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>
+      PromptShift — Plateforme Universelle de Conversion de Projets IA &copy; 2026 promptshift.dev
+    </footer>
+  </div>
+
+</body>
+</html>

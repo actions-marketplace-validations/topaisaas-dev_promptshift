@@ -1,0 +1,17 @@
+{
+  "autonomy-gate": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ./scripts/check_autonomy.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
