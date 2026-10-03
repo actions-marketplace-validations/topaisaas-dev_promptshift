@@ -204,8 +204,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ onSelectPlan, on
               {activePlan === 'pro'
                 ? 'Pro Pass Active (Beta Member)'
                 : !hasProject
-                ? `Upload Project to Claim Pro Pass (${CurrencyManager.formatZero(currency)})`
-                : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
+                ? 'Upload Project to Claim Pro Pass'
+                : 'Claim Free Pro Pass'}
             </button>
           </div>
         </div>

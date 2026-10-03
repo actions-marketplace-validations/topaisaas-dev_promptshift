@@ -35,7 +35,6 @@ export const Dropzone: React.FC<DropzoneProps> = ({ onProjectReady }) => {
   }, []);
 
   const singlePrice = CurrencyManager.getTierPrice('single', currency);
-  const freePriceText = CurrencyManager.formatZero(currency);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -240,12 +239,12 @@ export const Dropzone: React.FC<DropzoneProps> = ({ onProjectReady }) => {
           </p>
           <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              Free up to 5 files ({freePriceText})
+              {isFreeBeta ? 'Free up to 5 files (No account needed)' : 'Free up to 5 files'}
             </span>
             <span className="text-[11px] font-medium text-textMuted">•</span>
             <span className="text-[11px] font-semibold text-slate-300">
               {isFreeBeta
-                ? `Free Pro Pass in Beta for complete repositories (${freePriceText})`
+                ? 'Free Pro Pass in Beta for complete repositories'
                 : `${singlePrice.formatted} one-time pass for complete repositories`}
             </span>
           </div>

@@ -275,7 +275,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
               </span>
             ) : MonetizationManager.isFreeBeta() ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                PRO BETA ACCESS ({fileCount} FILES • {CurrencyManager.formatZero(currency)})
+                PRO BETA ACCESS ({fileCount} FILES)
               </span>
             ) : (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
@@ -308,7 +308,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
             className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 text-black font-black text-sm tracking-wide shadow-neonCyan hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all cursor-pointer"
           >
             <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
-            <span>Claim Free Pro Bundle ({fileCount} Files • {CurrencyManager.formatZero(currency)})</span>
+            <span>Claim Free Pro Bundle ({fileCount} Files)</span>
           </button>
         ) : (
           <button

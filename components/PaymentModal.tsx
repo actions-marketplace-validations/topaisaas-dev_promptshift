@@ -436,7 +436,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       : 'text-textMuted hover:text-white'
                   }`}
                 >
-                  {isFreeBeta ? `Pass Pro Developer (100% Free Beta • ${CurrencyManager.formatZero(currency)})` : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
+                  {isFreeBeta ? 'Pass Pro Developer (100% Free Beta)' : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
                   <span className="absolute -top-2.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-400 text-black uppercase tracking-wider shadow-md z-10 pointer-events-none">
                     {isFreeBeta ? '★ 100% Free' : '★ Popular'}
                   </span>
@@ -627,7 +627,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         ? 'Upload Project First to Activate'
                         : !isEmailValid
                         ? 'Enter Developer Email to Unlock'
-                        : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
+                        : 'Claim Free Pro Pass'}
                     </span>
                   </button>
 
