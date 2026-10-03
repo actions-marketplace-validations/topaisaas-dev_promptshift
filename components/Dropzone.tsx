@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UploadCloud, FolderUp, FileCode2, CheckCircle2, ArrowRight, Zap, AlertTriangle } from 'lucide-react';
 import { ClientPruner, ScannedFile } from '@/lib/pruner';
 import { CanonicalProject } from '@/lib/converter/capsSchema';
 import { SecurityGuards } from '@/lib/converter/securityGuards';
+import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
+import { MonetizationManager } from '@/lib/config/monetizationConfig';
 import JSZip from 'jszip';
 
 interface DropzoneProps {
@@ -17,6 +19,23 @@ export const Dropzone: React.FC<DropzoneProps> = ({ onProjectReady }) => {
   const [pruningStats, setPruningStats] = useState<{ rawBytes: number; prunedBytes: number; fileCount: number } | null>(null);
   const [targetPlatform, setTargetPlatform] = useState<'claude' | 'openai' | 'cursor' | 'gemini'>('claude');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<SupportedCurrency>(() =>
+    typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR'
+  );
+  const isFreeBeta = MonetizationManager.isFreeBeta();
+
+  useEffect(() => {
+    setCurrency(CurrencyManager.getActiveCurrency());
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent<SupportedCurrency>;
+      if (customEvent.detail) setCurrency(customEvent.detail);
+    };
+    window.addEventListener('promptshift_currency_changed', handler);
+    return () => window.removeEventListener('promptshift_currency_changed', handler);
+  }, []);
+
+  const singlePrice = CurrencyManager.getTierPrice('single', currency);
+  const freePriceText = CurrencyManager.formatZero(currency);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -219,13 +238,15 @@ export const Dropzone: React.FC<DropzoneProps> = ({ onProjectReady }) => {
           <p className="text-sm text-textMuted max-w-md">
             Instantly converts Antigravity, Claude, OpenAI & Cursor projects with 98.5% verified parity.
           </p>
-          <div className="flex items-center justify-center gap-2 mt-1">
+          <div className="flex items-center justify-center gap-2 mt-1 flex-wrap">
             <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-              Free up to 5 files
+              Free up to 5 files ({freePriceText})
             </span>
             <span className="text-[11px] font-medium text-textMuted">•</span>
             <span className="text-[11px] font-semibold text-slate-300">
-              $1.99 one-time pass for complete repositories
+              {isFreeBeta
+                ? `Free Pro Pass in Beta for complete repositories (${freePriceText})`
+                : `${singlePrice.formatted} one-time pass for complete repositories`}
             </span>
           </div>
         </div>

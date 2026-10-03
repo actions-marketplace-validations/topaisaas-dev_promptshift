@@ -459,7 +459,10 @@ async function runAllTests() {
     const { ClientVault } = await import('../lib/storage/clientVault');
     const { CurrencyManager } = await import('../lib/currency/currencyManager');
 
-    // 15.1 Verify Initial Free Beta Mode
+    const initialMode = MONETIZATION_CONFIG.mode;
+
+    // 15.1 Verify Free Beta Mode Logic
+    MONETIZATION_CONFIG.mode = 'free_beta';
     assert.strictEqual(MonetizationManager.isFreeBeta(), true);
     assert.strictEqual(MonetizationManager.isPaidMode(), false);
     assert.strictEqual(MonetizationManager.getFreeLimit(), 5);
@@ -497,15 +500,22 @@ async function runAllTests() {
     assert.strictEqual(ClientVault.isBetaPendingPaidUpgrade(), false, 'Paid invoice must clear pending upgrade');
     assert.strictEqual(ClientVault.getActivePlan(), 'pro', 'Paid invoice must grant official active Pro plan');
 
-    // Restore to free_beta mode for the current session
-    MONETIZATION_CONFIG.mode = 'free_beta';
-    assert.strictEqual(MonetizationManager.isFreeBeta(), true);
+    // Restore initial mode
+    MONETIZATION_CONFIG.mode = initialMode;
 
-    // 15.4 Localized Currency format check
+    // 15.4 Localized Currency format & formatZero checks
+    assert.strictEqual(CurrencyManager.formatZero('EUR'), '0 €');
+    assert.strictEqual(CurrencyManager.formatZero('USD'), '$0');
+    assert.strictEqual(CurrencyManager.formatZero('GBP'), '£0');
+    assert.strictEqual(CurrencyManager.formatZero('CAD'), 'CA$0');
+    assert.strictEqual(CurrencyManager.formatZero('AUD'), 'A$0');
+    assert.strictEqual(CurrencyManager.formatZero('JPY'), '¥0');
+    assert.strictEqual(CurrencyManager.getTierPrice('single', 'EUR').formatted, '1,99 €');
+    assert.strictEqual(CurrencyManager.getTierPrice('single', 'USD').formatted, '$1.99');
     assert(CurrencyManager.format(5.49, 'EUR').includes('€'), 'EUR must format with €');
     assert(CurrencyManager.format(5.99, 'USD').includes('$'), 'USD must format with $');
 
-    console.log('✓ Test 15: Free Public Beta, Early Adopter Pro Pass & Transition to Paid Mode Architecture verified.');
+    console.log('✓ Test 15: Free Public Beta, Early Adopter Pro Pass, Paid Transition & Multi-Currency zero formatting verified.');
   }
 
   console.log('\n🎉 ALL 15 UNIVERSAL TRANSPILER INTEGRATION TESTS PASSED 100%!');

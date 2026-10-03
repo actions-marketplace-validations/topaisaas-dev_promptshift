@@ -1066,7 +1066,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                   <div>
                     <span className="text-2xl font-black text-emeraldGlow">
                       {isFreeBeta && ClientVault.isBetaEarlyAdopter()
-                        ? (currency === 'EUR' ? '0 €' : '$0')
+                        ? CurrencyManager.formatZero(currency)
                         : CurrencyManager.getTierPrice('pro', currency).formatted}
                     </span>
                     <span className="text-xs text-textMuted block">

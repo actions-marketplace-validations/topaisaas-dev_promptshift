@@ -217,7 +217,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const tierPriceInfo = CurrencyManager.getTierPrice(selectedPlan, currency, 'monthly');
   const isFreePromo = appliedPromo?.discountPercent === 100;
   const currentAmount = isFreeBeta || isFreePromo ? '0.00' : tierPriceInfo.raw.toFixed(currency === 'JPY' ? 0 : 2);
-  const displayPrice = isFreeBeta ? '0 €' : isFreePromo ? 'FREE' : tierPriceInfo.formatted;
+  const displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : isFreePromo ? 'FREE' : tierPriceInfo.formatted;
 
   const handleBetaProActivation = () => {
     const finalEmail = customerEmail.trim();
@@ -401,20 +401,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <div
                 role="tablist"
                 aria-label="Subscription plan options"
-                className={`grid ${isFreeBeta ? 'grid-cols-2' : 'grid-cols-3'} p-1 rounded-2xl bg-slate-900 border border-borderColor gap-1 overflow-visible relative`}
+                className={`grid ${isFreeBeta ? 'grid-cols-1 max-w-sm mx-auto' : 'grid-cols-3'} p-1 rounded-2xl bg-slate-900 border border-borderColor gap-1 overflow-visible relative`}
               >
-                <button
-                  role="tab"
-                  aria-selected={selectedPlan === 'single'}
-                  onClick={() => setSelectedPlan('single')}
-                  className={`py-2 px-2 rounded-xl text-[11px] font-bold transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none whitespace-nowrap text-center ${
-                    selectedPlan === 'single'
-                      ? 'bg-slate-800 text-white shadow-sm border border-slate-700'
-                      : 'text-textMuted hover:text-white'
-                  }`}
-                >
-                  {isFreeBeta ? 'Starter (≤ 5 files)' : `Single (${CurrencyManager.getTierPrice('single', currency).formatted})`}
-                </button>
+                {!isFreeBeta && (
+                  <button
+                    role="tab"
+                    aria-selected={selectedPlan === 'single'}
+                    onClick={() => setSelectedPlan('single')}
+                    className={`py-2 px-2 rounded-xl text-[11px] font-bold transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none whitespace-nowrap text-center ${
+                      selectedPlan === 'single'
+                        ? 'bg-slate-800 text-white shadow-sm border border-slate-700'
+                        : 'text-textMuted hover:text-white'
+                    }`}
+                  >
+                    Single ({CurrencyManager.getTierPrice('single', currency).formatted})
+                  </button>
+                )}
 
                 <button
                   role="tab"
@@ -426,7 +428,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       : 'text-textMuted hover:text-white'
                   }`}
                 >
-                  {isFreeBeta ? 'Pass Pro (Free in Beta)' : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
+                  {isFreeBeta ? `Pass Pro Developer (100% Free Beta • ${CurrencyManager.formatZero(currency)})` : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
                   <span className="absolute -top-2.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-400 text-black uppercase tracking-wider shadow-md z-10 pointer-events-none">
                     {isFreeBeta ? '★ 100% Free' : '★ Popular'}
                   </span>
@@ -594,7 +596,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 >
                   <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
                   <span>
-                    {isProcessing ? 'Activating Pro Pass...' : 'Claim Free Pro Pass (0 €)'}
+                    {isProcessing ? 'Activating Pro Pass...' : `Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
                   </span>
                 </button>
               ) : (

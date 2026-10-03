@@ -42,7 +42,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     name: 'Euro',
     flag: '🇪🇺',
     rates: {
-      single: 1.89,
+      single: 1.99,
       proMonthly: 5.49,
       proAnnualMonthly: 3.80,
       teamMonthly: 18.49,
@@ -222,9 +222,22 @@ export class CurrencyManager {
   }
 
   /**
+   * Formats zero in the active localized currency (e.g. 0 €, $0, £0, CA$0, A$0, ¥0)
+   */
+  public static formatZero(currency: SupportedCurrency = 'USD'): string {
+    if (currency === 'EUR') return '0 €';
+    if (currency === 'GBP') return '£0';
+    if (currency === 'CAD') return 'CA$0';
+    if (currency === 'AUD') return 'A$0';
+    if (currency === 'JPY') return '¥0';
+    return '$0';
+  }
+
+  /**
    * Formats a given number into the appropriate localized price string
    */
   public static format(amount: number, currency: SupportedCurrency = 'USD'): string {
+    if (amount === 0) return this.formatZero(currency);
     const config = CURRENCIES[currency] || CURRENCIES.USD;
     if (currency === 'JPY') {
       return `${config.symbol}${Math.round(amount)}`;
