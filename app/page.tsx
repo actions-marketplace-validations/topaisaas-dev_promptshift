@@ -466,13 +466,28 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="w-full max-w-6xl mx-auto px-6 py-10 border-t border-slate-800/80 flex items-center justify-center gap-4 text-xs text-textMuted mt-12">
+      <footer className="w-full max-w-6xl mx-auto px-6 py-10 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted mt-12">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-slate-300">PromptShift.dev</span>
           <span>•</span>
           <span>Universal 1-Click AI Agent Bridge</span>
           <span>•</span>
           <span>Zero Server Logs</span>
+        </div>
+        <div className="flex items-center gap-4 text-xs">
+          <a
+            href="mailto:contact@promptshift.dev"
+            className="hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+          >
+            Contact & Support
+          </a>
+          <span>•</span>
+          <a
+            href="mailto:compliance@promptshift.dev"
+            className="hover:text-emerald-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded"
+          >
+            SOC-2 / DPA Compliance
+          </a>
         </div>
       </footer>
     </div>

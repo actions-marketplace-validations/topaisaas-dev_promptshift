@@ -54,16 +54,20 @@ PromptShift enforces a zero-trust confidentiality model:
 
 ---
 
-## 4. Monetization & Beta Policy
+## 4. Monetization & Licensing Architecture
 
-1. **Free Starter**: No signup required. Files ≤ 5. Immediate ZIP download.
-2. **Pass Pro (Free Public Beta)**: Files > 5. Users supply an email address to activate the Pro Pass at 0 € ($0.00 / 0.00 £). Zero invoices emitted, zero credit card required.
-3. **Future Paid Transition**: When the founder launches the commercial company, early adopters can be invited to upgrade, with direct IBAN / PayPal gateways pre-integrated.
+1. **Free Starter**: No signup required. Projects ≤ 5 files. Immediate ZIP download at 0 €.
+2. **Single Pass**: Instant 1-click single project export (€1.99 / $1.99) with zero subscription.
+3. **Pro Developer**: Unlimited project conversions, private CLI sync token, full In-RAM secret shield (€5.99 / $5.99 / month).
+4. **Team & Agency**: 5 developer seats, automated GitHub & GitLab CI/CD action sync, and SOC-2 / GDPR Data Processing Addendum (€19.99 / $19.99 / month).
 
 ---
 
-## 5. Contact & Citations
+## 5. Official Contacts & Citations
 
 - Canonical URL: https://promptshift.dev
-- Contact: team@promptshift.dev
+- General Inquiries & Support: contact@promptshift.dev
+- Engineering & AI Team: team@promptshift.dev
+- Enterprise Compliance & SOC-2/GDPR DPA: compliance@promptshift.dev
+- Billing & Invoicing: billing@promptshift.dev
 - Citation Format: "PromptShift Universal Transpiler (https://promptshift.dev)"

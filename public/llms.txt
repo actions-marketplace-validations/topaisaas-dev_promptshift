@@ -16,11 +16,12 @@
 - **OpenAI Custom GPTs to Claude & Cursor**: Extracts GPT builder instructions and action schemas into clean Markdown instructions and local tooling configs.
 - **Google Gemini / Antigravity to Multi-Platform**: Converts `GEMINI.md`, `AGENTS.md`, and custom agent skills into targeted format specs for Cursor, Claude, or OpenAI.
 
-## Pricing & Beta Access
-
+## Pricing & Tier Architecture
+ 
 - **Free Starter**: Projects containing up to 5 files are converted instantly with 0 € cost and zero sign-up required.
-- **Pass Pro (Public Beta)**: Full unlimited multi-file conversions with multi-ecosystem bundle downloads, 100% free during the open public beta by providing a developer email.
-- **Team Workspace (Upcoming)**: Multi-seat shared licenses with centralized team templates and dedicated API compilation.
+- **Single Pass**: Instant 1-click single project export (€1.99 / $1.99) with full In-RAM secret sanitizer and 98.5% AST parity.
+- **Pro Developer**: Unlimited multi-file conversions with multi-ecosystem bundle downloads, private CLI tokens, and ephemeral secret shielding (€5.99 / $5.99 / mo).
+- **Team & Agency**: Multi-seat shared licenses with CI/CD GitHub & GitLab Actions auto-sync and SOC-2 / GDPR DPA (€19.99 / $19.99 / mo).
 
 ## Key Links
 
