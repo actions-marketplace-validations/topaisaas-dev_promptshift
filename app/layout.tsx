@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'PromptShift — 1-Click Universal AI Project Bridge',
-    description: 'Shift AI projects between Gemini, Claude, OpenAI & Cursor in 1 click. 100% Free Open Beta.',
+    description: 'Shift AI projects between Gemini, Claude, OpenAI & Cursor in 1 click. Sovereign zero-retention bridge with 98.5% certified semantic fidelity.',
     images: ['/assets/official_logo.jpg'],
   },
   category: 'technology',
@@ -82,6 +82,23 @@ const jsonLdSchemas = [
     name: 'PromptShift',
     url: 'https://promptshift.dev',
     logo: 'https://promptshift.dev/assets/official_logo.jpg',
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        email: 'contact@promptshift.dev',
+        contactType: 'customer support',
+      },
+      {
+        '@type': 'ContactPoint',
+        email: 'compliance@promptshift.dev',
+        contactType: 'compliance officer',
+      },
+      {
+        '@type': 'ContactPoint',
+        email: 'billing@promptshift.dev',
+        contactType: 'billing support',
+      },
+    ],
     sameAs: [
       'https://github.com',
       'https://x.com',
@@ -114,7 +131,7 @@ const jsonLdSchemas = [
       lowPrice: '0',
       highPrice: '19.99',
       priceCurrency: 'USD',
-      offerCount: '3',
+      offerCount: '4',
       offers: [
         {
           '@type': 'Offer',
@@ -125,17 +142,24 @@ const jsonLdSchemas = [
         },
         {
           '@type': 'Offer',
-          name: 'Pro Developer (Open Beta)',
-          price: '0',
+          name: 'Single Migration Pass',
+          price: '1.99',
           priceCurrency: 'USD',
-          description: 'Unlimited files and full multi-ecosystem bundle offered 100% free during public beta.',
+          description: 'Instant 1-click single project export with full In-RAM secret redaction and 98.5% AST parity.',
         },
         {
           '@type': 'Offer',
-          name: 'Team Workspace',
+          name: 'Pro Developer Subscription',
+          price: '5.99',
+          priceCurrency: 'USD',
+          description: 'Unlimited multi-file conversions with multi-ecosystem bundle downloads, CLI tokens and RAM vault.',
+        },
+        {
+          '@type': 'Offer',
+          name: 'Team & Agency Pass',
           price: '19.99',
           priceCurrency: 'USD',
-          description: 'Commercial multi-seat workspace with priority compilation and central license management.',
+          description: 'Commercial multi-seat workspace with automated GitHub and GitLab CI/CD action sync and SOC-2 DPA.',
         },
       ],
     },
