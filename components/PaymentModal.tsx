@@ -15,6 +15,7 @@ import {
   Gift,
   Tag,
   Mail,
+  Share2,
 } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { ClientVault, VaultInvoice } from '@/lib/storage/clientVault';
@@ -687,6 +688,20 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <span>Download Clean PDF Invoice ({lastInvoice.invoiceNumber})</span>
                 </button>
               )}
+
+              {/* 1-Click Viral Share Loop (SMO & CRO) */}
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                  "Just migrated my AI coding assistant rules with @PromptShift (https://promptshift.dev)! 100% in-RAM execution, zero data retention & 98.5% verified AST parity. Highly recommended for multi-model devs! 🔥 #AI #DevTools #Cursor #Claude"
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Share your successful migration on X / Twitter"
+                className="w-full py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 font-semibold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <Share2 className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+                <span>Share Migration on X / Twitter</span>
+              </a>
 
               {onOpenPortal && (
                 <button

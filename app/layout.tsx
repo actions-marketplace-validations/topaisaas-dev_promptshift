@@ -191,6 +191,22 @@ const jsonLdSchemas = [
           text: 'PromptShift supports bidirectional migration between Anthropic Claude (.claude / system instructions), Cursor (.cursorrules / .cursor/rules/*.mdc), OpenAI Custom GPTs / Assistants v2, Google Gemini & Antigravity, and GitHub Copilot Workspace.',
         },
       },
+      {
+        '@type': 'Question',
+        name: 'Can I convert back and forth without losing rules?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes! PromptShift uses a unified AST intermediate representation (CAPS) that preserves 98.5%+ certified semantic fidelity. Autonomy directives, tone, architecture policies, and negative constraints are mapped without prompt drift.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What happens when the Beta concludes?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Your Early Adopter Beta status is stored in your sovereign local browser vault. You will enjoy complete access throughout the entire public beta, and will be offered exclusive grandfathered early adopter terms before any commercial transition.',
+        },
+      },
     ],
   },
 ];

@@ -6,6 +6,7 @@ import { DiffInspector } from '@/components/DiffInspector';
 import { TreeExplorer, TreeFileItem } from '@/components/TreeExplorer';
 import { PaymentModal } from '@/components/PaymentModal';
 import { PricingSection } from '@/components/PricingSection';
+import { FaqSection } from '@/components/FaqSection';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CanonicalProject } from '@/lib/converter/capsSchema';
 import { UniversalTranspiler, TranspileResult } from '@/lib/converter/universalTranspiler';
@@ -451,6 +452,9 @@ export default function HomePage() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
+
+      {/* Structured FAQ Section (AEO, VSO & Objection Buster) */}
+      <FaqSection />
 
       {/* Payment / Export & Subscription Modal */}
       <PaymentModal
