@@ -21,8 +21,8 @@ export interface MonetizationConfig {
 }
 
 export const MONETIZATION_CONFIG: MonetizationConfig = {
-  // Master toggle: Switch to 'paid' to activate the complete commercial checkout!
-  mode: 'paid',
+  // Master toggle: 'free_beta' for 100% free open public beta, or 'paid' for full commercial checkout.
+  mode: 'free_beta',
 
   // Free Starter project limit without email
   freeTierMaxFiles: 5,
