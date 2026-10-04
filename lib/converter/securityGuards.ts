@@ -13,7 +13,7 @@ export class SecurityGuards {
   private static SECRET_PATTERNS: Record<string, RegExp> = {
     'OpenAI API Key': /sk-[a-zA-Z0-9_-]{32,}/g,
     'Anthropic API Key': /sk-ant-[a-zA-Z0-9_-]{32,}/g,
-    'Google API Key': /AIza[0-9A-Za-z-_]{35}/g,
+    'Google API Key': /AIza[0-9A-Za-z-_]{30,40}/g,
     'GitHub Token': /(?:ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9_]{36,}/g,
     'AWS Access Key': /AKIA[0-9A-Z]{16}/g,
     'Generic Private Key': /-----BEGIN [A-Z ]+PRIVATE KEY-----/g,
