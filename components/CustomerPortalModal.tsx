@@ -65,6 +65,16 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
 
   // Authentication states
   const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
+
+  const isAdmin = Boolean(
+    (currentUser?.email && currentUser.email.toLowerCase().endsWith('@promptshift.dev')) ||
+    (typeof window !== 'undefined' && (
+      localStorage.getItem('promptshift_is_admin') === 'true' ||
+      sessionStorage.getItem('promptshift_is_admin') === 'true' ||
+      window.location.search.includes('admin=true')
+    ))
+  );
+
   const [authView, setAuthView] = useState<'signin' | 'signup' | 'forgot'>('signin');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
@@ -234,9 +244,17 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
       if (user?.email) {
         setCustomerInfo((prev) => ({ ...prev, email: user.email }));
         ClientVault.saveCustomerInfo({ ...customerInfo, email: user.email });
+
+        // Dispatch welcome confirmation email asynchronously
+        fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'welcome_account', email: user.email }),
+        }).catch((err) => console.warn('[Auth] Welcome email notification error:', err));
       }
       setAuthPassword('');
       setAuthConfirmPassword('');
+      setAuthSuccess('Account created! Welcome email dispatched.');
     } else {
       setAuthError(res.error || 'Registration failed.');
     }
@@ -721,8 +739,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 <p className="text-textMuted leading-relaxed text-[11px]">
                   <strong>Where is your data stored?</strong> Your conversion history, cached bundles, and receipts are stored
                   strictly within your browser&apos;s private local sandbox (HTML5 LocalStorage). PromptShift uses <strong>zero tracking cookies</strong> and
-                  <strong> zero cloud database persistence</strong> for your code. If you clear your browser&apos;s site data or click &ldquo;Purge Local Vault&rdquo;,
-                  all records are instantly and permanently erased.
+                  <strong> zero cloud database persistence</strong> for your code. If you clear your browser&apos;s site data or reset your local device cache,
+                  all records are permanently erased.
                 </p>
               </div>
             </div>
@@ -1175,19 +1193,25 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
               </span>
             )}
 
-            <button
-              onClick={() => {
-                ClientVault.purgeVault();
-                setConversions([]);
-                setInvoices([]);
-                setCustomerInfo({ name: '', company: '', email: '', vatId: '' });
-                setIsPurgedToast(true);
-                setTimeout(() => setIsPurgedToast(false), 3500);
-              }}
-              className="px-3 py-1.5 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 text-xs font-semibold transition-all cursor-pointer"
-            >
-              Purge Local Vault
-            </button>
+            {/* Admin only Purge Vault action - Hidden from regular clients */}
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  if (window.confirm("Admin Warning: Are you sure you want to purge the entire local vault?")) {
+                    ClientVault.purgeVault();
+                    setConversions([]);
+                    setInvoices([]);
+                    setCustomerInfo({ name: '', company: '', email: '', vatId: '' });
+                    setIsPurgedToast(true);
+                    setTimeout(() => setIsPurgedToast(false), 3500);
+                  }
+                }}
+                className="px-3 py-1.5 rounded-xl text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/30 text-xs font-mono font-semibold transition-all cursor-pointer"
+                title="Admin only action"
+              >
+                [Admin] Purge Vault
+              </button>
+            )}
 
             <button
               onClick={onClose}

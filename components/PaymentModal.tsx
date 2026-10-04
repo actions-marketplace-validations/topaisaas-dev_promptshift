@@ -238,6 +238,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     setTimeout(() => {
       ClientVault.enrollBetaPro(finalEmail);
       setIsProcessing(false);
+
+      // Dispatch confirmation email asynchronously
+      fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'pro_pass_activated',
+          email: finalEmail,
+          projectName: projectName || 'Universal AI Project',
+        }),
+      }).catch((err) => console.warn('[PaymentModal] Pro pass confirmation email error:', err));
+
       handlePaymentSuccess(
         'Pro Beta Pass (Early Adopter Free Access)',
         'BETA-' + Math.random().toString(36).substring(2, 8).toUpperCase()
