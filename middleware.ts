@@ -13,7 +13,7 @@ import type { NextRequest } from 'next/server';
  * - /assets/* (Static images and icons)
  * - /favicon.ico
  */
-export const IS_MAINTENANCE_MODE = false;
+export const IS_MAINTENANCE_MODE = true;
 
 export function middleware(request: NextRequest) {
   if (!IS_MAINTENANCE_MODE) {
