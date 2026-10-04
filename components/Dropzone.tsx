@@ -387,7 +387,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
               <span className="text-[11px] text-textMuted">
                 {isFreeBeta
                   ? 'Unlimited files • 100% Free in Beta with email'
-                  : 'Unlimited files • Complete repository pass'}
+                  : `Unlimited files • From ${singlePrice.formatted} one-time pass`}
               </span>
             </div>
           </div>
@@ -447,14 +447,18 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                     Option 1 • Recommended
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                    100% FREE BETA
+                    {isFreeBeta ? '100% FREE BETA' : 'FULL REPOSITORY PASS'}
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-white">
-                  Unlock All {overlimitState.totalCount} Files with Free Pro Pass
+                  {isFreeBeta
+                    ? `Unlock All ${overlimitState.totalCount} Files with Free Pro Pass`
+                    : `Unlock All ${overlimitState.totalCount} Files (${singlePrice.formatted})`}
                 </h4>
                 <p className="text-xs text-textMuted leading-relaxed">
-                  Converts your complete repository with all {overlimitState.totalCount} instructions, rules and knowledge files. Zero payment required during the Open Beta.
+                  {isFreeBeta
+                    ? `Converts your complete repository with all ${overlimitState.totalCount} instructions, rules and knowledge files. Zero payment required during the Open Beta.`
+                    : `Converts your complete repository with all ${overlimitState.totalCount} instructions, rules and knowledge files with verified parity. Instant 1-time pass at ${singlePrice.formatted}.`}
                 </p>
               </div>
 
@@ -463,7 +467,11 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black font-extrabold text-xs shadow-neonCyan transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-4 h-4 fill-current" />
-                <span>Switch to Pro &amp; Convert All {overlimitState.totalCount} Files</span>
+                <span>
+                  {isFreeBeta
+                    ? `Switch to Pro & Convert All ${overlimitState.totalCount} Files`
+                    : `Unlock Full Repository (${singlePrice.formatted})`}
+                </span>
               </button>
             </div>
 
@@ -544,7 +552,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
                   {isFreeBeta
                     ? 'Pro Developer Mode Active • Unlimited files • Free in Beta with email'
-                    : `Pro Developer Mode Active • Unlimited files • Complete Repositories`}
+                    : `Pro Developer Mode Active • Unlimited files • ${singlePrice.formatted} one-time pass`}
                 </span>
               )}
             </div>
