@@ -130,7 +130,7 @@ export class EmailTemplates {
 </html>`;
   }
 
-  public static welcomeAccount(email: string): { subject: string; html: string } {
+  public static welcomeAccount(email: string): { subject: string; html: string; text: string } {
     const title = 'Welcome to PromptShift — Your Sovereign AI Workspace';
     const body = `
       <h1>Account Created Successfully</h1>
@@ -150,13 +150,23 @@ export class EmailTemplates {
       <p style="font-size: 12px; color: #64748b; margin: 0;">Registered account email: <strong>${email}</strong></p>
     `;
 
+    const text = `Welcome to PromptShift (https://promptshift.dev)
+
+Your sovereign account has been created for ${email}.
+PromptShift provides zero-server-retention AI agent workspace transpilation across Claude, Cursor, Gemini, and OpenAI.
+
+Open PromptShift Studio: https://promptshift.dev
+
+Need support? Contact support@promptshift.dev`;
+
     return {
       subject: 'Welcome to PromptShift — Sovereign AI Agent Workspace',
       html: this.baseLayout(title, body),
+      text,
     };
   }
 
-  public static proPassActivated(email: string, projectName: string, fileCount?: number): { subject: string; html: string } {
+  public static proPassActivated(email: string, projectName: string, fileCount?: number): { subject: string; html: string; text: string } {
     const title = 'Your Free Pro Pass is Active — PromptShift';
     const countText = fileCount ? `${fileCount} files` : 'Complete repository';
     const body = `
@@ -182,9 +192,20 @@ export class EmailTemplates {
       <p style="font-size: 12px; color: #64748b; margin: 0;">Activated for developer: <strong>${email}</strong></p>
     `;
 
+    const text = `Free Pro Pass Activated — PromptShift
+
+Project: ${projectName}
+Scope: ${countText}
+Status: 98.5% Verified Semantic Parity
+Developer: ${email}
+
+Access your converted project: https://promptshift.dev
+Support: support@promptshift.dev`;
+
     return {
       subject: `⚡ Free Pro Pass Active: ${projectName} converted on PromptShift`,
       html: this.baseLayout(title, body),
+      text,
     };
   }
 
@@ -194,7 +215,7 @@ export class EmailTemplates {
     amount: string,
     currency: string,
     orderId: string
-  ): { subject: string; html: string } {
+  ): { subject: string; html: string; text: string } {
     const title = 'Payment Confirmed & License Active — PromptShift';
     const body = `
       <h1>⚡ Payment Confirmed!</h1>
@@ -220,9 +241,22 @@ export class EmailTemplates {
       <p style="font-size: 12px; color: #64748b; margin: 0;">Receipt sent to: <strong>${email}</strong></p>
     `;
 
+    const text = `Payment Confirmed — PromptShift
+
+Thank you for your purchase via Polar.sh Merchant of Record.
+
+Plan: ${planName}
+Total Paid: ${amount} ${currency}
+Order ID: ${orderId}
+Receipt sent to: ${email}
+
+Access PromptShift Studio: https://promptshift.dev
+Support & Billing: support@promptshift.dev`;
+
     return {
       subject: `⚡ Payment Confirmed: ${planName} active on PromptShift (${orderId})`,
       html: this.baseLayout(title, body),
+      text,
     };
   }
 }

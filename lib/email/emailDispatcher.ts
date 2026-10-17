@@ -80,8 +80,14 @@ export class EmailDispatcher {
           body: JSON.stringify({
             from: fromAddress,
             to: [email],
+            reply_to: 'support@promptshift.dev',
             subject: emailData.subject,
             html: emailData.html,
+            text: emailData.text,
+            headers: {
+              'List-Unsubscribe': '<mailto:support@promptshift.dev?subject=unsubscribe>',
+              'X-Entity-Ref-ID': payload.orderId || `ord_${Date.now()}`,
+            },
           }),
         });
 
