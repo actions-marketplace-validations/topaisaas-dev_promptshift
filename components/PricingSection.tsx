@@ -7,7 +7,7 @@ import { ClientVault, UserPlanTier } from '@/lib/storage/clientVault';
 import { MonetizationManager } from '@/lib/config/monetizationConfig';
 
 interface PricingSectionProps {
-  onSelectPlan: (plan: 'single' | 'pro' | 'team', cycle?: 'monthly' | 'annual') => void;
+  onSelectPlan: (plan: 'single' | 'pro' | 'team') => void;
   onStartFree: () => void;
   onSelectPro?: () => void;
   hasProject?: boolean;
@@ -20,7 +20,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   hasProject = false,
 }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [currency, setCurrency] = useState<SupportedCurrency>(() =>
     typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD'
   );
@@ -52,9 +51,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     };
   }, []);
 
-  const singlePrice = CurrencyManager.getTierPrice('single', currency, billingCycle);
-  const proPrice = CurrencyManager.getTierPrice('pro', currency, billingCycle);
-  const teamPrice = CurrencyManager.getTierPrice('team', currency, billingCycle);
+  const singlePrice = CurrencyManager.getTierPrice('single', currency);
+  const proPrice = CurrencyManager.getTierPrice('pro', currency);
+  const teamPrice = CurrencyManager.getTierPrice('team', currency);
 
   return (
     <section id="pricing" aria-labelledby="pricing-heading" className="w-full max-w-7xl mx-auto py-12 flex flex-col gap-8">
@@ -73,35 +72,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             ? 'Test PromptShift freely with zero commitment. Free Starter requires zero account, and Pro Developer access is 100% complimentary during the open public beta.'
             : 'From free small conversions to single repository passes, unlimited Pro subscriptions, and team CI/CD sync.'}
         </p>
-
-        {/* Monthly vs Annual Toggle (Only for commercial paid mode) */}
-        {!isFreeBeta && (
-          <div className="flex items-center gap-3 p-1 rounded-2xl bg-slate-900 border border-borderColor mt-2">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                billingCycle === 'monthly'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'text-textMuted hover:text-white'
-              }`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                billingCycle === 'annual'
-                  ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold shadow-neonCyan'
-                  : 'text-textMuted hover:text-white'
-              }`}
-            >
-              <span>Annual Pass</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-400 text-black font-black uppercase">
-                Save 30%
-              </span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Grid: 2 balanced cards in Free Beta mode (Free Starter + Pro Developer), or 4 distinct tiers in Commercial Paid mode */}
@@ -392,7 +362,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectPlan('pro', billingCycle)}
+              onClick={() => onSelectPlan('pro')}
               disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-black text-xs transition-all ${
                 activePlan === 'pro'
@@ -410,8 +380,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 ? 'Included in Team Plan'
                 : activePlan === 'vip'
                 ? 'Included in VIP Access'
-                : billingCycle === 'annual'
-                ? `Subscribe Pro (${proPrice.formattedTotal}/yr • Save 30%)`
                 : `Subscribe Pro (${proPrice.formatted}/mo)`}
             </button>
           </div>
@@ -455,7 +423,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectPlan('team', billingCycle)}
+              onClick={() => onSelectPlan('team')}
               disabled={activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-bold text-xs border transition-all ${
                 activePlan === 'team'
@@ -470,11 +438,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 : activePlan === 'vip'
                 ? 'Included in VIP Access'
                 : activePlan === 'pro'
-                ? billingCycle === 'annual'
-                  ? `Upgrade to Team (${teamPrice.formattedTotal}/yr)`
-                  : `Upgrade to Team (${teamPrice.formatted}/mo)`
-                : billingCycle === 'annual'
-                ? `Upgrade Team (${teamPrice.formattedTotal}/yr)`
+                ? `Upgrade to Team (${teamPrice.formatted}/mo)`
                 : `Upgrade Team (${teamPrice.formatted}/mo)`}
             </button>
           </div>

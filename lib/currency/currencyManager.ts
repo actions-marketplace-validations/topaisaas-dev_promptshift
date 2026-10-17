@@ -16,9 +16,7 @@ export interface CurrencyConfig {
   rates: {
     single: number;
     proMonthly: number;
-    proAnnualMonthly: number;
     teamMonthly: number;
-    teamAnnualMonthly: number;
   };
 }
 
@@ -31,9 +29,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 1.99,
       proMonthly: 5.99,
-      proAnnualMonthly: 4.10,
       teamMonthly: 19.99,
-      teamAnnualMonthly: 16.50,
     },
   },
   EUR: {
@@ -44,9 +40,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 1.99,
       proMonthly: 5.49,
-      proAnnualMonthly: 3.80,
       teamMonthly: 18.49,
-      teamAnnualMonthly: 15.20,
     },
   },
   GBP: {
@@ -57,9 +51,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 1.59,
       proMonthly: 4.79,
-      proAnnualMonthly: 3.30,
       teamMonthly: 15.99,
-      teamAnnualMonthly: 13.10,
     },
   },
   CAD: {
@@ -70,9 +62,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 2.69,
       proMonthly: 7.99,
-      proAnnualMonthly: 5.50,
       teamMonthly: 26.99,
-      teamAnnualMonthly: 22.20,
     },
   },
   AUD: {
@@ -83,9 +73,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 2.99,
       proMonthly: 8.99,
-      proAnnualMonthly: 6.20,
       teamMonthly: 29.99,
-      teamAnnualMonthly: 24.70,
     },
   },
   JPY: {
@@ -96,9 +84,7 @@ export const CURRENCIES: Record<SupportedCurrency, CurrencyConfig> = {
     rates: {
       single: 299,
       proMonthly: 899,
-      proAnnualMonthly: 620,
       teamMonthly: 2999,
-      teamAnnualMonthly: 2470,
     },
   },
 };
@@ -188,12 +174,11 @@ export class CurrencyManager {
   }
 
   /**
-   * Retrieves the localized price for a specific tier and billing cycle
+   * Retrieves the localized price for a specific tier
    */
   public static getTierPrice(
     tier: 'single' | 'pro' | 'team',
-    currency: SupportedCurrency = 'USD',
-    billingCycle: 'monthly' | 'annual' = 'monthly'
+    currency: SupportedCurrency = 'USD'
   ): {
     formatted: string;
     raw: number;
@@ -215,30 +200,24 @@ export class CurrencyManager {
     }
 
     if (tier === 'pro') {
-      const price = billingCycle === 'monthly' ? config.rates.proMonthly : config.rates.proAnnualMonthly;
-      const annualTotalNum = Math.round(config.rates.proAnnualMonthly * 12);
-      const totalAmount = billingCycle === 'monthly' ? config.rates.proMonthly : annualTotalNum;
-      const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(annualTotalNum, currency)} billed annually)`;
+      const price = config.rates.proMonthly;
       return {
         formatted: this.format(price, currency),
         raw: price,
-        billingSuffix: suffix,
-        totalAmount,
-        formattedTotal: this.format(totalAmount, currency),
+        billingSuffix: '/ month',
+        totalAmount: price,
+        formattedTotal: this.format(price, currency),
       };
     }
 
     // Team tier
-    const price = billingCycle === 'monthly' ? config.rates.teamMonthly : config.rates.teamAnnualMonthly;
-    const annualTotalNum = Math.round(config.rates.teamAnnualMonthly * 12);
-    const totalAmount = billingCycle === 'monthly' ? config.rates.teamMonthly : annualTotalNum;
-    const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(annualTotalNum, currency)} billed annually)`;
+    const price = config.rates.teamMonthly;
     return {
       formatted: this.format(price, currency),
       raw: price,
-      billingSuffix: suffix,
-      totalAmount,
-      formattedTotal: this.format(totalAmount, currency),
+      billingSuffix: '/ month',
+      totalAmount: price,
+      formattedTotal: this.format(price, currency),
     };
   }
 }

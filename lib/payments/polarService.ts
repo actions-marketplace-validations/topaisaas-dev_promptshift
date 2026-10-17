@@ -10,7 +10,6 @@ import crypto from 'node:crypto';
 
 export interface PolarCheckoutRequest {
   plan: 'single' | 'pro' | 'team';
-  billingCycle?: 'monthly' | 'annual';
   customerEmail?: string;
   projectName?: string;
   returnUrl?: string;
@@ -27,15 +26,7 @@ export class PolarService {
     return process.env.POLAR_ACCESS_TOKEN || 'polar_oat_bCrvRXLieKhThTzt1Q2TkRaviLKjSVEPPJtDu0wgOm3';
   }
 
-  public static getProductId(plan: 'single' | 'pro' | 'team', cycle: 'monthly' | 'annual' = 'monthly'): string {
-    if (cycle === 'annual') {
-      switch (plan) {
-        case 'pro':
-          return process.env.POLAR_PRODUCT_PRO_ANNUAL_ID || process.env.POLAR_PRODUCT_PRO_ID || 'f646306b-cddd-4478-8aba-ec282a93397a';
-        case 'team':
-          return process.env.POLAR_PRODUCT_TEAM_ANNUAL_ID || process.env.POLAR_PRODUCT_TEAM_ID || '9e8ca309-7881-4d7e-bfb0-6e6eda85505b';
-      }
-    }
+  public static getProductId(plan: 'single' | 'pro' | 'team'): string {
     switch (plan) {
       case 'single':
         return process.env.POLAR_PRODUCT_SINGLE_PASS_ID || '3e74e0dd-27da-4b78-8dee-f2e0fa36ed25';
@@ -48,15 +39,7 @@ export class PolarService {
     }
   }
 
-  public static getPermanentCheckoutLink(plan: 'single' | 'pro' | 'team', cycle: 'monthly' | 'annual' = 'monthly'): string {
-    if (cycle === 'annual') {
-      switch (plan) {
-        case 'pro':
-          return process.env.NEXT_PUBLIC_POLAR_PRO_ANNUAL_URL || 'https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a';
-        case 'team':
-          return process.env.NEXT_PUBLIC_POLAR_TEAM_ANNUAL_URL || 'https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC';
-      }
-    }
+  public static getPermanentCheckoutLink(plan: 'single' | 'pro' | 'team'): string {
     switch (plan) {
       case 'single':
         return 'https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E';
@@ -70,12 +53,11 @@ export class PolarService {
   }
 
   public static async createCheckout(req: PolarCheckoutRequest): Promise<PolarCheckoutResponse> {
-    const cycle = req.billingCycle || 'monthly';
     const token = this.getAccessToken();
-    const productId = this.getProductId(req.plan, cycle);
+    const productId = this.getProductId(req.plan);
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://promptshift.dev';
 
-    const successUrl = req.successUrl || `${appUrl}/?checkout=success&plan=${req.plan}&cycle=${cycle}&checkout_id={CHECKOUT_ID}`;
+    const successUrl = req.successUrl || `${appUrl}/?checkout=success&plan=${req.plan}&checkout_id={CHECKOUT_ID}`;
     const returnUrl = req.returnUrl || `${appUrl}/#pricing`;
 
     try {
@@ -94,7 +76,6 @@ export class PolarService {
           metadata: {
             app: 'promptshift',
             plan: req.plan,
-            cycle,
             project_name: req.projectName || 'default_project',
           },
         }),
@@ -105,7 +86,7 @@ export class PolarService {
         console.error('Polar API Checkout Error:', response.status, errorText);
         // Fallback to permanent hosted checkout link
         return {
-          checkoutUrl: this.getPermanentCheckoutLink(req.plan, cycle),
+          checkoutUrl: this.getPermanentCheckoutLink(req.plan),
           checkoutId: `polar_direct_${Date.now()}`,
         };
       }
@@ -118,7 +99,7 @@ export class PolarService {
     } catch (err) {
       console.error('Polar Checkout Exception:', err);
       return {
-        checkoutUrl: this.getPermanentCheckoutLink(req.plan, cycle),
+        checkoutUrl: this.getPermanentCheckoutLink(req.plan),
         checkoutId: `polar_err_fallback_${Date.now()}`,
       };
     }

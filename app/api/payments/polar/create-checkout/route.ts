@@ -4,7 +4,7 @@ import { PolarService } from '@/lib/payments/polarService';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { plan, billingCycle, customerEmail, projectName, returnUrl, successUrl } = body;
+    const { plan, customerEmail, projectName, returnUrl, successUrl } = body;
 
     if (!plan || !['single', 'pro', 'team'].includes(plan)) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
@@ -12,7 +12,6 @@ export async function POST(req: NextRequest) {
 
     const checkout = await PolarService.createCheckout({
       plan,
-      billingCycle: billingCycle === 'annual' ? 'annual' : 'monthly',
       customerEmail,
       projectName,
       returnUrl,

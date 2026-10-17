@@ -28,7 +28,6 @@ interface PaymentModalProps {
   projectName: string;
   zipBase64?: string;
   initialPlan?: 'single' | 'pro' | 'team';
-  initialBillingCycle?: 'monthly' | 'annual';
   initialIsPaid?: boolean;
   onOpenPortal?: () => void;
 }
@@ -39,13 +38,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   projectName,
   zipBase64,
   initialPlan = 'single',
-  initialBillingCycle = 'monthly',
   initialIsPaid = false,
   onOpenPortal,
 }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
   const [selectedPlan, setSelectedPlan] = useState<'single' | 'pro' | 'team'>(isFreeBeta ? 'pro' : initialPlan);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(initialBillingCycle);
   const [currency, setCurrency] = useState<SupportedCurrency>(() =>
     typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR'
   );
@@ -72,7 +69,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setSelectedPlan(isFreeBeta ? 'pro' : initialPlan);
-      setBillingCycle(initialBillingCycle || 'monthly');
       const invoices = ClientVault.getInvoices();
       const recentInvoice = invoices.length > 0 ? invoices[0] : null;
 
@@ -101,7 +97,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         setCustomerEmail('');
       }
     }
-  }, [isOpen, initialPlan, initialBillingCycle, initialIsPaid, isFreeBeta]);
+  }, [isOpen, initialPlan, initialIsPaid, isFreeBeta]);
 
   // Listen to currency changes dispatched from anywhere in the app
   useEffect(() => {
@@ -115,8 +111,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   if (!isOpen) return null;
 
-  const activeCycle = selectedPlan === 'single' ? 'monthly' : billingCycle;
-  const tierPriceInfo = CurrencyManager.getTierPrice(selectedPlan, currency, activeCycle);
+  const tierPriceInfo = CurrencyManager.getTierPrice(selectedPlan, currency);
   const hasProject = Boolean(zipBase64 && zipBase64.trim().length > 0);
   const isEmailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(customerEmail.trim());
   const currentAmount = isFreeBeta ? '0.00' : tierPriceInfo.totalAmount.toFixed(currency === 'JPY' ? 0 : 2);
@@ -175,7 +170,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     try {
       const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://promptshift.dev';
-      const successUrl = `${appUrl}/?checkout=success&plan=${selectedPlan}&cycle=${activeCycle}&checkout_id={CHECKOUT_ID}`;
+      const successUrl = `${appUrl}/?checkout=success&plan=${selectedPlan}&checkout_id={CHECKOUT_ID}`;
       const returnUrl = `${appUrl}/#pricing`;
 
       const res = await fetch('/api/payments/polar/create-checkout', {
@@ -183,7 +178,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan: selectedPlan,
-          billingCycle: activeCycle,
           customerEmail: emailToUse,
           projectName: projectName || 'Universal AI Project',
           successUrl,
@@ -234,10 +228,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       team: 'Team & Agency Pass' as const,
     };
 
-    const finalPlanName =
-      selectedPlan !== 'single' && activeCycle === 'annual'
-        ? `${planNameMap[selectedPlan]} (Annual)`
-        : planNameMap[selectedPlan];
+    const finalPlanName = planNameMap[selectedPlan];
 
     // 1. Record invoice in ClientVault with localized currency and customer email
     const customer = ClientVault.getCustomerInfo();
@@ -378,9 +369,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 >
                   {isFreeBeta
                     ? 'Pass Pro Developer (100% Free Beta)'
-                    : activeCycle === 'annual'
-                    ? `Pro (${CurrencyManager.getTierPrice('pro', currency, 'annual').formatted}/mo)`
-                    : `Pro (${CurrencyManager.getTierPrice('pro', currency, 'monthly').formatted}/mo)`}
+                    : `Pro (${CurrencyManager.getTierPrice('pro', currency).formatted}/mo)`}
                   <span className="absolute -top-2.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-emerald-400 text-black uppercase tracking-wider shadow-md z-10 pointer-events-none">
                     {isFreeBeta ? '★ 100% Free' : '★ Popular'}
                   </span>
@@ -397,54 +386,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                         : 'text-textMuted hover:text-white'
                     }`}
                   >
-                    {activeCycle === 'annual'
-                      ? `Team (${CurrencyManager.getTierPrice('team', currency, 'annual').formatted}/mo)`
-                      : `Team (${CurrencyManager.getTierPrice('team', currency, 'monthly').formatted}/mo)`}
+                    {`Team (${CurrencyManager.getTierPrice('team', currency).formatted}/mo)`}
                     <span className="absolute -top-2.5 right-1.5 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-purple-400 text-black uppercase tracking-wider shadow-md z-10 pointer-events-none">
                       CI/CD
                     </span>
                   </button>
                 )}
               </div>
-
-              {/* Billing Cycle Switcher for Pro & Team */}
-              {!isFreeBeta && selectedPlan !== 'single' && (
-                <div className="flex items-center justify-center pt-2 pb-0.5">
-                  <div className="inline-flex p-0.5 rounded-xl bg-slate-900 border border-borderColor">
-                    <button
-                      type="button"
-                      onClick={() => setBillingCycle('monthly')}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                        billingCycle === 'monthly'
-                          ? 'bg-slate-800 text-white shadow-sm border border-slate-700'
-                          : 'text-textMuted hover:text-white'
-                      }`}
-                    >
-                      Monthly Billing
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBillingCycle('annual')}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        billingCycle === 'annual'
-                          ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-extrabold shadow-sm'
-                          : 'text-emerald-400 hover:text-emerald-300'
-                      }`}
-                    >
-                      <span>Annual Pass</span>
-                      <span
-                        className={`text-[8px] font-black px-1.5 py-0.5 rounded-full ${
-                          billingCycle === 'annual'
-                            ? 'bg-black text-emerald-300'
-                            : 'bg-emerald-500/20 text-emerald-300'
-                        }`}
-                      >
-                        SAVE 30%
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Scrollable / Interactive Form Body */}
@@ -493,8 +441,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       {selectedPlan === 'single'
                         ? (isFreeBeta ? 'Free Starter (No Signup)' : 'Pay-As-You-Go Pass')
                         : selectedPlan === 'pro'
-                        ? (isFreeBeta ? 'Pro Developer Pass (Beta)' : activeCycle === 'annual' ? 'Pro Developer Subscription (Annual)' : 'Pro Developer Subscription')
-                        : (isFreeBeta ? 'Team & Agency (Included in Beta)' : activeCycle === 'annual' ? 'Team & Agency Pass (Annual)' : 'Team & Agency Pass')}
+                        ? (isFreeBeta ? 'Pro Developer Pass (Beta)' : 'Pro Developer Subscription')
+                        : (isFreeBeta ? 'Team & Agency (Included in Beta)' : 'Team & Agency Pass')}
                     </span>
                     {selectedPlan === 'pro' && (
                       <Sparkles className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
@@ -507,8 +455,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     {selectedPlan === 'single'
                       ? (isFreeBeta ? 'Up to 2 files per project without creating an account.' : 'Single project migration. Zero recurring subscription. Full secret redactor.')
                       : selectedPlan === 'pro'
-                      ? (isFreeBeta ? 'Unlimited projects (> 2 files), CLI Token, all In-RAM cybersecurity shields.' : activeCycle === 'annual' ? 'Unlimited migrations • Billed annually • Save 30% • Cancel anytime' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
-                      : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : activeCycle === 'annual' ? '5 seats • Billed annually • GitHub CI/CD sync • SOC-2 DPA' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
+                      ? (isFreeBeta ? 'Unlimited projects (> 2 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
+                      : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
                   </p>
                 </div>
 
@@ -521,8 +469,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       ? 'Free in Beta'
                       : selectedPlan === 'single'
                       ? 'one-time'
-                      : activeCycle === 'annual'
-                      ? `/ year (${tierPriceInfo.formatted}/mo • Save 30%)`
                       : `/ month (${currency})`}
                   </span>
                 </div>
@@ -639,8 +585,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                             ? 'Opening Secure Polar Checkout...'
                             : selectedPlan === 'single'
                             ? `Unlock Single Pass with Polar (${displayPrice})`
-                            : activeCycle === 'annual'
-                            ? `Subscribe with Polar (${displayPrice}/year)`
                             : `Subscribe with Polar (${displayPrice}/month)`}
                         </span>
                       </button>
