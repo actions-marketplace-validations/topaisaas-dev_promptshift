@@ -108,75 +108,24 @@ const CURRENCY_CHANGE_EVENT = 'promptshift_currency_changed';
 
 export class CurrencyManager {
   /**
-   * Automatically detects the user's localized currency from browser environment
+   * Universal Currency Manager — Defaults to USD ($1.99, $5.99, $19.99)
    */
   public static detectCurrency(): SupportedCurrency {
     if (typeof window === 'undefined') return 'USD';
 
-    // 1. User manual override stored locally (only if explicitly picked by the user)
+    // User manual override stored locally (only if explicitly picked by the user)
     const explicitChoice = localStorage.getItem('promptshift_user_currency_explicit');
     const saved = localStorage.getItem(STORAGE_KEY) as SupportedCurrency | null;
     if (explicitChoice && saved && CURRENCIES[saved]) {
       return saved;
     }
 
-    // 2. Client timezone heuristic
-    try {
-      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-
-      if (timeZone.startsWith('Europe/London')) {
-        return 'GBP';
-      }
-      if (
-        timeZone.startsWith('Europe/') ||
-        timeZone.includes('Paris') ||
-        timeZone.includes('Berlin') ||
-        timeZone.includes('Madrid') ||
-        timeZone.includes('Rome') ||
-        timeZone.includes('Amsterdam') ||
-        timeZone.includes('Brussels') ||
-        timeZone.includes('Vienna') ||
-        timeZone.includes('Lisbon') ||
-        timeZone.includes('Athens') ||
-        timeZone.includes('Helsinki') ||
-        timeZone.includes('Dublin')
-      ) {
-        return 'EUR';
-      }
-      if (timeZone.startsWith('Asia/Tokyo')) {
-        return 'JPY';
-      }
-      if (timeZone.startsWith('Australia/') || timeZone.includes('Sydney') || timeZone.includes('Melbourne')) {
-        return 'AUD';
-      }
-      if (timeZone.startsWith('America/Toronto') || timeZone.startsWith('America/Vancouver') || timeZone.startsWith('America/Montreal') || timeZone.startsWith('America/Edmonton')) {
-        return 'CAD';
-      }
-    } catch {
-      // Fallback
-    }
-
-    // 3. User navigator language & languages array
-    try {
-      const languages = (navigator.languages || [navigator.language || '']).map((l) => l.toLowerCase());
-      for (const lang of languages) {
-        if (lang.includes('fr') || lang.includes('de') || lang.includes('es') || lang.includes('it') || lang.includes('nl') || lang.includes('pt')) {
-          return 'EUR';
-        }
-        if (lang.includes('en-gb')) return 'GBP';
-        if (lang.includes('en-ca') || lang.includes('fr-ca')) return 'CAD';
-        if (lang.includes('en-au')) return 'AUD';
-        if (lang.includes('ja')) return 'JPY';
-      }
-    } catch {
-      // Fallback
-    }
-
-    return 'EUR'; // Default to EUR for international developer friendly experience
+    // Default universal pricing currency is USD ($)
+    return 'USD';
   }
 
   /**
-   * Asynchronously refines the user's localized currency via server IP geolocation
+   * Asynchronously refines the user's localized currency via server IP geolocation if explicitly requested
    */
   public static async initFromIp(): Promise<SupportedCurrency> {
     if (typeof window === 'undefined') return 'USD';
@@ -185,16 +134,6 @@ export class CurrencyManager {
       if (explicitChoice) {
         const saved = localStorage.getItem(STORAGE_KEY) as SupportedCurrency | null;
         if (saved && CURRENCIES[saved]) return saved;
-      }
-
-      const res = await fetch('/api/geo');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.currency && CURRENCIES[data.currency as SupportedCurrency]) {
-          const detected = data.currency as SupportedCurrency;
-          this.setCurrency(detected, false);
-          return detected;
-        }
       }
     } catch {
       // Fallback silently

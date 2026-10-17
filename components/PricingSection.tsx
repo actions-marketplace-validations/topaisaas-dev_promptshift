@@ -21,7 +21,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
+  const [currency, setCurrency] = useState<SupportedCurrency>(() =>
+    typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD'
+  );
   const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
 
   useEffect(() => {
@@ -267,7 +269,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </button>
           </div>
 
-          {/* Tier 2: Single Repository Pass ($1.99 / 1,99 €) */}
+          {/* Tier 2: Single Repository Pass ($1.99) */}
           <div className="p-6 rounded-3xl bg-cardBg border border-emerald-500/40 flex flex-col justify-between shadow-lg hover:border-emerald-500/60 transition-all relative">
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
               ★ One-Time Pass

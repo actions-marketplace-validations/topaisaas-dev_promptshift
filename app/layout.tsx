@@ -201,10 +201,10 @@ const jsonLdSchemas = [
       },
       {
         '@type': 'Question',
-        name: 'How does the Free Public Beta work?',
+        name: 'What are the pricing options and tiers?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'During the public beta phase, projects with up to 5 files are converted instantly with zero sign-up required (Free Starter). Larger multi-file projects unlock the full Pro Developer tier for free by simply saving a developer email, with zero payment or credit card required.',
+          text: 'PromptShift offers a Free Starter tier (instant conversion for projects up to 5 files with zero signup), a Single Migration Pass at $1.99 for one-off full project exports, a Pro Developer plan at $5.99/mo (or $4.10/mo billed annually) for unlimited multi-ecosystem migrations, and a Team & Agency pass at $19.99/mo.',
         },
       },
       {
@@ -225,10 +225,10 @@ const jsonLdSchemas = [
       },
       {
         '@type': 'Question',
-        name: 'What happens when the Beta concludes?',
+        name: 'How do I manage my billing, receipts, and VAT invoices?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Your Early Adopter Beta status is stored in your sovereign local browser vault. You will enjoy complete access throughout the entire public beta, and will be offered exclusive grandfathered early adopter terms before any commercial transition.',
+          text: 'All checkouts and subscriptions are securely processed by Polar.sh as Merchant of Record. You can access your 1-click self-service customer portal directly inside PromptShift to manage billing, download tax-compliant VAT invoices, and adjust plans anytime.',
         },
       },
     ],

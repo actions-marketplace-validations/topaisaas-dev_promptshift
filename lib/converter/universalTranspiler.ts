@@ -66,6 +66,7 @@ export class UniversalTranspiler {
     };
 
     const files: Record<string, string> = {};
+    const VIRAL_WATERMARK = '<!-- Transpiled with promptshift.dev • Universal AI Project Bridge (98.5% AST Parity) -->\n\n';
     let diffTargetTitle = '';
     let diffTargetCode = '';
 
@@ -98,7 +99,7 @@ export class UniversalTranspiler {
       }
 
       const claudeMdContent = claudeMd.join('\n');
-      files['CLAUDE.md'] = claudeMdContent;
+      files['CLAUDE.md'] = VIRAL_WATERMARK + claudeMdContent;
 
       // 2. Strict XML formatted instructions for Claude Projects Web UI
       const xmlInstructions = [
@@ -180,8 +181,8 @@ export class UniversalTranspiler {
       }
 
       const openaiPromptContent = openaiSystemPrompt.join('\n');
-      files['OPENAI_SYSTEM_PROMPT.md'] = openaiPromptContent;
-      files['custom_gpt_instructions.txt'] = openaiPromptContent;
+      files['OPENAI_SYSTEM_PROMPT.md'] = VIRAL_WATERMARK + openaiPromptContent;
+      files['custom_gpt_instructions.txt'] = VIRAL_WATERMARK + openaiPromptContent;
 
       // 2. Custom GPT Manifest
       files['custom_gpt_manifest.json'] = JSON.stringify(
@@ -250,7 +251,7 @@ export class UniversalTranspiler {
       }
 
       const cursorContent = cursorrules.join('\n');
-      files['.cursorrules'] = cursorContent;
+      files['.cursorrules'] = VIRAL_WATERMARK + cursorContent;
 
       // 2. Modern Cursor Multi-Rule standard (.cursor/rules/*.mdc)
       for (const r of cleanProject.rules) {
@@ -264,7 +265,7 @@ ${r.content.trim()}
       }
 
       // 3. Windsurf compatibility
-      files['.windsurfrules'] = cursorContent;
+      files['.windsurfrules'] = VIRAL_WATERMARK + cursorContent;
 
       // 4. Cursor Settings
       files['.cursor/settings.json'] = JSON.stringify(
@@ -280,8 +281,8 @@ ${r.content.trim()}
       diffTargetCode = cursorContent;
     } else {
       // Gemini / Google Antigravity format
-      files['GEMINI.md'] = cleanProject.persona.raw_system_prompt;
-      files['AGENTS.md'] = cleanProject.persona.raw_system_prompt;
+      files['GEMINI.md'] = VIRAL_WATERMARK + cleanProject.persona.raw_system_prompt;
+      files['AGENTS.md'] = VIRAL_WATERMARK + cleanProject.persona.raw_system_prompt;
 
       for (const r of cleanProject.rules) {
         const rulePath = r.name.startsWith('.agents/rules/') ? r.name : `.agents/rules/${r.name}`;

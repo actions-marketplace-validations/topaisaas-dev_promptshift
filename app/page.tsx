@@ -40,7 +40,7 @@ export default function HomePage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentPlan, setPaymentPlan] = useState<'single' | 'pro' | 'team'>('pro');
   const [zipBase64, setZipBase64] = useState<string | undefined>(undefined);
-  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
+  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
   const [isVip, setIsVip] = useState(false);
   const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
 
@@ -531,27 +531,47 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="w-full max-w-6xl mx-auto px-6 py-10 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted mt-12">
-        <div className="flex items-center gap-2">
+      <footer className="w-full max-w-6xl mx-auto px-6 py-12 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-textMuted mt-12">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold text-slate-300">PromptShift.dev</span>
           <span>•</span>
           <span>Universal 1-Click AI Agent Bridge</span>
           <span>•</span>
-          <span>Zero Server Logs</span>
+          <span>Zero Server Storage Guarantee</span>
         </div>
-        <div className="flex items-center gap-4 text-xs">
+        <div className="flex flex-wrap items-center gap-4 text-xs">
+          <Link
+            href="/terms"
+            className="hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+          >
+            Terms & EULA
+          </Link>
+          <span>•</span>
+          <Link
+            href="/privacy"
+            className="hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
+          >
+            Privacy Policy
+          </Link>
+          <span>•</span>
+          <Link
+            href="/security"
+            className="hover:text-emerald-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded"
+          >
+            Security & DPA
+          </Link>
           <a
             href="mailto:contact@promptshift.dev"
             className="hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
           >
-            Contact & Support
+            Support (contact@promptshift.dev)
           </a>
           <span>•</span>
           <a
             href="mailto:compliance@promptshift.dev"
-            className="hover:text-emerald-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded"
+            className="hover:text-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 rounded"
           >
-            SOC-2 / DPA Compliance
+            Compliance (compliance@promptshift.dev)
           </a>
         </div>
       </footer>

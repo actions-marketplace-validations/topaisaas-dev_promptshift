@@ -70,6 +70,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       ) {
         setCustomerEmail(savedCust.email);
       } else {
+        if (savedCust.email && savedCust.email.endsWith('@promptshift.dev')) {
+          ClientVault.saveCustomerInfo({ ...savedCust, email: '' });
+        }
         setCustomerEmail('');
       }
     }
@@ -100,7 +103,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
     const finalEmail = customerEmail.trim();
     if (!isEmailValid) {
-      setEmailError('A valid developer email is strictly required to activate your Free Pro Pass.');
+      setEmailError('A valid email address is strictly required to activate your Free Pro Pass.');
       return;
     }
     setEmailError('');
@@ -128,6 +131,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePolarCheckout = async () => {
+    const emailToUse = customerEmail.trim();
+    if (!emailToUse || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailToUse)) {
+      setEmailError('Please enter your email so Polar can deliver your receipt and license key.');
+      const inputEl = document.getElementById('dev-email-input');
+      if (inputEl) inputEl.focus();
+      return;
+    }
+
     setIsProcessing(true);
     setEmailError('');
 
@@ -141,7 +152,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan: selectedPlan,
-          customerEmail: customerEmail.trim() || undefined,
+          customerEmail: emailToUse,
           projectName: projectName || 'Universal AI Project',
           successUrl,
           returnUrl,
@@ -408,12 +419,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
               </div>
 
-              {/* Email for Customer Portal & Sovereign Vault */}
+              {/* Email for Customer Receipt, License & Sovereign Vault */}
               <div className="flex flex-col gap-1 text-left">
                 <label htmlFor="dev-email-input" className="text-[11px] font-bold text-textMuted flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                    <span>{isFreeBeta ? 'Developer Email (Required to activate Free Pro Pass) *' : 'Developer Email (for Receipt & Sovereign Vault)'}</span>
+                    <span>Your Email (Receipt, VAT Invoice & License Key) *</span>
                   </span>
                   <span className="text-[10px] text-emerald-400 font-medium">Sovereign Vault Linked</span>
                 </label>
@@ -431,13 +442,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       else if (!isFreeBeta) handlePolarCheckout();
                     }
                   }}
-                  placeholder="your-email@developer.com"
+                  placeholder="your.email@company.com"
                   className={`w-full px-3 py-2 rounded-xl bg-slate-900 border ${
                     emailError ? 'border-red-500' : 'border-borderColor'
                   } text-xs text-white placeholder-textMuted focus:outline-none focus:border-cyan-400 transition-colors font-mono`}
                 />
+                <p className="text-[10px] text-slate-400 px-1">
+                  Polar.sh delivers your official order receipt, VAT invoice, and license confirmation directly to this email.
+                </p>
                 {emailError && (
-                  <span className="text-[11px] text-red-400 pl-1">{emailError}</span>
+                  <span className="text-[11px] text-red-400 pl-1 font-semibold">{emailError}</span>
                 )}
               </div>
 

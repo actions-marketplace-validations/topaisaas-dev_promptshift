@@ -20,9 +20,9 @@ const FAQ_ITEMS: FaqItem[] = [
       'Yes, 100%. PromptShift operates with strict in-RAM processing and zero server data retention. All uploads are processed ephemerally and sanitized in volatile memory to redact leaked credentials (OpenAI, Anthropic, Stripe, AWS, HuggingFace, etc.) before conversion. Nothing is ever saved to a persistent server disk or database.',
   },
   {
-    question: 'How does the Free Public Beta work?',
+    question: 'What are the pricing tiers and payment options?',
     answer:
-      'During the open public beta phase, projects with up to 5 files are converted instantly with zero sign-up required (Free Starter). Larger multi-file repositories unlock the full Pro Developer tier for free by simply saving a developer email, with zero payment or credit card required.',
+      'PromptShift offers flexible pricing: Free Starter for small projects (up to 5 files with zero signup), Single Deposit Pass at $1.99 one-time for pay-as-you-go migrations, Pro Developer at $5.99/month for unlimited migrations and CLI sync, and Team & Agency at $19.99/month with CI/CD automation. Payments are processed securely via Polar.sh Merchant of Record with native Apple Pay, Google Pay, Credit/Debit Cards, and SEPA.',
   },
   {
     question: 'Which AI platforms are currently supported?',
@@ -35,9 +35,9 @@ const FAQ_ITEMS: FaqItem[] = [
       'Yes! PromptShift uses a unified AST intermediate representation (CAPS) that preserves 98.5%+ certified semantic fidelity. Autonomy directives, tone, architecture policies, and negative constraints are mapped without prompt drift.',
   },
   {
-    question: 'What happens when the Beta concludes?',
+    question: 'Can I cancel my subscription or download official VAT invoices?',
     answer:
-      'Your Early Adopter Beta status is stored in your sovereign local browser vault. You will enjoy complete access throughout the entire public beta, and will be offered exclusive grandfathered early adopter terms before any commercial transition.',
+      'Yes. Subscriptions can be cancelled anytime with zero hassle directly from your Customer Portal. Official VAT invoices and clean PDF receipts are recorded in your Sovereign Client Vault and available for instant download.',
   },
 ];
 
