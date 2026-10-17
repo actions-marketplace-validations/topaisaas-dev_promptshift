@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
 import { Zap, ShieldCheck, ArrowRightLeft, Sparkles, Layers, Lock } from 'lucide-react';
 import JSZip from 'jszip';
+import { DEMO_PRESETS, DemoPreset } from '@/lib/demoPresets';
 
 export default function HomePage() {
   const isFreeBeta = MonetizationManager.isFreeBeta();
@@ -301,6 +302,10 @@ export default function HomePage() {
     });
   };
 
+  const handleLoadDemo = (preset: DemoPreset) => {
+    handleProjectReady(preset.project, preset.targetKey);
+  };
+
   return (
     <div className="flex flex-col items-center gap-12 py-6">
       {/* Hero Section */}
@@ -329,6 +334,28 @@ export default function HomePage() {
           tools, and autonomy directives with verified semantic fidelity.
         </p>
       </section>
+
+      {/* 1-Click Interactive Live Demo Presets */}
+      <div className="w-full max-w-3xl flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm">
+        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-400">
+          <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+          <span>No project handy right now? Test live with 1-click sample workspaces:</span>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+          {DEMO_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => handleLoadDemo(preset)}
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-700/80 hover:border-cyan-500/50 bg-slate-950/70 hover:bg-slate-800/80 text-xs font-medium text-slate-200 hover:text-white transition-all transform hover:-translate-y-0.5 shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            >
+              <span className="font-semibold">{preset.name}</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 group-hover:bg-cyan-500 group-hover:text-black transition-colors">
+                {preset.badge}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Dropzone Area with ErrorBoundary */}
       <ErrorBoundary

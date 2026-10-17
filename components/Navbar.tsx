@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck } from 'lucide-react';
+import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck, Terminal } from 'lucide-react';
 import { BenchmarkModal } from '@/components/BenchmarkModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { CustomerPortalModal } from '@/components/CustomerPortalModal';
@@ -21,7 +21,7 @@ export const Navbar: React.FC = () => {
   const [isPortalOpen, setIsPortalOpen] = useState(false);
   const [isGitHubActionOpen, setIsGitHubActionOpen] = useState(false);
   const [isSecurityWhitepaperOpen, setIsSecurityWhitepaperOpen] = useState(false);
-  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
+  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
   const [authUser, setAuthUser] = useState<{ email: string } | null>(null);
   const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
 
@@ -118,6 +118,14 @@ export const Navbar: React.FC = () => {
             <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Security & DPA</span>
           </button>
+
+          <Link
+            href="/cli"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
+          >
+            <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+            <span>CLI</span>
+          </Link>
 
           <a
             href="#pricing"
