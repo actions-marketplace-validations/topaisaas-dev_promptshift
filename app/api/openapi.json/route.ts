@@ -88,7 +88,7 @@ export async function GET() {
           },
         },
       },
-      '/api/payments/create-checkout': {
+      '/api/payments/polar/create-checkout': {
         post: {
           summary: 'Create Polar.sh Checkout Session',
           description: 'Generates a secure checkout session URL powered by Polar.sh as Merchant of Record.',
@@ -99,9 +99,9 @@ export async function GET() {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['productId', 'customerEmail'],
+                  required: ['plan', 'customerEmail'],
                   properties: {
-                    productId: { type: 'string', description: 'Polar product ID' },
+                    plan: { type: 'string', enum: ['single', 'pro', 'team'], description: 'Subscription or pass tier' },
                     customerEmail: { type: 'string', format: 'email', description: 'Customer billing email' },
                   },
                 },
