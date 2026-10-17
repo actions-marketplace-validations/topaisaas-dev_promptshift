@@ -187,4 +187,43 @@ export class EmailTemplates {
       html: this.baseLayout(title, body),
     };
   }
+
+  public static orderCompleted(
+    email: string,
+    planName: string,
+    amount: string,
+    currency: string,
+    orderId: string
+  ): { subject: string; html: string } {
+    const title = 'Payment Confirmed & License Active — PromptShift';
+    const body = `
+      <h1>⚡ Payment Confirmed!</h1>
+      <p>Thank you for purchasing <strong>${planName}</strong> on PromptShift via Polar.sh Merchant of Record.</p>
+      
+      <div class="box">
+        <div class="box-title">💳 Order & License Confirmation:</div>
+        <p style="margin: 0; font-size: 12px; color: #cbd5e1;">
+          <strong>Plan:</strong> ${planName}<br>
+          <strong>Total Paid:</strong> ${amount} ${currency}<br>
+          <strong>Order ID:</strong> ${orderId}<br>
+          <strong>Payment Processor:</strong> Polar.sh (Apple Pay, Google Pay, Cards, SEPA)<br>
+          <strong>Architecture:</strong> Sovereign Vault • Zero Server Retention
+        </p>
+      </div>
+
+      <p>Your license pass has been activated. You can convert unlimited AI projects with verified 98.5% semantic AST parity and zero server data retention.</p>
+
+      <div class="button-container">
+        <a href="https://promptshift.dev" class="button">Access PromptShift Converter →</a>
+      </div>
+
+      <p style="font-size: 12px; color: #64748b; margin: 0;">Receipt sent to: <strong>${email}</strong></p>
+    `;
+
+    return {
+      subject: `⚡ Payment Confirmed: ${planName} active on PromptShift (${orderId})`,
+      html: this.baseLayout(title, body),
+    };
+  }
 }
+

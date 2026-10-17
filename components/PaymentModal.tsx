@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   CheckCircle2,
   ShieldCheck,
   Download,
-  CreditCard,
   Lock,
   Sparkles,
   Zap,
@@ -17,116 +16,11 @@ import {
   AlertTriangle,
   UploadCloud,
 } from 'lucide-react';
-import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { ClientVault, VaultInvoice } from '@/lib/storage/clientVault';
 import { InvoiceGenerator } from '@/lib/invoices/invoiceGenerator';
 import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
-import { MonetizationManager, MONETIZATION_CONFIG } from '@/lib/config/monetizationConfig';
-
-interface PayPalButtonWrapperProps {
-  currentAmount: string;
-  currency: string;
-  selectedPlan: string;
-  onSuccess: () => void;
-}
-
-const PayPalButtonWrapper: React.FC<PayPalButtonWrapperProps> = ({
-  currentAmount,
-  currency,
-  selectedPlan,
-  onSuccess,
-}) => {
-  const [{ isPending, isRejected }] = usePayPalScriptReducer();
-  const [isFallbackLoading, setIsFallbackLoading] = useState(false);
-
-  if (isRejected) {
-    return (
-      <button
-        type="button"
-        disabled={isFallbackLoading}
-        onClick={async () => {
-          setIsFallbackLoading(true);
-          try {
-            const res = await fetch('/api/payments/paypal/create-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ amount: currentAmount, currency }),
-            });
-            const data = await res.json();
-            if (data.id) {
-              await fetch('/api/payments/paypal/capture-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderID: data.id }),
-              });
-              onSuccess();
-            }
-          } catch (err) {
-            console.error('PayPal fallback error:', err);
-          } finally {
-            setIsFallbackLoading(false);
-          }
-        }}
-        aria-label="Pay with PayPal"
-        className="w-full h-[42px] min-h-[42px] max-h-[42px] flex-shrink-0 rounded-xl bg-[#ffc439] hover:bg-[#f2ba32] text-black font-extrabold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer select-none border border-amber-400/40"
-      >
-        <span className="font-bold text-[#003087]">Pay</span>
-        <span className="font-bold text-[#0079C1]">Pal</span>
-        <span className="text-xs font-semibold ml-1 text-slate-900">
-          {isFallbackLoading ? 'Connecting...' : 'Checkout'}
-        </span>
-      </button>
-    );
-  }
-
-  return (
-    <div className="w-full min-h-[42px] flex-shrink-0 relative">
-      {isPending && (
-        <div className="w-full h-[42px] rounded-xl bg-[#ffc439]/90 animate-pulse flex items-center justify-center gap-1 text-black font-bold text-xs select-none border border-amber-400/40">
-          <span className="text-[#003087]">Pay</span>
-          <span className="text-[#0079C1]">Pal</span>
-          <span className="text-slate-800 text-[11px] font-medium ml-1">Loading secure checkout...</span>
-        </div>
-      )}
-      <div className={isPending ? 'hidden' : 'block'}>
-        <PayPalButtons
-          key={`paypal-btn-${currency}-${selectedPlan}`}
-          fundingSource="paypal"
-          style={{
-            layout: 'horizontal',
-            color: 'gold',
-            shape: 'rect',
-            height: 42,
-            label: 'paypal',
-            tagline: false,
-          }}
-          createOrder={async () => {
-            const res = await fetch('/api/payments/paypal/create-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ amount: currentAmount, currency }),
-            });
-            const data = await res.json();
-            if (!data.id) throw new Error(data.error || 'Failed to create PayPal order');
-            return data.id;
-          }}
-          onApprove={async (data) => {
-            await fetch('/api/payments/paypal/capture-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ orderID: data.orderID }),
-            });
-            onSuccess();
-          }}
-          onError={(err) => {
-            console.warn('PayPal Buttons warning:', err);
-          }}
-        />
-      </div>
-    </div>
-  );
-};
+import { MonetizationManager } from '@/lib/config/monetizationConfig';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -136,9 +30,6 @@ interface PaymentModalProps {
   initialPlan?: 'single' | 'pro' | 'team';
   onOpenPortal?: () => void;
 }
-
-// Feature flag: set to true to display direct debit/credit card checkout button
-const ENABLE_CARD_PAYMENT = true;
 
 export const PaymentModal: React.FC<PaymentModalProps> = ({
   isOpen,
@@ -150,18 +41,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
   const [selectedPlan, setSelectedPlan] = useState<'single' | 'pro' | 'team'>(isFreeBeta ? 'pro' : initialPlan);
-  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR');
+  const [currency, setCurrency] = useState<SupportedCurrency>(() =>
+    typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR'
+  );
   const [isPaid, setIsPaid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastInvoice, setLastInvoice] = useState<VaultInvoice | null>(null);
   const [emailError, setEmailError] = useState('');
-
-  // Memoize PayPal script options to avoid unmount/remount loops
-  const paypalScriptOptions = useMemo(() => ({
-    clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test',
-    currency: currency || 'EUR',
-    intent: 'capture',
-  }), [currency]);
 
   // Developer account & email state
   const [customerEmail, setCustomerEmail] = useState('');
@@ -235,6 +121,41 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }, 400);
   };
 
+  const handlePolarCheckout = async () => {
+    setIsProcessing(true);
+    setEmailError('');
+
+    try {
+      const appUrl = typeof window !== 'undefined' ? window.location.origin : 'https://promptshift.dev';
+      const successUrl = `${appUrl}/?checkout=success&plan=${selectedPlan}&checkout_id={CHECKOUT_ID}`;
+      const returnUrl = `${appUrl}/#pricing`;
+
+      const res = await fetch('/api/payments/polar/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          customerEmail: customerEmail.trim() || undefined,
+          projectName: projectName || 'Universal AI Project',
+          successUrl,
+          returnUrl,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        // Redirect to Polar hosted checkout (Merchant of Record)
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error(data.error || 'Unable to initialize Polar checkout session.');
+      }
+    } catch (err: any) {
+      console.error('Polar checkout launch error:', err);
+      setEmailError(err.message || 'Unable to open Polar secure checkout. Please try again.');
+      setIsProcessing(false);
+    }
+  };
+
   const downloadBundle = () => {
     if (!zipBase64) return;
     const link = document.createElement('a');
@@ -246,8 +167,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePaymentSuccess = async (
-    method: 'PayPal' | 'Debit / Credit Card' | 'Pro Beta Pass (Early Adopter Free Access)' = 'PayPal',
-    orderId: string = 'PAYID-' + Math.random().toString(36).substring(2, 10).toUpperCase()
+    method: string = 'Polar.sh (Apple Pay, Google Pay, Cards)',
+    orderId: string = 'POLAR-' + Math.random().toString(36).substring(2, 10).toUpperCase()
   ) => {
     setIsPaid(true);
 
@@ -323,8 +244,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   };
 
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || 'test';
-
   return (
     <div
       role="dialog"
@@ -341,7 +260,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
-        {/* Modal Header - Fixed & Motionless */}
+        {/* Modal Header */}
         <div className="flex flex-col gap-1 text-center items-center flex-shrink-0">
           <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyanGlow/30 flex items-center justify-center text-cyanGlow mb-1 flex-shrink-0" aria-hidden="true">
             {isFreeBeta ? <Sparkles className="w-6 h-6 text-emerald-400" /> : <Lock className="w-6 h-6" />}
@@ -368,7 +287,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
         {!isPaid ? (
           <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-            {/* Plan Selector Tabs: Localized Prices - Motionless & Badges Never Truncated */}
+            {/* Plan Selector Tabs */}
             <div className="pt-3 pb-1 flex-shrink-0 overflow-visible">
               <div
                 role="tablist"
@@ -426,7 +345,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               </div>
             </div>
 
-            {/* Scrollable / Interactive Form Body - Frozen & Motionless */}
+            {/* Scrollable / Interactive Form Body */}
             <div className="flex-1 min-h-0 flex flex-col justify-between overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable] pr-1 my-1 gap-2.5 focus:outline-none">
               {!hasProject && isFreeBeta && (
                 <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-300 text-left">
@@ -440,158 +359,156 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
               )}
 
-              {/* Selected Plan Details Card - Constant Height */}
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950/80 border border-borderColor min-h-[78px]">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-white">
-                    {selectedPlan === 'single'
-                      ? (isFreeBeta ? 'Free Starter (No Signup)' : 'Pay-As-You-Go Pass')
-                      : selectedPlan === 'pro'
-                      ? (isFreeBeta ? 'Pro Developer Pass (Beta)' : 'Pro Developer Subscription')
-                      : (isFreeBeta ? 'Team & Agency (Included in Beta)' : 'Team & Agency Pass')}
-                  </span>
-                  {selectedPlan === 'pro' && (
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
-                  )}
-                  {selectedPlan === 'team' && (
-                    <Building2 className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
-                  )}
-                </div>
-                <p className="text-[11px] text-textMuted mt-0.5 max-w-[270px] min-h-[32px] flex items-center">
-                  {selectedPlan === 'single'
-                    ? (isFreeBeta ? 'Up to 5 files per project without creating an account or entering card details.' : 'Single project migration. Zero subscription. Full secret redactor.')
-                    : selectedPlan === 'pro'
-                    ? (isFreeBeta ? 'Unlimited projects (> 5 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
-                    : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
-                </p>
-              </div>
-
-              <div className="text-right flex-shrink-0 min-w-[90px]">
-                <span className="text-2xl font-black text-emeraldGlow leading-none block">
-                  {displayPrice}
-                </span>
-                <span className="text-[10px] text-textMuted block min-h-[14px] mt-0.5">
-                  {isFreeBeta
-                    ? 'Free in Beta'
-                    : selectedPlan === 'single'
-                    ? 'one-time'
-                    : `/ month (${currency})`}
-                </span>
-              </div>
-            </div>
-
-            {/* Email for Customer Portal & Sovereign Vault */}
-            <div className="flex flex-col gap-1 text-left">
-              <label htmlFor="dev-email-input" className="text-[11px] font-bold text-textMuted flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isFreeBeta ? 'Developer Email (Required to activate Free Pro Pass) *' : 'Email (for Customer Portal & Invoices)'}</span>
-                </span>
-                <span className="text-[10px] text-emerald-400 font-medium">Sovereign Vault Linked</span>
-              </label>
-              <input
-                id="dev-email-input"
-                type="email"
-                value={customerEmail}
-                onChange={(e) => {
-                  setCustomerEmail(e.target.value);
-                  if (emailError) setEmailError('');
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && isFreeBeta && isEmailValid && hasProject) handleBetaProActivation();
-                }}
-                placeholder="your-email@developer.com"
-                className={`w-full px-3 py-2 rounded-xl bg-slate-900 border ${
-                  emailError ? 'border-red-500' : 'border-borderColor'
-                } text-xs text-white placeholder-textMuted focus:outline-none focus:border-cyan-400 transition-colors font-mono`}
-              />
-              {emailError && (
-                <span className="text-[11px] text-red-400 pl-1">{emailError}</span>
-              )}
-            </div>
-
-            {/* Payment & Action Buttons */}
-            <div className="flex flex-col gap-3 my-1">
-              {isFreeBeta ? (
-                /* Free Beta Pro Activation Button */
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBetaProActivation}
-                    disabled={!isEmailValid || !hasProject || isProcessing}
-                    aria-label={`Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
-                    className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all select-none ${
-                      !isEmailValid || !hasProject || isProcessing
-                        ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none'
-                        : 'bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black shadow-neonCyan hover:brightness-105 active:brightness-95 cursor-pointer'
-                    }`}
-                  >
-                    <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
-                    <span>
-                      {isProcessing
-                        ? 'Activating Pro Pass...'
-                        : !hasProject
-                        ? 'Upload Project First to Activate'
-                        : !isEmailValid
-                        ? 'Enter Developer Email to Unlock'
-                        : 'Claim Free Pro Pass'}
+              {/* Selected Plan Details Card */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950/80 border border-borderColor min-h-[78px]">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-white">
+                      {selectedPlan === 'single'
+                        ? (isFreeBeta ? 'Free Starter (No Signup)' : 'Pay-As-You-Go Pass')
+                        : selectedPlan === 'pro'
+                        ? (isFreeBeta ? 'Pro Developer Pass (Beta)' : 'Pro Developer Subscription')
+                        : (isFreeBeta ? 'Team & Agency (Included in Beta)' : 'Team & Agency Pass')}
                     </span>
-                  </button>
-
-                  {!hasProject && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <UploadCloud className="w-4 h-4 text-cyan-400" />
-                      <span>Upload Project First in Converter</span>
-                    </button>
-                  )}
+                    {selectedPlan === 'pro' && (
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+                    )}
+                    {selectedPlan === 'team' && (
+                      <Building2 className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-textMuted mt-0.5 max-w-[270px] min-h-[32px] flex items-center">
+                    {selectedPlan === 'single'
+                      ? (isFreeBeta ? 'Up to 5 files per project without creating an account.' : 'Single project migration. Zero recurring subscription. Full secret redactor.')
+                      : selectedPlan === 'pro'
+                      ? (isFreeBeta ? 'Unlimited projects (> 5 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
+                      : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
+                  </p>
                 </div>
-              ) : (
-                <>
-                  {/* 1. Official Single PayPal Button with Rock-Solid Fallback & State Handler */}
-                  <PayPalScriptProvider options={paypalScriptOptions}>
-                    <PayPalButtonWrapper
-                      currentAmount={currentAmount}
-                      currency={currency}
-                      selectedPlan={selectedPlan}
-                      onSuccess={() => handlePaymentSuccess('PayPal')}
-                    />
-                  </PayPalScriptProvider>
 
-                  {/* 2. Direct Debit / Credit Card - Frozen & Motionless */}
-                  {ENABLE_CARD_PAYMENT && (
+                <div className="text-right flex-shrink-0 min-w-[90px]">
+                  <span className="text-2xl font-black text-emeraldGlow leading-none block">
+                    {displayPrice}
+                  </span>
+                  <span className="text-[10px] text-textMuted block min-h-[14px] mt-0.5">
+                    {isFreeBeta
+                      ? 'Free in Beta'
+                      : selectedPlan === 'single'
+                      ? 'one-time'
+                      : `/ month (${currency})`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Email for Customer Portal & Sovereign Vault */}
+              <div className="flex flex-col gap-1 text-left">
+                <label htmlFor="dev-email-input" className="text-[11px] font-bold text-textMuted flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{isFreeBeta ? 'Developer Email (Required to activate Free Pro Pass) *' : 'Developer Email (for Receipt & Sovereign Vault)'}</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-medium">Sovereign Vault Linked</span>
+                </label>
+                <input
+                  id="dev-email-input"
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => {
+                    setCustomerEmail(e.target.value);
+                    if (emailError) setEmailError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      if (isFreeBeta && isEmailValid && hasProject) handleBetaProActivation();
+                      else if (!isFreeBeta) handlePolarCheckout();
+                    }
+                  }}
+                  placeholder="your-email@developer.com"
+                  className={`w-full px-3 py-2 rounded-xl bg-slate-900 border ${
+                    emailError ? 'border-red-500' : 'border-borderColor'
+                  } text-xs text-white placeholder-textMuted focus:outline-none focus:border-cyan-400 transition-colors font-mono`}
+                />
+                {emailError && (
+                  <span className="text-[11px] text-red-400 pl-1">{emailError}</span>
+                )}
+              </div>
+
+              {/* Payment & Action Buttons */}
+              <div className="flex flex-col gap-3 my-1">
+                {isFreeBeta ? (
+                  /* Free Beta Pro Activation Button */
+                  <div className="flex flex-col gap-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        setIsProcessing(true);
-                        setTimeout(() => {
-                          setIsProcessing(false);
-                          handlePaymentSuccess('Debit / Credit Card');
-                        }, 1200);
-                      }}
-                      aria-label="Subscribe with debit/credit card"
-                      className="w-full h-[42px] min-h-[42px] max-h-[42px] flex-shrink-0 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 border border-emerald-400/40 hover:border-emerald-300 transition-colors cursor-pointer select-none whitespace-nowrap transform-none"
+                      onClick={handleBetaProActivation}
+                      disabled={!isEmailValid || !hasProject || isProcessing}
+                      aria-label={`Claim Free Pro Pass (${CurrencyManager.formatZero(currency)})`}
+                      className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all select-none ${
+                        !isEmailValid || !hasProject || isProcessing
+                          ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed shadow-none'
+                          : 'bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black shadow-neonCyan hover:brightness-105 active:brightness-95 cursor-pointer'
+                      }`}
                     >
-                      <CreditCard className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                      <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
                       <span>
                         {isProcessing
-                          ? 'Processing Payment...'
-                          : 'Subscribe with debit/credit card'}
+                          ? 'Activating Pro Pass...'
+                          : !hasProject
+                          ? 'Upload Project First to Activate'
+                          : !isEmailValid
+                          ? 'Enter Developer Email to Unlock'
+                          : 'Claim Free Pro Pass'}
                       </span>
                     </button>
-                  )}
-                </>
-              )}
+
+                    {!hasProject && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <UploadCloud className="w-4 h-4 text-cyan-400" />
+                        <span>Upload Project First in Converter</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  /* Polar Merchant of Record Checkout Button */
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={handlePolarCheckout}
+                      disabled={isProcessing}
+                      aria-label={`Pay ${displayPrice} with Polar`}
+                      className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonCyan hover:brightness-105 active:brightness-95 transition-all select-none cursor-pointer border border-cyan-300/40 ${
+                        isProcessing ? 'opacity-80 cursor-wait' : ''
+                      }`}
+                    >
+                      <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
+                      <span>
+                        {isProcessing
+                          ? 'Opening Secure Polar Checkout...'
+                          : `Unlock with Polar (${displayPrice})`}
+                      </span>
+                    </button>
+
+                    <div className="flex items-center justify-center gap-3 text-[10px] text-textMuted py-0.5">
+                      <span>Apple Pay</span>
+                      <span>•</span>
+                      <span>Google Pay</span>
+                      <span>•</span>
+                      <span>Cards & SEPA</span>
+                      <span>•</span>
+                      <span>MoR by Polar.sh</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
         ) : (
           /* Payment Success State */
           <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-4 py-4 text-center overflow-y-auto">
@@ -641,7 +558,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </button>
               )}
 
-              {/* 1-Click Viral Share Loop (SMO & CRO) */}
+              {/* 1-Click Viral Share Loop */}
               <a
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
                   "Just migrated my AI coding assistant rules with @PromptShift (https://promptshift.dev)! 100% in-RAM execution, zero data retention & 98.5% verified AST parity. Highly recommended for multi-model devs! 🔥 #AI #DevTools #Cursor #Claude"

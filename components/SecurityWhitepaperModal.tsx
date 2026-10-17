@@ -118,7 +118,7 @@ export const SecurityWhitepaperModal: React.FC<SecurityWhitepaperModalProps> = (
           <p className="text-textMuted leading-relaxed">
             Under GDPR (EU 2016/679) Article 28, PromptShift acts as an ephemeral data processor. Because zero customer
             source code is retained, there are zero third-party cloud subprocessors for your repository code.
-            Only PCI-DSS Level 1 payment processors (PayPal, Stripe) handle billing metadata.
+            Only PCI-DSS Level 1 Merchant of Record (Polar.sh) handles billing metadata.
           </p>
           <div className="flex items-center gap-4 mt-2 text-[11px]">
             <span className="text-emerald-400 font-semibold flex items-center gap-1">

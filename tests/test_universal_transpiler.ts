@@ -245,7 +245,7 @@ async function runAllTests() {
       planName: 'Single Project Pass',
       amount: '1.99',
       currency: 'USD',
-      paymentMethod: 'PayPal',
+      paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
       status: 'PAID',
     });
 
@@ -486,13 +486,13 @@ async function runAllTests() {
     assert.strictEqual(ClientVault.isBetaPendingPaidUpgrade(), true, 'Beta user without invoice must be flagged for paid upgrade');
     assert.strictEqual(ClientVault.getActivePlan(), 'free', 'Beta user in paid mode without invoice must fall back to free');
 
-    // When the user completes payment via PayPal or Credit Card
+    // When the user completes payment via Polar.sh (Apple Pay, Google Pay, Cards)
     ClientVault.saveInvoice({
-      orderId: 'PAYID-LIVE-987654',
+      orderId: 'POLAR-LIVE-987654',
       planName: 'Pro Developer Subscription',
       amount: '5.49',
       currency: 'EUR',
-      paymentMethod: 'PayPal',
+      paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
       status: 'PAID',
       customerEmail: 'early.adopter@startup.fr',
     });

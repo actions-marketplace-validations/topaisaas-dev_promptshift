@@ -27,7 +27,7 @@ export interface VaultInvoice {
   amount: string;
   currency: string;
   timestamp: string;
-  paymentMethod: 'PayPal' | 'Credit Card (Direct IBAN)' | string;
+  paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)' | 'Polar.sh' | string;
   status: 'PAID';
   customerName?: string;
   customerCompany?: string;

@@ -6,10 +6,14 @@
 import { EmailTemplates } from './emailTemplates';
 
 export interface SendEmailPayload {
-  action: 'welcome_account' | 'pro_pass_activated';
+  action: 'welcome_account' | 'pro_pass_activated' | 'order_completed';
   email: string;
   projectName?: string;
   fileCount?: number;
+  planName?: string;
+  amount?: string;
+  currency?: string;
+  orderId?: string;
 }
 
 export interface EmailDispatchResult {
@@ -42,6 +46,14 @@ export class EmailDispatcher {
         email,
         payload.projectName || 'Universal AI Project',
         payload.fileCount
+      );
+    } else if (action === 'order_completed') {
+      emailData = EmailTemplates.orderCompleted(
+        email,
+        payload.planName || 'PromptShift Pass',
+        payload.amount || '0.00',
+        payload.currency || 'EUR',
+        payload.orderId || `ORD-${Date.now()}`
       );
     } else {
       return {

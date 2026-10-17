@@ -3,7 +3,7 @@
  * 
  * Central switch to control monetization state across the entire platform:
  * - 'free_beta' : Open Public Beta. Starter is 100% free (<= 5 files). Pro is 100% free in exchange for email. Zero payment required.
- * - 'paid'      : Full commercial monetization with PayPal & Credit Card processing (Single $1.99, Pro $5.99/mo, Team $19.99/mo).
+ * - 'paid'      : Full commercial monetization with Polar.sh Merchant of Record (Apple Pay, Google Pay, Cards, SEPA).
  */
 
 export type MonetizationMode = 'free_beta' | 'paid';

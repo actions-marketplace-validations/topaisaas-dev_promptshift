@@ -67,6 +67,44 @@ export default function HomePage() {
     window.addEventListener('promptshift_vip_activated', vipHandler);
     window.addEventListener('promptshift_plan_changed', planHandler);
 
+    // Polar Checkout success redirect detection
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('checkout') === 'success') {
+        const planParam = (urlParams.get('plan') as 'single' | 'pro' | 'team') || 'pro';
+        const checkoutId = urlParams.get('checkout_id') || `polar_${Date.now()}`;
+
+        // Save plan activation to Sovereign Vault
+        ClientVault.setActivePlan(planParam);
+        setActivePlan(planParam);
+        setPaymentPlan(planParam);
+
+        // Record verified invoice in Sovereign Vault
+        const customer = ClientVault.getCustomerInfo();
+        const tierPrice = CurrencyManager.getTierPrice(planParam, CurrencyManager.getActiveCurrency());
+        ClientVault.saveInvoice({
+          orderId: checkoutId,
+          planName:
+            planParam === 'team'
+              ? 'Team & Agency Pass'
+              : planParam === 'pro'
+              ? 'Pro Developer Subscription'
+              : 'Single Project Pass',
+          amount: tierPrice.raw.toFixed(2),
+          currency: CurrencyManager.getActiveCurrency(),
+          paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
+          status: 'PAID',
+          customerName: customer.name || 'Lead Autonomous Software Engineer',
+          customerCompany: customer.company || 'Engineering Studio',
+          customerEmail: customer.email || 'developer@promptshift.dev',
+        });
+
+        setIsPaymentModalOpen(true);
+        // Clean URL to prevent re-trigger on reload
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
     return () => {
       window.removeEventListener('promptshift_currency_changed', handler);
       window.removeEventListener('promptshift_vip_activated', vipHandler);
