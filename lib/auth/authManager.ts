@@ -14,6 +14,10 @@ export interface AuthUser {
   createdAt: string;
   failedAttempts: number;
   lockoutUntil?: number;
+  invoices?: any[];
+  conversions?: any[];
+  customerInfo?: any;
+  plan?: string;
 }
 
 export interface AuthSession {
@@ -193,6 +197,23 @@ export class AuthManager {
       expiresAt: now + SESSION_DURATION_MS,
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+
+    // Restore account-scoped vault data if saved
+    if (typeof window !== 'undefined') {
+      if (user.invoices && Array.isArray(user.invoices) && user.invoices.length > 0) {
+        localStorage.setItem('promptshift_vault_invoices', JSON.stringify(user.invoices));
+      }
+      if (user.conversions && Array.isArray(user.conversions) && user.conversions.length > 0) {
+        localStorage.setItem('promptshift_vault_conversions', JSON.stringify(user.conversions));
+      }
+      if (user.customerInfo) {
+        localStorage.setItem('promptshift_customer_info', JSON.stringify(user.customerInfo));
+      }
+      if (user.plan && user.plan !== 'free') {
+        localStorage.setItem('promptshift_active_plan', user.plan);
+      }
+    }
+
     this.dispatchAuthChange(normalizedEmail);
 
     return { success: true };
@@ -373,6 +394,34 @@ export class AuthManager {
       } catch {
         // Fallback for non-browser mock runners
       }
+    }
+  }
+
+  /**
+   * Backs up account-scoped vault data into the user's account record before logout
+   */
+  public static backupAccountVault(
+    email: string,
+    vaultData: {
+      invoices?: any[];
+      conversions?: any[];
+      customerInfo?: any;
+      plan?: string;
+    }
+  ): void {
+    if (typeof window === 'undefined') return;
+    const normalizedEmail = (email || '').trim().toLowerCase();
+    if (!normalizedEmail) return;
+    const accounts = this.getAccounts();
+    const user = accounts[normalizedEmail];
+    if (user) {
+      if (vaultData.invoices && vaultData.invoices.length > 0) user.invoices = vaultData.invoices;
+      if (vaultData.conversions && vaultData.conversions.length > 0) user.conversions = vaultData.conversions;
+      if (vaultData.customerInfo && (vaultData.customerInfo.name || vaultData.customerInfo.company || vaultData.customerInfo.email)) {
+        user.customerInfo = vaultData.customerInfo;
+      }
+      if (vaultData.plan && vaultData.plan !== 'free') user.plan = vaultData.plan;
+      this.saveAccounts(accounts);
     }
   }
 

@@ -315,12 +315,22 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
   );
 
   const handleSignOut = () => {
+    const user = AuthManager.getCurrentUser() || currentUser;
+    if (user?.email) {
+      AuthManager.backupAccountVault(user.email, {
+        invoices: ClientVault.getInvoices(),
+        conversions: ClientVault.getConversions(),
+        customerInfo: ClientVault.getCustomerInfo(),
+        plan: ClientVault.getActivePlan(),
+      });
+    }
     AuthManager.signOut();
-    ClientVault.setActivePlan('free');
-    ClientVault.saveCustomerInfo({ name: '', company: '', email: '', vatId: '', poNumber: '', isReverseCharge: false });
+    ClientVault.clearSessionData();
     setCurrentUser(null);
     setActivePlan('free');
     setCustomerInfo({ name: '', company: '', email: '', vatId: '' });
+    setConversions([]);
+    setInvoices([]);
     setIsGuestBypass(!AuthManager.hasRegisteredAccounts());
     setAuthView('signin');
     setAuthEmail('');
@@ -329,6 +339,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('promptshift_auth_changed', { detail: { email: null } }));
       window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
+      window.dispatchEvent(new CustomEvent('promptshift_vault_purged'));
     }
   };
 
@@ -1274,16 +1285,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
               </button>
             )}
 
-            {isSessionActive ? (
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-all cursor-pointer"
-                title="Sign out of your account"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign Out</span>
-              </button>
-            ) : isGuestBypass && AuthManager.hasRegisteredAccounts() ? (
+            {!isSessionActive && isGuestBypass && AuthManager.hasRegisteredAccounts() ? (
               <button
                 onClick={() => setIsGuestBypass(false)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-cyan-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer"

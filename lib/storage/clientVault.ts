@@ -173,7 +173,13 @@ export class ClientVault {
   public static getActivePlan(): UserPlanTier {
     if (typeof window === 'undefined') return 'free';
     try {
-      // 1. Check verified paid invoices first (Highest authority: verified purchases)
+      const explicit = localStorage.getItem(ACTIVE_PLAN_KEY) as UserPlanTier | null;
+      // 1. If explicit plan is 'free', the user is explicitly signed out or on free sandbox
+      if (explicit === 'free') {
+        return 'free';
+      }
+
+      // 2. Check verified paid invoices (Highest authority: verified commercial purchases)
       const invoices = this.getInvoices();
       for (const inv of invoices) {
         const name = (inv.planName || '').toLowerCase();
@@ -182,7 +188,7 @@ export class ClientVault {
         if (name.includes('single')) return 'single';
       }
 
-      // 2. Check Beta Early Adopter pass
+      // 3. Check Beta Early Adopter pass
       if (this.isBetaEarlyAdopter()) {
         // In free_beta mode, early adopters enjoy full Pro tier
         if (MonetizationManager.isFreeBeta()) {
@@ -192,19 +198,14 @@ export class ClientVault {
         return 'free';
       }
 
-      // 3. Check explicit subscription plan stored in Sovereign Vault
-      const explicit = localStorage.getItem(ACTIVE_PLAN_KEY) as UserPlanTier | null;
+      // 4. Check explicit commercial subscription plan stored in Sovereign Vault
       if (explicit && ['team', 'pro', 'single'].includes(explicit)) {
         return explicit;
       }
 
-      // 4. Check VIP code / promo pass
+      // 5. Check VIP code / promo pass
       if (localStorage.getItem('promptshift_vip_status') === 'true' || explicit === 'vip') {
         return 'vip';
-      }
-
-      if (explicit === 'free') {
-        return 'free';
       }
 
       return 'free';
@@ -280,6 +281,25 @@ export class ClientVault {
     localStorage.removeItem(ACTIVE_PLAN_KEY);
     localStorage.removeItem('promptshift_vip_status');
     localStorage.removeItem('promptshift_vip_code');
+    if (typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('promptshift_vault_purged'));
+      window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
+    }
+  }
+
+  /**
+   * Clears active session data when user logs out (invoices, conversions, customer profile, and resets plan to free)
+   */
+  public static clearSessionData(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(CONVERSIONS_KEY);
+    localStorage.removeItem(INVOICES_KEY);
+    localStorage.removeItem(CUSTOMER_INFO_KEY);
+    localStorage.setItem(ACTIVE_PLAN_KEY, 'free');
+    localStorage.removeItem('promptshift_vip_status');
+    localStorage.removeItem('promptshift_vip_code');
+    localStorage.removeItem('promptshift_beta_early_adopter');
+    localStorage.removeItem('promptshift_beta_enrolled_at');
     if (typeof window.dispatchEvent === 'function') {
       window.dispatchEvent(new CustomEvent('promptshift_vault_purged'));
       window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));

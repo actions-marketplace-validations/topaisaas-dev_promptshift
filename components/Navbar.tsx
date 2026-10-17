@@ -73,16 +73,24 @@ export const Navbar: React.FC = () => {
   const isSessionActive = Boolean(authUser || (activePlan && activePlan !== 'free') || customerEmail);
 
   const handleSignOut = () => {
+    const user = AuthManager.getCurrentUser() || authUser;
+    if (user?.email) {
+      AuthManager.backupAccountVault(user.email, {
+        invoices: ClientVault.getInvoices(),
+        conversions: ClientVault.getConversions(),
+        customerInfo: ClientVault.getCustomerInfo(),
+        plan: ClientVault.getActivePlan(),
+      });
+    }
     AuthManager.signOut();
-    ClientVault.setActivePlan('free');
-    const cust = ClientVault.getCustomerInfo();
-    ClientVault.saveCustomerInfo({ ...cust, email: '', name: '', company: '' });
+    ClientVault.clearSessionData();
     setAuthUser(null);
     setActivePlan('free');
     setCustomerEmail('');
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('promptshift_auth_changed', { detail: { email: null } }));
       window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
+      window.dispatchEvent(new CustomEvent('promptshift_vault_purged'));
     }
   };
 

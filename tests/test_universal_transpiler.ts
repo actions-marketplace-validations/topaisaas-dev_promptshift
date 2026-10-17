@@ -366,7 +366,48 @@ async function runAllTests() {
     assert.strictEqual(loginRes.success, true);
     assert.strictEqual(AuthManager.isAuthenticated(), true);
 
-    console.log('✓ Test 13: Sovereign Auth, OWASP brute-force defense, SHA-256 vault hashing, and OTP password recovery verified.');
+    // Test account-scoped vault backup and sign out clearance
+    const { ClientVault } = await import('../lib/storage/clientVault');
+    ClientVault.clearSessionData();
+    ClientVault.saveInvoice({
+      orderId: 'ORD-SEC-01',
+      planName: 'Pro Developer Subscription',
+      amount: '5.99',
+      currency: 'USD',
+      paymentMethod: 'Polar.sh',
+      status: 'PAID',
+    });
+    ClientVault.setActivePlan('pro');
+    assert.strictEqual(ClientVault.getActivePlan(), 'pro');
+    assert.strictEqual(ClientVault.getInvoices().length, 1);
+
+    // Sign out: backup and clear session data
+    AuthManager.backupAccountVault(testEmail, {
+      invoices: ClientVault.getInvoices(),
+      conversions: ClientVault.getConversions(),
+      customerInfo: ClientVault.getCustomerInfo(),
+      plan: ClientVault.getActivePlan(),
+    });
+    AuthManager.signOut();
+    ClientVault.clearSessionData();
+
+    // Verify session sandbox is 100% clean and free
+    assert.strictEqual(AuthManager.isAuthenticated(), false);
+    assert.strictEqual(ClientVault.getActivePlan(), 'free');
+    assert.strictEqual(ClientVault.getInvoices().length, 0);
+
+    // Sign back in: verify account vault data restoration
+    const restoreLogin = await AuthManager.signIn(testEmail, newPass);
+    assert.strictEqual(restoreLogin.success, true);
+    assert.strictEqual(ClientVault.getActivePlan(), 'pro');
+    assert.strictEqual(ClientVault.getInvoices().length, 1);
+    assert.strictEqual(ClientVault.getInvoices()[0].orderId, 'ORD-SEC-01');
+
+    // Clean up
+    AuthManager.signOut();
+    ClientVault.clearSessionData();
+
+    console.log('✓ Test 13: Sovereign Auth, OWASP brute-force defense, SHA-256 vault hashing, OTP password recovery & vault backup/restore verified.');
   }
 
   // 14. Test Analytics Aggregator, Telemetry Metrics & Product Optimization Engine
