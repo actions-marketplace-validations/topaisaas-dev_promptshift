@@ -32,7 +32,7 @@
   "homepage": "https://promptshift.dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/topaisaas-dev/promptshift.git"
+    "url": "git+https://github.com/topaisaas-dev/promptshift.git"
   },
   "engines": {
     "node": ">=18.0.0"
