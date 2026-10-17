@@ -12,8 +12,6 @@ import {
   Zap,
   Receipt,
   Building2,
-  Gift,
-  Tag,
   Mail,
   Share2,
   AlertTriangle,
@@ -23,7 +21,6 @@ import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@pa
 import { ClientVault, VaultInvoice } from '@/lib/storage/clientVault';
 import { InvoiceGenerator } from '@/lib/invoices/invoiceGenerator';
 import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
-import { PromoManager, PromoValidationResult } from '@/lib/promo/promoManager';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
 import { MonetizationManager, MONETIZATION_CONFIG } from '@/lib/config/monetizationConfig';
 
@@ -166,11 +163,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     intent: 'capture',
   }), [currency]);
 
-  // Promo code state
-  const [promoInput, setPromoInput] = useState('');
-  const [promoError, setPromoError] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<PromoValidationResult | null>(null);
-
   // Developer account & email state
   const [customerEmail, setCustomerEmail] = useState('');
 
@@ -181,25 +173,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       setIsPaid(false);
       setLastInvoice(null);
       setCurrency(CurrencyManager.getActiveCurrency());
-      setPromoError('');
       setEmailError('');
 
       // Auto-load previously entered email from sovereign local vault if available
       const savedCust = ClientVault.getCustomerInfo();
       if (savedCust.email && savedCust.email !== 'billing@promptshift.dev') {
         setCustomerEmail(savedCust.email);
-      }
-
-      // Auto-apply VIP pass if already active in storage or URL
-      if (PromoManager.isVipActive()) {
-        const code = PromoManager.getVipCode() || 'DEVVIP';
-        setAppliedPromo({
-          valid: true,
-          code,
-          discountPercent: 100,
-          description: 'Lifetime VIP Developer Pass (100% OFF)',
-          passType: 'vip_pro',
-        });
       }
     }
   }, [isOpen, initialPlan, isFreeBeta]);
@@ -219,9 +198,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const tierPriceInfo = CurrencyManager.getTierPrice(selectedPlan, currency, 'monthly');
   const hasProject = Boolean(zipBase64 && zipBase64.trim().length > 0);
   const isEmailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(customerEmail.trim());
-  const isFreePromo = appliedPromo?.discountPercent === 100;
-  const currentAmount = isFreeBeta || isFreePromo ? '0.00' : tierPriceInfo.raw.toFixed(currency === 'JPY' ? 0 : 2);
-  const displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : isFreePromo ? 'FREE' : tierPriceInfo.formatted;
+  const currentAmount = isFreeBeta ? '0.00' : tierPriceInfo.raw.toFixed(currency === 'JPY' ? 0 : 2);
+  const displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : tierPriceInfo.formatted;
 
   const handleBetaProActivation = () => {
     if (!hasProject) {
@@ -257,26 +235,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     }, 400);
   };
 
-  const handleApplyPromo = () => {
-    setPromoError('');
-    if (!promoInput.trim()) return;
-
-    const res = PromoManager.validate(promoInput);
-    if (res.valid) {
-      setAppliedPromo(res);
-      PromoManager.activateVip(res.code);
-      AnalyticsTracker.trackPromo(res.code, res.discountPercent);
-      setPromoInput('');
-    } else {
-      setPromoError('Invalid or expired promo code.');
-    }
-  };
-
-  const handleRemovePromo = () => {
-    setAppliedPromo(null);
-    setPromoError('');
-  };
-
   const downloadBundle = () => {
     if (!zipBase64) return;
     const link = document.createElement('a');
@@ -288,14 +246,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePaymentSuccess = async (
-    method: 'PayPal' | 'Debit / Credit Card' | 'VIP Promo Pass (100% OFF)' | 'Pro Beta Pass (Early Adopter Free Access)' = 'PayPal',
+    method: 'PayPal' | 'Debit / Credit Card' | 'Pro Beta Pass (Early Adopter Free Access)' = 'PayPal',
     orderId: string = 'PAYID-' + Math.random().toString(36).substring(2, 10).toUpperCase()
   ) => {
     setIsPaid(true);
 
     AnalyticsTracker.track({
       type: 'payment_completed',
-      planTier: isFreePromo ? 'vip' : selectedPlan,
+      planTier: selectedPlan,
       currency,
       projectTitleAnon: projectName,
     });
@@ -306,9 +264,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       team: 'Team & Agency Pass' as const,
     };
 
-    const finalPlanName = isFreePromo
-      ? `${planNameMap[selectedPlan]} (VIP 100% Free Pass)`
-      : planNameMap[selectedPlan];
+    const finalPlanName = planNameMap[selectedPlan];
 
     // 1. Record invoice in ClientVault with localized currency and customer email
     const customer = ClientVault.getCustomerInfo();
@@ -388,12 +344,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         {/* Modal Header - Fixed & Motionless */}
         <div className="flex flex-col gap-1 text-center items-center flex-shrink-0">
           <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyanGlow/30 flex items-center justify-center text-cyanGlow mb-1 flex-shrink-0" aria-hidden="true">
-            {isFreePromo || isFreeBeta ? <Sparkles className="w-6 h-6 text-emerald-400" /> : <Lock className="w-6 h-6" />}
+            {isFreeBeta ? <Sparkles className="w-6 h-6 text-emerald-400" /> : <Lock className="w-6 h-6" />}
           </div>
           <h2 id="payment-modal-title" className="text-xl font-bold text-white tracking-tight min-h-[28px] flex items-center justify-center">
-            {isFreePromo
-              ? 'VIP Developer Access Unlocked'
-              : isFreeBeta
+            {isFreeBeta
               ? 'Pro Developer Pass — Public Beta'
               : selectedPlan === 'team'
               ? 'Unlock Team & Agency Pass'
@@ -402,9 +356,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               : 'Unlock 1-Click Conversion Pass'}
           </h2>
           <p className="text-xs text-textMuted max-w-sm text-center min-h-[32px] flex items-center justify-center">
-            {isFreePromo
-              ? '100% Free peer access granted via promo code. Zero payment required.'
-              : isFreeBeta
+            {isFreeBeta
               ? '100% Free Pro access for early adopters during public beta. Simply enter your developer email.'
               : selectedPlan === 'team'
               ? 'Full team license with CI/CD GitHub & GitLab sync, SOC-2 DPA, and unlimited migrations.'
@@ -520,7 +472,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   {displayPrice}
                 </span>
                 <span className="text-[10px] text-textMuted block min-h-[14px] mt-0.5">
-                  {isFreePromo || isFreeBeta
+                  {isFreeBeta
                     ? 'Free in Beta'
                     : selectedPlan === 'single'
                     ? 'one-time'
@@ -528,52 +480,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 </span>
               </div>
             </div>
-
-            {/* Promo Code & VIP Section for Dev Friends */}
-            {!isFreeBeta && (
-              <div className="p-3 rounded-2xl bg-slate-900/70 border border-borderColor flex flex-col gap-2">
-                {appliedPromo ? (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold">
-                      <Gift className="w-4 h-4 flex-shrink-0 text-emerald-400" />
-                      <span>
-                        Code <strong>{appliedPromo.code}</strong> Applied: {appliedPromo.description}
-                      </span>
-                    </div>
-                    <button
-                      onClick={handleRemovePromo}
-                      className="text-[11px] text-textMuted hover:text-white underline ml-2"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-3.5 h-3.5 text-textMuted flex-shrink-0" />
-                    <input
-                      type="text"
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleApplyPromo();
-                      }}
-                      placeholder="Have a promo code?"
-                      className="flex-1 bg-transparent text-xs text-white placeholder-textMuted focus:outline-none uppercase font-mono tracking-wider"
-                    />
-                    <button
-                      onClick={handleApplyPromo}
-                      className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs border border-slate-700 transition-colors"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                )}
-
-                {promoError && (
-                  <span className="text-[11px] text-red-400 pl-1">{promoError}</span>
-                )}
-              </div>
-            )}
 
             {/* Email for Customer Portal & Sovereign Vault */}
             <div className="flex flex-col gap-1 text-left">
@@ -605,19 +511,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               )}
             </div>
 
-            {/* Payment & VIP Claim Action Buttons */}
+            {/* Payment & Action Buttons */}
             <div className="flex flex-col gap-3 my-1">
-              {isFreePromo ? (
-                /* VIP 100% Free Claim Button */
-                <button
-                  onClick={() => handlePaymentSuccess('VIP Promo Pass (100% OFF)')}
-                  aria-label="Claim your 100% free VIP developer bundle"
-                  className="w-full h-[46px] rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonEmerald hover:brightness-105 active:brightness-95 transition-colors cursor-pointer"
-                >
-                  <Gift className="w-4 h-4" />
-                  <span>Claim Free VIP Bundle & Pass (100% OFF)</span>
-                </button>
-              ) : isFreeBeta ? (
+              {isFreeBeta ? (
                 /* Free Beta Pro Activation Button */
                 <div className="flex flex-col gap-2">
                   <button
@@ -704,9 +600,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">
-                {isFreePromo
-                  ? 'VIP Developer Pass Activated!'
-                  : isFreeBeta
+                {isFreeBeta
                   ? 'Free Beta Pro Pass Activated!'
                   : selectedPlan === 'team'
                   ? 'Team & Agency Pass Activated!'
@@ -715,9 +609,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   : 'Payment Confirmed!'}
               </h3>
               <p className="text-xs text-textMuted mt-1">
-                {isFreePromo
-                  ? `Thank you for testing PromptShift! Your full VIP access and bundle are linked to ${customerEmail.trim() || 'your Sovereign Client Vault'}.`
-                  : isFreeBeta
+                {isFreeBeta
                   ? `Congratulations! Your Early Adopter Pro Pass is active and linked to ${customerEmail.trim() || 'your Sovereign Client Vault'}. Download your project bundle and enjoy unrestricted Pro access.`
                   : selectedPlan === 'team'
                   ? `5 team seats, CI/CD auto-sync, and unlimited project exports are now unlocked for ${customerEmail.trim() || 'your organization'}.`

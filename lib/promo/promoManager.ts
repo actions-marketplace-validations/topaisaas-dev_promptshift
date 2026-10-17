@@ -14,33 +14,7 @@ export interface PromoValidationResult {
   passType: 'vip_pro' | 'free_single';
 }
 
-const PROMO_CODES: Record<string, { discountPercent: number; description: string; passType: 'vip_pro' | 'free_single' }> = {
-  DEVVIP: {
-    discountPercent: 100,
-    description: 'Lifetime VIP Developer Pass (100% OFF)',
-    passType: 'vip_pro',
-  },
-  FRIENDS: {
-    discountPercent: 100,
-    description: 'Developer Friends & Peers Pass (100% OFF)',
-    passType: 'vip_pro',
-  },
-  BETA2026: {
-    discountPercent: 100,
-    description: 'Beta Tester All-Access Pass (100% OFF)',
-    passType: 'vip_pro',
-  },
-  LAUNCHVIP: {
-    discountPercent: 100,
-    description: 'Launch Day VIP Pass (100% OFF)',
-    passType: 'vip_pro',
-  },
-  COMMUNITY: {
-    discountPercent: 100,
-    description: 'Open-Source Community Pass (100% OFF)',
-    passType: 'vip_pro',
-  },
-};
+const PROMO_CODES: Record<string, { discountPercent: number; description: string; passType: 'vip_pro' | 'free_single' }> = {};
 
 const VIP_ACTIVE_KEY = 'promptshift_vip_status';
 const VIP_CODE_KEY = 'promptshift_vip_code';
@@ -86,33 +60,20 @@ export class PromoManager {
    * Checks if VIP mode is currently active
    */
   public static isVipActive(): boolean {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(VIP_ACTIVE_KEY) === 'true';
+    return false;
   }
 
   /**
    * Returns active VIP code if present
    */
   public static getVipCode(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem(VIP_CODE_KEY);
+    return null;
   }
 
   /**
    * Inspects current URL search params for ?promo=... or ?vip=...
    */
   public static checkUrlForPromo(): PromoValidationResult | null {
-    if (typeof window === 'undefined') return null;
-    const params = new URLSearchParams(window.location.search);
-    const promo = params.get('promo') || params.get('code') || params.get('vip');
-
-    if (promo) {
-      const res = this.validate(promo);
-      if (res.valid) {
-        this.activateVip(res.code);
-        return res;
-      }
-    }
     return null;
   }
 }

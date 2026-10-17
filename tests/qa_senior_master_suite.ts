@@ -14,7 +14,6 @@ import { CanonicalProject } from '../lib/converter/capsSchema';
 import { SecurityGuards } from '../lib/converter/securityGuards';
 import { ClientPruner } from '../lib/pruner';
 import { CurrencyManager } from '../lib/currency/currencyManager';
-import { PromoManager } from '../lib/promo/promoManager';
 import { AuthManager } from '../lib/auth/authManager';
 import { EmailDispatcher } from '../lib/email/emailDispatcher';
 import { EmailTemplates } from '../lib/email/emailTemplates';
