@@ -152,6 +152,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePolarCheckout = async () => {
+    if (selectedPlan === 'single' && !hasProject) {
+      setEmailError('Please upload your project in the converter first before purchasing a Single Pass.');
+      return;
+    }
+
     const emailToUse = customerEmail.trim();
     if (!emailToUse || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailToUse)) {
       setEmailError('Please enter your email so Polar can deliver your receipt and license key.');
@@ -396,7 +401,31 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <div className="flex flex-col gap-0.5">
                     <span className="font-bold">No project uploaded yet</span>
                     <span className="text-[11px] text-amber-200/80">
-                      You must upload your project folder or .zip in the converter first before claiming and downloading your Free Pro Pass bundle.
+                      You must upload your project folder or .zip in the converter first before claiming your Free Pro Pass.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {!hasProject && !isFreeBeta && selectedPlan === 'single' && (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5 text-xs text-amber-300 text-left">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-400 mt-0.5" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-bold">Single Pass requires a loaded project</span>
+                    <span className="text-[11px] text-amber-200/80">
+                      The Single Pass ($1.99) is tied to a specific codebase conversion. Please drag & drop your project first, or choose Pro for unlimited access.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {!hasProject && !isFreeBeta && (selectedPlan === 'pro' || selectedPlan === 'team') && (
+                <div className="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-start gap-2.5 text-xs text-cyan-300 text-left">
+                  <Sparkles className="w-4 h-4 flex-shrink-0 text-cyan-400 mt-0.5" />
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-bold">Continuous License Activation</span>
+                    <span className="text-[11px] text-cyan-200/80">
+                      Subscribing unlocks unlimited conversions across your browser and provides your CLI Token. You can convert any project immediately after checkout.
                     </span>
                   </div>
                 </div>
@@ -524,22 +553,40 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 ) : (
                   /* Polar Merchant of Record Checkout Button */
                   <div className="flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={handlePolarCheckout}
-                      disabled={isProcessing}
-                      aria-label={`Pay ${displayPrice} with Polar`}
-                      className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonCyan hover:brightness-105 active:brightness-95 transition-all select-none cursor-pointer border border-cyan-300/40 ${
-                        isProcessing ? 'opacity-80 cursor-wait' : ''
-                      }`}
-                    >
-                      <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
-                      <span>
-                        {isProcessing
-                          ? 'Opening Secure Polar Checkout...'
-                          : `Unlock with Polar (${displayPrice})`}
-                      </span>
-                    </button>
+                    {!hasProject && selectedPlan === 'single' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          const dropzoneEl = document.getElementById('dropzone');
+                          if (dropzoneEl) dropzoneEl.scrollIntoView({ behavior: 'smooth' });
+                          else window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+                      >
+                        <UploadCloud className="w-4 h-4 text-cyan-400" />
+                        <span>Upload Project to Use Single Pass ({displayPrice})</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handlePolarCheckout}
+                        disabled={isProcessing}
+                        aria-label={`Pay ${displayPrice} with Polar`}
+                        className={`w-full h-[46px] min-h-[46px] max-h-[46px] flex-shrink-0 rounded-xl bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-black font-black text-sm flex items-center justify-center gap-2 shadow-neonCyan hover:brightness-105 active:brightness-95 transition-all select-none cursor-pointer border border-cyan-300/40 ${
+                          isProcessing ? 'opacity-80 cursor-wait' : ''
+                        }`}
+                      >
+                        <Zap className="w-4 h-4 flex-shrink-0 fill-current" />
+                        <span>
+                          {isProcessing
+                            ? 'Opening Secure Polar Checkout...'
+                            : selectedPlan === 'single'
+                            ? `Unlock Single Pass with Polar (${displayPrice})`
+                            : `Subscribe with Polar (${displayPrice})`}
+                        </span>
+                      </button>
+                    )}
 
                     <div className="flex items-center justify-center gap-3 text-[10px] text-textMuted py-0.5">
                       <span>Apple Pay</span>
@@ -582,7 +629,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               </p>
             </div>
             <div className="flex flex-col gap-2.5 w-full">
-              {zipBase64 && (
+              {zipBase64 ? (
                 <button
                   onClick={downloadBundle}
                   aria-label="Download your converted project ZIP archive"
@@ -591,6 +638,29 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <Download className="w-4 h-4" aria-hidden="true" />
                   <span>Download Converted Bundle (.zip)</span>
                 </button>
+              ) : (
+                <div className="w-full p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-left flex flex-col gap-2 my-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-300">
+                    <Sparkles className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span>Unlimited Pro Conversions Active!</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Your Pro license is now active on this browser with zero file limits. Drag & drop any AI project into the Studio to convert it with 98.5% certified AST parity.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      const dropzoneEl = document.getElementById('dropzone');
+                      if (dropzoneEl) dropzoneEl.scrollIntoView({ behavior: 'smooth' });
+                      else window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="w-full mt-1 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-extrabold text-xs flex items-center justify-center gap-2 shadow-neonEmerald hover:brightness-105 active:brightness-95 cursor-pointer"
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Convert First Project Now →</span>
+                  </button>
+                </div>
               )}
 
               {lastInvoice && (

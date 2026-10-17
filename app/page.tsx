@@ -59,11 +59,23 @@ export default function HomePage() {
       const customEvent = e as CustomEvent<SupportedCurrency>;
       if (customEvent.detail) setCurrency(customEvent.detail);
     };
-    const vipHandler = () => setIsVip(true);
+    const initialPlan = ClientVault.getActivePlan();
+    setActivePlan(initialPlan);
+    if (initialPlan === 'pro' || initialPlan === 'team') {
+      setUploadMode('pro');
+    }
+
+    const vipHandler = () => {
+      setIsVip(true);
+      setUploadMode('pro');
+    };
     const planHandler = (e: Event) => {
       const custom = e as CustomEvent<UserPlanTier>;
-      if (custom.detail) setActivePlan(custom.detail);
-      else setActivePlan(ClientVault.getActivePlan());
+      const newPlan = custom.detail || ClientVault.getActivePlan();
+      setActivePlan(newPlan);
+      if (newPlan === 'pro' || newPlan === 'team') {
+        setUploadMode('pro');
+      }
     };
 
     window.addEventListener('promptshift_currency_changed', handler);
@@ -344,11 +356,17 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="text-center flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyanGlow text-xs font-bold tracking-wide">
-          <Sparkles className="w-3.5 h-3.5" />
+        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide ${
+          hasProAccess
+            ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow-sm'
+            : 'bg-cyan-500/10 border border-cyan-500/30 text-cyanGlow'
+        }`}>
+          <Sparkles className={`w-3.5 h-3.5 ${hasProAccess ? 'text-emerald-400' : ''}`} />
           <span>
             {isVip
               ? 'VIP DEV PASS ACTIVE • 100% FREE FULL CODEBASES'
+              : hasProAccess
+              ? `${activePlan.toUpperCase()} PASS ACTIVE • UNLIMITED CONVERSIONS`
               : isFreeBeta
               ? 'OPEN PUBLIC BETA • FREE PRO PASS AVAILABLE'
               : `FREE FOR UP TO ${MonetizationManager.getFreeLimit()} FILES • ${CurrencyManager.getTierPrice('single', currency).formatted} FULL REPOSITORIES`}

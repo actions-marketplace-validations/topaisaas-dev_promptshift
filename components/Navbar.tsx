@@ -138,7 +138,12 @@ export const Navbar: React.FC = () => {
           <CurrencySelector />
 
           {/* Customer Portal / Account Button - Positioned to the right of Currency with gap */}
-          <div className="ml-2 sm:ml-3">
+          <div className="ml-2 sm:ml-3 flex items-center gap-2">
+            {activePlan !== 'free' && (
+              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-black tracking-wide uppercase">
+                ★ {activePlan} active
+              </span>
+            )}
             <button
               onClick={() => setIsPortalOpen(true)}
               aria-label="Open Customer Portal: Past Downloads & PDF Invoices"

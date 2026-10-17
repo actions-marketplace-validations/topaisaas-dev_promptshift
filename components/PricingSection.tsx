@@ -312,10 +312,18 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectPlan('single')}
+              onClick={() => {
+                if (!hasProject) {
+                  onStartFree();
+                } else {
+                  onSelectPlan('single');
+                }
+              }}
               className="w-full mt-6 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
-              Get Single Pass ({singlePrice.formatted})
+              {!hasProject
+                ? `Upload Project First (${singlePrice.formatted})`
+                : `Get Single Pass (${singlePrice.formatted})`}
             </button>
           </div>
 
