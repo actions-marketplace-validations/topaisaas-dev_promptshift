@@ -98,7 +98,7 @@ export class AuthManager {
   /**
    * Retrieves all registered local accounts
    */
-  private static getAccounts(): Record<string, AuthUser> {
+  public static getAccounts(): Record<string, AuthUser> {
     if (typeof window === 'undefined') return {};
     try {
       const raw = localStorage.getItem(ACCOUNTS_KEY);
@@ -106,6 +106,14 @@ export class AuthManager {
     } catch {
       return {};
     }
+  }
+
+  /**
+   * Returns whether any accounts have been registered on this device
+   */
+  public static hasRegisteredAccounts(): boolean {
+    if (typeof window === 'undefined') return false;
+    return Object.keys(this.getAccounts()).length > 0;
   }
 
   /**

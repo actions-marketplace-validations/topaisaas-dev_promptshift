@@ -12,6 +12,6 @@
     "code_interpreter": true,
     "dalle_image_generation": false
   },
-  "knowledge_files_count": 7,
+  "knowledge_files_count": 17,
   "target_platform": "chatgpt_custom_gpt"
 }

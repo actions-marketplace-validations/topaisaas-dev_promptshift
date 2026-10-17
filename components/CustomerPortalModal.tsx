@@ -91,7 +91,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     if (isOpen) {
       const user = AuthManager.getCurrentUser();
       setCurrentUser(user);
-      setActivePlan(ClientVault.getActivePlan());
+      const currentPlan = ClientVault.getActivePlan();
+      setActivePlan(currentPlan);
       setConversions(ClientVault.getConversions());
       setInvoices(ClientVault.getInvoices());
       const savedInfo = ClientVault.getCustomerInfo();
@@ -99,6 +100,13 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
         ...savedInfo,
         email: user?.email || savedInfo.email || '',
       });
+      // If user has no registered password account, or already has an active plan or customer email,
+      // allow instant sovereign vault access without showing login blocker
+      const hasPlan = Boolean(currentPlan && currentPlan !== 'free');
+      const hasEmail = Boolean(savedInfo.email && savedInfo.email.trim().length > 0);
+      if (!user && (!AuthManager.hasRegisteredAccounts() || hasPlan || hasEmail)) {
+        setIsGuestBypass(true);
+      }
       CurrencyManager.initFromIp().then((curr) => {
         setCurrency(curr);
       });
@@ -300,13 +308,28 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     }
   };
 
+  const isSessionActive = Boolean(
+    currentUser ||
+    (activePlan && activePlan !== 'free') ||
+    (customerInfo.email && customerInfo.email.trim().length > 0)
+  );
+
   const handleSignOut = () => {
     AuthManager.signOut();
+    ClientVault.setActivePlan('free');
+    ClientVault.saveCustomerInfo({ name: '', company: '', email: '', vatId: '', poNumber: '', isReverseCharge: false });
     setCurrentUser(null);
-    setIsGuestBypass(false);
+    setActivePlan('free');
+    setCustomerInfo({ name: '', company: '', email: '', vatId: '' });
+    setIsGuestBypass(!AuthManager.hasRegisteredAccounts());
     setAuthView('signin');
+    setAuthEmail('');
     setAuthPassword('');
     setAuthConfirmPassword('');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('promptshift_auth_changed', { detail: { email: null } }));
+      window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
+    }
   };
 
   return (
@@ -335,13 +358,17 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
               <p className="text-xs text-textMuted mt-0.5 min-h-[18px]">
                 {currentUser
                   ? `Signed in as ${currentUser.email} • Past project conversions & official PDF receipts.`
-                  : 'Sign in to access your past AST conversions, official PDF receipts, and Pro CLI token.'}
+                  : customerInfo.email
+                  ? `Active session: ${customerInfo.email} (${(activePlan || 'Free').toUpperCase()}) • Past conversions & official PDF receipts.`
+                  : activePlan && activePlan !== 'free'
+                  ? `Active session: ${(activePlan).toUpperCase()} plan • Past conversions & official PDF receipts.`
+                  : 'Sovereign vault for your past AST conversions, official PDF receipts, and CLI tokens.'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {currentUser ? (
+            {isSessionActive ? (
               <button
                 onClick={handleSignOut}
                 aria-label="Sign out of customer portal"
@@ -350,7 +377,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
               </button>
-            ) : isGuestBypass ? (
+            ) : isGuestBypass && AuthManager.hasRegisteredAccounts() ? (
               <button
                 onClick={() => setIsGuestBypass(false)}
                 aria-label="Exit guest mode and return to sign in"
@@ -1183,6 +1210,30 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 <code>npx promptshift convert --token {dummyCliToken.slice(0, 12)}... --target claude</code>
               </div>
             </div>
+
+            {/* Session & Device Disconnect */}
+            {isSessionActive && (
+              <div className="p-5 rounded-2xl bg-slate-900 border border-borderColor flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-red-400" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      Session & Device Disconnect
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out Device</span>
+                  </button>
+                </div>
+                <p className="text-xs text-textMuted leading-relaxed">
+                  Sign out of this browser session, clear customer credentials, and return this device to Free tier sandbox mode.
+                </p>
+              </div>
+            )}
           </div>
         )}
             </div>
@@ -1223,7 +1274,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
               </button>
             )}
 
-            {currentUser ? (
+            {isSessionActive ? (
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-all cursor-pointer"
@@ -1232,7 +1283,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
               </button>
-            ) : isGuestBypass ? (
+            ) : isGuestBypass && AuthManager.hasRegisteredAccounts() ? (
               <button
                 onClick={() => setIsGuestBypass(false)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-cyan-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer"

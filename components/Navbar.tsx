@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck, Terminal } from 'lucide-react';
+import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck, Terminal, LogOut } from 'lucide-react';
 import { BenchmarkModal } from '@/components/BenchmarkModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { CustomerPortalModal } from '@/components/CustomerPortalModal';
@@ -23,6 +23,7 @@ export const Navbar: React.FC = () => {
   const [isSecurityWhitepaperOpen, setIsSecurityWhitepaperOpen] = useState(false);
   const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
   const [authUser, setAuthUser] = useState<{ email: string } | null>(null);
+  const [customerEmail, setCustomerEmail] = useState('');
   const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
 
   React.useEffect(() => {
@@ -31,6 +32,10 @@ export const Navbar: React.FC = () => {
     });
     setAuthUser(AuthManager.getCurrentUser());
     setActivePlan(ClientVault.getActivePlan());
+    const cust = ClientVault.getCustomerInfo();
+    if (cust?.email && !cust.email.endsWith('@promptshift.dev')) {
+      setCustomerEmail(cust.email);
+    }
 
     const handler = (e: Event) => {
       const customEvent = e as CustomEvent<SupportedCurrency>;
@@ -41,8 +46,10 @@ export const Navbar: React.FC = () => {
       const custom = e as CustomEvent<{ email: string | null }>;
       if (custom.detail?.email) {
         setAuthUser({ email: custom.detail.email });
+        setCustomerEmail(custom.detail.email);
       } else {
         setAuthUser(null);
+        setCustomerEmail('');
       }
     };
 
@@ -62,6 +69,22 @@ export const Navbar: React.FC = () => {
       window.removeEventListener('promptshift_plan_changed', planHandler);
     };
   }, []);
+
+  const isSessionActive = Boolean(authUser || (activePlan && activePlan !== 'free') || customerEmail);
+
+  const handleSignOut = () => {
+    AuthManager.signOut();
+    ClientVault.setActivePlan('free');
+    const cust = ClientVault.getCustomerInfo();
+    ClientVault.saveCustomerInfo({ ...cust, email: '', name: '', company: '' });
+    setAuthUser(null);
+    setActivePlan('free');
+    setCustomerEmail('');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('promptshift_auth_changed', { detail: { email: null } }));
+      window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
+    }
+  };
 
   return (
     <>
@@ -164,6 +187,11 @@ export const Navbar: React.FC = () => {
                   <UserCheck className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                   <span className="truncate max-w-[110px]">{authUser.email.split('@')[0]}</span>
                 </>
+              ) : customerEmail ? (
+                <>
+                  <UserCheck className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+                  <span className="truncate max-w-[110px]">{customerEmail.split('@')[0]}</span>
+                </>
               ) : (
                 <>
                   <User className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
@@ -171,6 +199,18 @@ export const Navbar: React.FC = () => {
                 </>
               )}
             </button>
+
+            {isSessionActive && (
+              <button
+                onClick={handleSignOut}
+                aria-label="Sign out of account and reset session"
+                title="Sign out / Disconnect"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              >
+                <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            )}
           </div>
         </div>
       </header>

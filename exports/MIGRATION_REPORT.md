@@ -7,7 +7,7 @@
 - **Source Platform**: Google Antigravity / Gemini
 - **Target Platforms**: Anthropic Claude & OpenAI ChatGPT / Assistants
 - **Total Rules Processed**: 1
-- **Knowledge Base Documents**: 7
+- **Knowledge Base Documents**: 17
 - **Autonomy Policy Preserved**: YES (Clause 'ET BEN BRAVO!' compiled)
 
 ---
@@ -30,9 +30,9 @@
 ---
 
 ## 4. Context Budget & Sharding Analysis
-- **Estimated Volume**: ~7,637 tokens
-- **Claude Target**: 3.8% of context window (Strategy: `direct_context_injection`)
-- **OpenAI Custom GPT Target**: 95.5% of instruction budget (Strategy: `direct_context_injection`)
+- **Estimated Volume**: ~13,660 tokens
+- **Claude Target**: 6.8% of context window (Strategy: `direct_context_injection`)
+- **OpenAI Custom GPT Target**: 170.8% of instruction budget (Strategy: `vector_rag_sharding`)
 
 ---
 
