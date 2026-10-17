@@ -42,6 +42,7 @@ export default function HomePage() {
   const [modalInitialPaid, setModalInitialPaid] = useState(false);
   const [checkoutSuccessNotice, setCheckoutSuccessNotice] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<'single' | 'pro' | 'team'>('pro');
+  const [paymentBillingCycle, setPaymentBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [zipBase64, setZipBase64] = useState<string | undefined>(undefined);
   const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
   const [isVip, setIsVip] = useState(false);
@@ -87,30 +88,32 @@ export default function HomePage() {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('checkout') === 'success') {
         const planParam = (urlParams.get('plan') as 'single' | 'pro' | 'team') || 'pro';
+        const cycleParam = (urlParams.get('cycle') as 'monthly' | 'annual') || 'monthly';
         const checkoutId = urlParams.get('checkout_id') || `polar_${Date.now()}`;
 
         // Save plan activation to Sovereign Vault
         ClientVault.setActivePlan(planParam);
         setActivePlan(planParam);
         setPaymentPlan(planParam);
+        setPaymentBillingCycle(cycleParam);
         setModalInitialPaid(true);
 
         const planTitle =
           planParam === 'team'
-            ? 'Team & Agency Pass'
+            ? cycleParam === 'annual' ? 'Team & Agency Pass (Annual)' : 'Team & Agency Pass'
             : planParam === 'pro'
-            ? 'Pro Developer Subscription'
+            ? cycleParam === 'annual' ? 'Pro Developer Subscription (Annual)' : 'Pro Developer Subscription'
             : 'Single Project Pass';
 
         setCheckoutSuccessNotice(`Payment confirmed! Your ${planTitle} is now unlocked.`);
 
         // Record verified invoice in Sovereign Vault
         const customer = ClientVault.getCustomerInfo();
-        const tierPrice = CurrencyManager.getTierPrice(planParam, CurrencyManager.getActiveCurrency());
+        const tierPrice = CurrencyManager.getTierPrice(planParam, CurrencyManager.getActiveCurrency(), cycleParam);
         ClientVault.saveInvoice({
           orderId: checkoutId,
           planName: planTitle,
-          amount: tierPrice.raw.toFixed(2),
+          amount: tierPrice.totalAmount.toFixed(2),
           currency: CurrencyManager.getActiveCurrency(),
           paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
           status: 'PAID',
@@ -573,8 +576,9 @@ export default function HomePage() {
       {/* Dedicated Pricing & Subscription Section */}
       <PricingSection
         hasProject={Boolean(project && zipBase64)}
-        onSelectPlan={(plan) => {
+        onSelectPlan={(plan, cycle = 'monthly') => {
           setPaymentPlan(plan);
+          setPaymentBillingCycle(cycle);
           setModalInitialPaid(false);
           setIsPaymentModalOpen(true);
         }}
@@ -611,6 +615,7 @@ export default function HomePage() {
         projectName={transpileResult ? transpileResult.projectName : 'Universal AI Project'}
         zipBase64={zipBase64}
         initialPlan={paymentPlan}
+        initialBillingCycle={paymentBillingCycle}
         initialIsPaid={modalInitialPaid}
       />
     </div>

@@ -194,36 +194,51 @@ export class CurrencyManager {
     tier: 'single' | 'pro' | 'team',
     currency: SupportedCurrency = 'USD',
     billingCycle: 'monthly' | 'annual' = 'monthly'
-  ): { formatted: string; raw: number; billingSuffix: string } {
+  ): {
+    formatted: string;
+    raw: number;
+    billingSuffix: string;
+    totalAmount: number;
+    formattedTotal: string;
+  } {
     const config = CURRENCIES[currency] || CURRENCIES.USD;
 
     if (tier === 'single') {
+      const singlePrice = config.rates.single;
       return {
-        formatted: this.format(config.rates.single, currency),
-        raw: config.rates.single,
+        formatted: this.format(singlePrice, currency),
+        raw: singlePrice,
         billingSuffix: '/ project',
+        totalAmount: singlePrice,
+        formattedTotal: this.format(singlePrice, currency),
       };
     }
 
     if (tier === 'pro') {
       const price = billingCycle === 'monthly' ? config.rates.proMonthly : config.rates.proAnnualMonthly;
-      const annualTotal = (config.rates.proAnnualMonthly * 12).toFixed(currency === 'JPY' ? 0 : 0);
-      const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(Number(annualTotal), currency)} billed annually)`;
+      const annualTotalNum = Math.round(config.rates.proAnnualMonthly * 12);
+      const totalAmount = billingCycle === 'monthly' ? config.rates.proMonthly : annualTotalNum;
+      const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(annualTotalNum, currency)} billed annually)`;
       return {
         formatted: this.format(price, currency),
         raw: price,
         billingSuffix: suffix,
+        totalAmount,
+        formattedTotal: this.format(totalAmount, currency),
       };
     }
 
     // Team tier
     const price = billingCycle === 'monthly' ? config.rates.teamMonthly : config.rates.teamAnnualMonthly;
-    const annualTotal = (config.rates.teamAnnualMonthly * 12).toFixed(currency === 'JPY' ? 0 : 0);
-    const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(Number(annualTotal), currency)} billed annually)`;
+    const annualTotalNum = Math.round(config.rates.teamAnnualMonthly * 12);
+    const totalAmount = billingCycle === 'monthly' ? config.rates.teamMonthly : annualTotalNum;
+    const suffix = billingCycle === 'monthly' ? '/ month' : `/ mo (${this.format(annualTotalNum, currency)} billed annually)`;
     return {
       formatted: this.format(price, currency),
       raw: price,
       billingSuffix: suffix,
+      totalAmount,
+      formattedTotal: this.format(totalAmount, currency),
     };
   }
 }

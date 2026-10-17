@@ -7,7 +7,7 @@ import { ClientVault, UserPlanTier } from '@/lib/storage/clientVault';
 import { MonetizationManager } from '@/lib/config/monetizationConfig';
 
 interface PricingSectionProps {
-  onSelectPlan: (plan: 'single' | 'pro' | 'team') => void;
+  onSelectPlan: (plan: 'single' | 'pro' | 'team', cycle?: 'monthly' | 'annual') => void;
   onStartFree: () => void;
   onSelectPro?: () => void;
   hasProject?: boolean;
@@ -392,7 +392,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectPlan('pro')}
+              onClick={() => onSelectPlan('pro', billingCycle)}
               disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-black text-xs transition-all ${
                 activePlan === 'pro'
@@ -410,7 +410,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 ? 'Included in Team Plan'
                 : activePlan === 'vip'
                 ? 'Included in VIP Access'
-                : `Subscribe Pro (${proPrice.formatted})`}
+                : billingCycle === 'annual'
+                ? `Subscribe Pro (${proPrice.formattedTotal}/yr • Save 30%)`
+                : `Subscribe Pro (${proPrice.formatted}/mo)`}
             </button>
           </div>
 
@@ -453,7 +455,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             </div>
 
             <button
-              onClick={() => onSelectPlan('team')}
+              onClick={() => onSelectPlan('team', billingCycle)}
               disabled={activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-bold text-xs border transition-all ${
                 activePlan === 'team'
@@ -468,8 +470,12 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 : activePlan === 'vip'
                 ? 'Included in VIP Access'
                 : activePlan === 'pro'
-                ? `Upgrade to Team (${teamPrice.formatted})`
-                : `Upgrade Team (${teamPrice.formatted})`}
+                ? billingCycle === 'annual'
+                  ? `Upgrade to Team (${teamPrice.formattedTotal}/yr)`
+                  : `Upgrade to Team (${teamPrice.formatted}/mo)`
+                : billingCycle === 'annual'
+                ? `Upgrade Team (${teamPrice.formattedTotal}/yr)`
+                : `Upgrade Team (${teamPrice.formatted}/mo)`}
             </button>
           </div>
         </div>
