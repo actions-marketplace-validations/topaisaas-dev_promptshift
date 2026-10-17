@@ -49,6 +49,7 @@ export class UniversalTranspiler {
       metadata: {
         ...project.metadata,
         title: project.metadata?.title || (project.metadata as any)?.name || 'Universal AI Project',
+        source_platform: project.metadata?.source_platform || 'universal',
       },
       persona: {
         ...project.persona,
@@ -312,8 +313,8 @@ ${r.content.trim()}
       files,
       alerts,
       diff: {
-        sourceTitle: `${cleanProject.metadata.source_platform.toUpperCase()} (Source)`,
-        sourceCode: project.persona.raw_system_prompt,
+        sourceTitle: `${(cleanProject.metadata.source_platform || 'universal').toUpperCase()} (Source)`,
+        sourceCode: cleanProject.persona.raw_system_prompt || '',
         targetTitle: diffTargetTitle,
         targetCode: diffTargetCode,
       },
@@ -371,7 +372,7 @@ ${r.content.trim()}
           : 'ANTIGRAVITY MASTER FIDELITY';
 
       return {
-        sourceTitle: `${fileName} (${project.metadata.source_platform.toUpperCase()} SOURCE)`,
+        sourceTitle: `${fileName} (${(project.metadata?.source_platform || 'universal').toUpperCase()} SOURCE)`,
         sourceCode: fileContent,
         targetTitle: fullTranspile.diff.targetTitle,
         targetCode: fullTranspile.diff.targetCode,
