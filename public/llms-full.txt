@@ -56,7 +56,7 @@ PromptShift enforces a zero-trust confidentiality model:
 
 ## 4. Monetization & Licensing Architecture
 
-1. **Free Starter**: No signup required. Projects ≤ 5 files. Immediate ZIP download at $0.
+1. **Free Starter**: No signup required. Projects ≤ 2 files. Immediate ZIP download at $0.
 2. **Single Pass**: Instant 1-click single project export ($1.99 one-time) with zero subscription.
 3. **Pro Developer**: Unlimited project conversions, private CLI sync token, full In-RAM secret shield ($5.99 / month).
 4. **Team & Agency**: 5 developer seats, automated GitHub & GitLab CI/CD action sync, and SOC-2 / GDPR Data Processing Addendum ($19.99 / month).

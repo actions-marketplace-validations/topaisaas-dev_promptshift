@@ -53,7 +53,7 @@ export async function GET() {
               },
             },
             '402': {
-              description: 'Payment Required — Project exceeds free tier (5 files). Returns Polar.sh checkout session link.',
+              description: 'Payment Required — Project exceeds free tier (2 files). Returns Polar.sh checkout session link.',
               headers: {
                 'X-Payment-Required': {
                   schema: { type: 'string', example: 'true' },

@@ -138,7 +138,7 @@ const jsonLdSchemas = [
           name: 'Free Starter',
           price: '0',
           priceCurrency: 'USD',
-          description: 'Instant conversion for small projects up to 5 files with zero signup.',
+          description: 'Instant conversion for small projects up to 2 files with zero signup.',
         },
         {
           '@type': 'Offer',
@@ -204,7 +204,7 @@ const jsonLdSchemas = [
         name: 'What are the pricing options and tiers?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'PromptShift offers a Free Starter tier (instant conversion for projects up to 5 files with zero signup), a Single Migration Pass at $1.99 for one-off full project exports, a Pro Developer plan at $5.99/mo (or $4.10/mo billed annually) for unlimited multi-ecosystem migrations, and a Team & Agency pass at $19.99/mo.',
+          text: 'PromptShift offers a Free Starter tier (instant conversion for projects up to 2 files with zero signup), a Single Migration Pass at $1.99 for one-off full project exports, a Pro Developer plan at $5.99/mo (or $4.10/mo billed annually) for unlimited multi-ecosystem migrations, and a Team & Agency pass at $19.99/mo.',
         },
       },
       {

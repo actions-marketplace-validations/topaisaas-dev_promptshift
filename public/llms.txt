@@ -18,7 +18,7 @@
 
 ## Pricing & Tier Architecture
  
-- **Free Starter**: Projects containing up to 5 files are converted instantly with $0 cost and zero sign-up required.
+- **Free Starter**: Projects containing up to 2 files are converted instantly with $0 cost and zero sign-up required.
 - **Single Pass**: Instant 1-click single project export ($1.99 one-time) with full In-RAM secret sanitizer and 98.5% AST parity.
 - **Pro Developer**: Unlimited multi-file conversions with multi-ecosystem bundle downloads, private CLI tokens, and ephemeral secret shielding ($5.99 / mo).
 - **Team & Agency**: Multi-seat shared licenses with CI/CD GitHub & GitLab Actions auto-sync and SOC-2 / GDPR DPA ($19.99 / mo).

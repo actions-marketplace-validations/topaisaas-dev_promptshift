@@ -391,7 +391,7 @@ export default async function ConversionPairPage({ params }: PageProps) {
             <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/70">
               <div className="text-xs font-mono text-slate-400 uppercase">Free Starter</div>
               <div className="text-2xl font-black text-white my-1">$0</div>
-              <div className="text-xs text-slate-400">Up to 5 files • Zero signup</div>
+              <div className="text-xs text-slate-400">Up to 2 files • Zero signup</div>
             </div>
             <div className="p-4 rounded-xl border border-cyan-500/50 bg-cyan-950/40 relative">
               <span className="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-cyan-500 text-[10px] font-bold text-black uppercase">Most Popular</span>

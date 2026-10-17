@@ -138,16 +138,16 @@ async function runAllTests() {
     console.log('✓ Test 5: In-RAM secret sanitizer verified.');
   }
 
-  // Test 6: Free Tier Threshold Logic
+  // Test 6: Free Tier Threshold Logic (<= 2 files free Starter vs > 2 files paid)
   {
-    const smallProject = createMockProject(2);
-    const smallTotal = smallProject.knowledge_base.length + smallProject.rules.length + 1; // 2 + 1 + 1 = 4
-    assert(smallTotal <= 5, 'Small project must fall within Free Tier (<= 5 files)');
+    const smallProject = createMockProject(0); // 1 master prompt + 1 rule = 2 files
+    const smallTotal = smallProject.knowledge_base.length + smallProject.rules.length + 1; // 0 + 1 + 1 = 2
+    assert(smallTotal <= 2, 'Small project must fall within Free Starter (<= 2 files)');
 
     const largeProject = createMockProject(20);
     const largeTotal = largeProject.knowledge_base.length + largeProject.rules.length + 1; // 20 + 1 + 1 = 22
-    assert(largeTotal > 5, 'Large project must require $1.99 Pay-As-You-Go pass');
-    console.log('✓ Test 6: Freemium boundary logic (<= 5 files free vs > 5 files paid) verified.');
+    assert(largeTotal > 2, 'Large project must require $1.99 Pay-As-You-Go pass or Pro');
+    console.log('✓ Test 6: Freemium boundary logic (<= 2 files free vs > 2 files paid) verified.');
   }
 
   // Test 7: Model-Specific Knowledge File Preview & Dynamic Scoring Divergence
@@ -465,7 +465,7 @@ async function runAllTests() {
     MONETIZATION_CONFIG.mode = 'free_beta';
     assert.strictEqual(MonetizationManager.isFreeBeta(), true);
     assert.strictEqual(MonetizationManager.isPaidMode(), false);
-    assert.strictEqual(MonetizationManager.getFreeLimit(), 5);
+    assert.strictEqual(MonetizationManager.getFreeLimit(), 2);
 
     // 15.2 Enroll as Early Adopter Beta Pro with email
     ClientVault.purgeVault();

@@ -2,7 +2,7 @@
  * PromptShift Monetization & Release Mode Configuration
  * 
  * Central switch to control monetization state across the entire platform:
- * - 'free_beta' : Open Public Beta. Starter is 100% free (<= 5 files). Pro is 100% free in exchange for email. Zero payment required.
+ * - 'free_beta' : Open Public Beta. Starter is 100% free (<= 2 files). Pro is 100% free in exchange for email. Zero payment required.
  * - 'paid'      : Full commercial monetization with Polar.sh Merchant of Record (Apple Pay, Google Pay, Cards, SEPA).
  */
 

@@ -124,7 +124,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <div className="border-t border-borderColor pt-4 flex flex-col gap-3 text-xs text-slate-300">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Up to <strong>5 files</strong> per project</span>
+                  <span>Up to <strong>2 files</strong> per project</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -149,7 +149,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               onClick={onStartFree}
               className="w-full mt-8 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
             >
-              {activePlan === 'free' ? 'Current Plan (Start Free)' : 'Start Free (≤ 5 files)'}
+              {activePlan === 'free' ? 'Current Plan (Start Free)' : 'Start Free (≤ 2 files)'}
             </button>
           </div>
 
@@ -174,7 +174,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <div className="border-t border-borderColor pt-4 flex flex-col gap-3 text-xs text-white">
                 <div className="flex items-center gap-2.5 font-medium">
                   <Zap className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                  <span><strong>Unlimited project exports</strong> (&gt; 5 files)</span>
+                  <span><strong>Unlimited project exports</strong> (&gt; 2 files)</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -240,7 +240,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <div className="border-t border-borderColor pt-4 flex flex-col gap-2.5 text-xs text-slate-300">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                  <span>Up to <strong>5 files</strong> per project</span>
+                  <span>Up to <strong>2 files</strong> per project</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />

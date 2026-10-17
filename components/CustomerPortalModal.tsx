@@ -1074,7 +1074,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                     </div>
                     <p className="text-xs text-textMuted mt-0.5">
                       {ClientVault.isBetaEarlyAdopter() && isFreeBeta
-                        ? 'Full early adopter access: unlimited migrations (> 5 files), CLI Token, and RAM shields.'
+                        ? 'Full early adopter access: unlimited migrations (> 2 files), CLI Token, and RAM shields.'
                         : 'Unlimited AST migrations, CLI terminal sync, and zero file count ceilings.'}
                     </p>
                   </div>
@@ -1120,7 +1120,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                     <p className="text-xs text-textMuted mt-0.5">
                       {activePlan === 'single'
                         ? 'Single project migration unlocked. Upgrade for unlimited daily migrations.'
-                        : 'Free quick-transpiler active (up to 5 files per project).'}
+                        : 'Free quick-transpiler active (up to 2 files per project).'}
                     </p>
                   </div>
                 </div>

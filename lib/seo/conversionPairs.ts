@@ -148,7 +148,7 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       },
       {
         question: 'What is the cost to migrate?',
-        answer: 'Projects up to 5 files are free. Full single project passes are $1.99, or $5.99/mo for unlimited Pro conversions.',
+        answer: 'Projects up to 2 files are free. Full single project passes are $1.99, or $5.99/mo for unlimited Pro conversions.',
       },
     ],
   },
@@ -238,7 +238,7 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       },
       {
         question: 'What is the pricing?',
-        answer: 'Free Starter for up to 5 files. $1.99 for a single full pass, or $5.99/mo for unlimited Pro migrations.',
+        answer: 'Free Starter for up to 2 files. $1.99 for a single full pass, or $5.99/mo for unlimited Pro migrations.',
       },
     ],
   },
@@ -373,7 +373,7 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       },
       {
         question: 'How much does it cost?',
-        answer: 'Free for projects up to 5 files. $1.99 for a single project pass or $5.99/mo for unlimited Pro migrations.',
+        answer: 'Free for projects up to 2 files. $1.99 for a single project pass or $5.99/mo for unlimited Pro migrations.',
       },
     ],
   },
@@ -463,7 +463,7 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       },
       {
         question: 'What is the pricing model?',
-        answer: 'Free for small projects up to 5 files. $1.99 Single Migration Pass, or $5.99/mo for unlimited Pro access.',
+        answer: 'Free for small projects up to 2 files. $1.99 Single Migration Pass, or $5.99/mo for unlimited Pro access.',
       },
     ],
   },
@@ -553,7 +553,7 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       },
       {
         question: 'What are the subscription plans?',
-        answer: 'Free Starter for up to 5 files. $1.99 Single Migration Pass, or $5.99/mo Pro Developer with unlimited conversions.',
+        answer: 'Free Starter for up to 2 files. $1.99 Single Migration Pass, or $5.99/mo Pro Developer with unlimited conversions.',
       },
     ],
   },

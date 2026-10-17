@@ -84,7 +84,7 @@ export class AnalyticsAggregator {
       currencyBreakdown[curr] = (currencyBreakdown[curr] || 0) + 1;
 
       // File distribution
-      if (files <= 5) fileDist.under5Files++;
+      if (files <= 2) fileDist.under5Files++;
       else if (files <= 15) fileDist.sixTo15Files++;
       else if (files <= 50) fileDist.sixteenTo50Files++;
       else fileDist.over50Files++;
@@ -173,11 +173,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-freemium-balance',
         category: 'pricing',
-        title: `Freemium 5-File Threshold: ${paidRatio}% conversion into paid tiers`,
-        description: `The current threshold (≤ 5 files free) covers ${under5} small projects while encouraging ${over5} larger repositories to upgrade to Pro.`,
+        title: `Freemium 2-File Threshold: ${paidRatio}% conversion into paid tiers`,
+        description: `The current threshold (≤ 2 files free) covers ${under5} small projects while encouraging ${over5} larger repositories to upgrade to Pro.`,
         impact: paidRatio > 30 ? 'high' : 'medium',
-        metricGrounding: `${over5} projects exceed the 5-file free starter limit (${paidRatio}% upgrade incentive).`,
-        actionableStep: `Keep the 5-file free threshold: it delivers frictionless onboarding while protecting upgrade conversions on real-world projects.`,
+        metricGrounding: `${over5} projects exceed the 2-file free starter limit (${paidRatio}% upgrade incentive).`,
+        actionableStep: `Keep the 2-file free threshold: it delivers frictionless onboarding while protecting upgrade conversions on real-world projects.`,
       });
     }
 

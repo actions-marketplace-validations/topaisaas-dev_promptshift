@@ -18,6 +18,7 @@ import { AuthManager } from '../lib/auth/authManager';
 import { EmailDispatcher } from '../lib/email/emailDispatcher';
 import { EmailTemplates } from '../lib/email/emailTemplates';
 import { middleware, IS_MAINTENANCE_MODE } from '../middleware';
+import { MonetizationManager } from '../lib/config/monetizationConfig';
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert';
@@ -240,20 +241,18 @@ async function runSeniorQASuite() {
     assert.ok(geminiResult.parityScore >= 95);
   });
 
-  await test('Free Starter Quota Boundary & 5-file Slicing Integrity', () => {
-    // 1 master prompt + 2 rules + 5 knowledge base = 8 files (> 5)
+  await test('Free Starter Quota Boundary & Core Slicing Integrity', () => {
+    // 1 master prompt + 2 rules + 5 knowledge base = 8 files (> freeLimit)
     const largeProj = createSyntheticProject(5);
     const initialFilesCount = 1 + largeProj.rules.length + largeProj.knowledge_base.length;
     assert.strictEqual(initialFilesCount, 8, 'Initial file count should be 8');
 
-    // Simulate slicing to 5 core files:
-    // Slot 1: master prompt
-    // Slot 2-3: 2 rules
-    // Slot 4-5: 2 top knowledge files (3 remaining omitted)
+    // Simulate slicing to freeLimit core files:
+    const freeLimit = MonetizationManager.getFreeLimit();
     const masterSlots = largeProj.persona.raw_system_prompt ? 1 : 0;
-    const availableSlots = 5 - masterSlots;
+    const availableSlots = Math.max(0, freeLimit - masterSlots);
     const slicedRules = largeProj.rules.slice(0, availableSlots);
-    const remainingForKb = availableSlots - slicedRules.length;
+    const remainingForKb = Math.max(0, availableSlots - slicedRules.length);
     const slicedKb = largeProj.knowledge_base.slice(0, remainingForKb);
 
     const slicedProj: CanonicalProject = {
@@ -263,7 +262,7 @@ async function runSeniorQASuite() {
     };
 
     const finalSlicedCount = masterSlots + slicedProj.rules.length + slicedProj.knowledge_base.length;
-    assert.strictEqual(finalSlicedCount, 5, 'Sliced project must strictly have exactly 5 files');
+    assert.strictEqual(finalSlicedCount, freeLimit, `Sliced project must strictly have exactly ${freeLimit} files`);
     const result = UniversalTranspiler.transpile(slicedProj, 'claude');
     assert.ok(result.files['CLAUDE.md'], 'Sliced project transpile succeeds');
   });

@@ -515,14 +515,14 @@ Try it with your project: https://promptshift.dev
                 Project Size Distribution
               </h2>
               <p className="text-xs text-textMuted mt-0.5">
-                Free tier calibration (≤ 5 files) vs paid conversion volume
+                Free tier calibration (≤ 2 files) vs paid conversion volume
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 my-4">
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-emerald-400 font-bold block mb-1">
-                  ≤ 5 Files (Free Starter)
+                  ≤ 2 Files (Free Starter)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.under5Files}
@@ -534,7 +534,7 @@ Try it with your project: https://promptshift.dev
 
               <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
                 <span className="text-[11px] text-cyan-400 font-bold block mb-1">
-                  6 to 15 Files (Single Pass)
+                  3 to 15 Files (Single Pass)
                 </span>
                 <span className="text-xl font-black text-white">
                   {summary.fileCountDistribution.sixTo15Files}

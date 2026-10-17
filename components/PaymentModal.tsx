@@ -398,9 +398,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   </div>
                   <p className="text-[11px] text-textMuted mt-0.5 max-w-[270px] min-h-[32px] flex items-center">
                     {selectedPlan === 'single'
-                      ? (isFreeBeta ? 'Up to 5 files per project without creating an account.' : 'Single project migration. Zero recurring subscription. Full secret redactor.')
+                      ? (isFreeBeta ? 'Up to 2 files per project without creating an account.' : 'Single project migration. Zero recurring subscription. Full secret redactor.')
                       : selectedPlan === 'pro'
-                      ? (isFreeBeta ? 'Unlimited projects (> 5 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
+                      ? (isFreeBeta ? 'Unlimited projects (> 2 files), CLI Token, all In-RAM cybersecurity shields.' : 'Unlimited project migrations • CLI sync • All shields • Cancel anytime')
                       : (isFreeBeta ? 'Multi-file export, full bundle, CI/CD synchronization included in beta.' : '5 seats included • GitHub CI/CD Action auto-sync • SOC-2 DPA • Priority support')}
                   </p>
                 </div>

@@ -351,7 +351,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 )}
               </span>
               <span className="text-[11px] text-textMuted">
-                ≤ 5 files • 100% Instant, zero email required
+                ≤ {freeLimit} files • 100% Instant, zero email required
               </span>
             </div>
           </div>
@@ -426,7 +426,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   Project Exceeds Free Starter Limit ({overlimitState.totalCount} Files Detected)
                 </h3>
                 <p className="text-xs text-textMuted mt-1">
-                  The Free Starter plan includes up to 5 files with zero email required. How would you like to proceed?
+                  The Free Starter plan includes up to {freeLimit} files with zero email required. How would you like to proceed?
                 </p>
               </div>
             </div>
@@ -488,10 +488,10 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                   </span>
                 </div>
                 <h4 className="text-sm font-bold text-white">
-                  Keep Free Starter (Convert 5 Core Files Only)
+                  Keep Free Starter (Convert {freeLimit} Core Files Only)
                 </h4>
                 <p className="text-xs text-textMuted leading-relaxed">
-                  Extracts and converts your master instructions and top rules (5 files max). Fully anonymous with zero email or registration.
+                  Extracts and converts your master instructions and top rule ({freeLimit} files max). Fully anonymous with zero email or registration.
                 </p>
               </div>
 
@@ -499,7 +499,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 onClick={handleResolveKeepStarter}
                 className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>✂️ Convert 5 Core Files Only</span>
+                <span>✂️ Convert {freeLimit} Core Files Only</span>
               </button>
             </div>
           </div>
@@ -547,7 +547,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
             <div className="flex items-center justify-center gap-2 mt-1">
               {currentMode === 'starter' ? (
                 <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  Free Starter Active • Up to 5 files • 100% Instant, no email needed
+                  Free Starter Active • Up to {freeLimit} files • 100% Instant, no email needed
                 </span>
               ) : (
                 <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">

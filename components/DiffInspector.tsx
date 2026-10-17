@@ -285,7 +285,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <span>
-              <strong>Free Starter Active:</strong> Converted the 5 core instruction &amp; rule files. Extra files were excluded to keep conversion 100% instant with zero email.
+              <strong>Free Starter Active:</strong> Converted the {fileCount} core instruction &amp; rule files. Extra files were excluded to keep conversion 100% instant with zero email.
             </span>
           </div>
           <button
@@ -306,7 +306,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
             </span>
             {isSlicedStarter ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                FREE STARTER (5 CORE FILES)
+                FREE STARTER ({fileCount} CORE FILES)
               </span>
             ) : isFree && !hasProAccess ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -346,7 +346,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
             <span>
               {isVip
                 ? `Download VIP Bundle (100% FREE • ${fileCount} Files)`
-                : hasProAccess && fileCount > 5
+                : hasProAccess && fileCount > MonetizationManager.getFreeLimit()
                 ? `Download Pro Bundle (${fileCount} Files)`
                 : `Download Free Bundle (${fileCount} ${fileCount === 1 ? 'File' : 'Files'})`}
             </span>

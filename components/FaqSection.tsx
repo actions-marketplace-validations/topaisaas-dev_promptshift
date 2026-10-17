@@ -22,7 +22,7 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'What are the pricing tiers and payment options?',
     answer:
-      'PromptShift offers flexible pricing: Free Starter for small projects (up to 5 files with zero signup), Single Deposit Pass at $1.99 one-time for pay-as-you-go migrations, Pro Developer at $5.99/month for unlimited migrations and CLI sync, and Team & Agency at $19.99/month with CI/CD automation. Payments are processed securely via Polar.sh Merchant of Record with native Apple Pay, Google Pay, Credit/Debit Cards, and SEPA.',
+      'PromptShift offers flexible pricing: Free Starter for small projects (up to 2 files with zero signup), Single Deposit Pass at $1.99 one-time for pay-as-you-go migrations, Pro Developer at $5.99/month for unlimited migrations and CLI sync, and Team & Agency at $19.99/month with CI/CD automation. Payments are processed securely via Polar.sh Merchant of Record with native Apple Pay, Google Pay, Credit/Debit Cards, and SEPA.',
   },
   {
     question: 'Which AI platforms are currently supported?',

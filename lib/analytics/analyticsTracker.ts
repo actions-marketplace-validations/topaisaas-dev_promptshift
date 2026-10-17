@@ -215,7 +215,7 @@ export class AnalyticsTracker {
       const offsetMs = Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000);
       const fileCount = Math.floor(Math.random() * 18) + 2;
       const sizeBytes = fileCount * 7800 + Math.floor(Math.random() * 45000);
-      const isFree = fileCount <= 5;
+      const isFree = fileCount <= 2;
       const plan = isFree ? (i % 5 === 0 ? 'vip' : 'free') : plans[i % plans.length];
       const target = targets[i % targets.length];
       const source = sources[i % sources.length];

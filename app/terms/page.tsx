@@ -80,10 +80,10 @@ export default function TermsPage() {
             </h2>
             <div className="space-y-3">
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                <h3 className="font-bold text-white text-xs uppercase tracking-wide">A. Free Starter Pass (≤ 5 files)</h3>
+                <h3 className="font-bold text-white text-xs uppercase tracking-wide">A. Free Starter Pass (≤ 2 files)</h3>
                 <p className="text-xs text-slate-400 mt-1">
                   Complimentary, registration-free license granting non-exclusive rights to convert and export projects containing
-                  up to 5 knowledge base/rule files. Zero payment required.
+                  up to 2 knowledge base/rule files (1 master prompt + 1 rule). Zero payment required.
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800">

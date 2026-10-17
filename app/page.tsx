@@ -242,8 +242,8 @@ export default function HomePage() {
         fileCount,
         sizeBytes,
         parityScore: finalResult.parityScore || 98.5,
-        isFreeTier: isVip || fileCount <= 5,
-        planTier: isVip ? 'vip' : fileCount <= 5 ? 'free' : 'single',
+        isFreeTier: isVip || fileCount <= MonetizationManager.getFreeLimit(),
+        planTier: isVip ? 'vip' : fileCount <= MonetizationManager.getFreeLimit() ? 'free' : 'single',
         currency,
         secretsCount: finalResult.alerts ? finalResult.alerts.length : 0,
       });
@@ -317,7 +317,7 @@ export default function HomePage() {
               ? 'VIP DEV PASS ACTIVE • 100% FREE FULL CODEBASES'
               : isFreeBeta
               ? 'OPEN PUBLIC BETA • FREE PRO PASS AVAILABLE'
-              : `FREE FOR UP TO 5 FILES • ${CurrencyManager.getTierPrice('single', currency).formatted} FULL REPOSITORIES`}
+              : `FREE FOR UP TO ${MonetizationManager.getFreeLimit()} FILES • ${CurrencyManager.getTierPrice('single', currency).formatted} FULL REPOSITORIES`}
           </span>
         </div>
 
