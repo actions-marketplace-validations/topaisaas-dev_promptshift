@@ -525,8 +525,9 @@ async function runSeniorQASuite() {
     assert.strictEqual(CurrencyManager.formatZero('USD'), '$0');
   });
 
-  await test('Offline Maintenance Mode: Public traffic rewritten to /maintenance with 503, APIs blocked, /bouboule accessible', async () => {
-    assert.strictEqual(IS_MAINTENANCE_MODE, true, 'IS_MAINTENANCE_MODE must be enabled');
+  await test('Online Live Mode & Maintenance Middleware Safeguard', async () => {
+    // When live online, IS_MAINTENANCE_MODE is false
+    assert.strictEqual(IS_MAINTENANCE_MODE, false, 'Site must be online in production');
 
     function createMockRequest(pathname: string) {
       return {
@@ -535,28 +536,18 @@ async function runSeniorQASuite() {
       } as any;
     }
 
-    // 1. Root / rewrite to /maintenance with Retry-After header
+    // 1. Root / passes through directly without rewrite
     const rootRes = middleware(createMockRequest('/'));
-    assert.strictEqual(rootRes.headers.get('retry-after'), '3600', 'Must return retry-after header');
-    assert.ok(rootRes.headers.get('x-middleware-rewrite')?.includes('/maintenance'), 'Must rewrite root to /maintenance');
+    assert.strictEqual(rootRes.headers.get('x-middleware-rewrite'), null, 'Root must not be rewritten when online');
+    assert.strictEqual(rootRes.status, 200, 'Root must return 200');
 
-    // 2. API route /api/convert returns 503 JSON
+    // 2. API route /api/convert passes through
     const apiRes = middleware(createMockRequest('/api/convert'));
-    assert.strictEqual(apiRes.status, 503, 'API must return HTTP 503 during maintenance');
-    assert.strictEqual(apiRes.headers.get('retry-after'), '3600');
-    const apiJson = await apiRes.json();
-    assert.strictEqual(apiJson.code, 'MAINTENANCE_MODE_ACTIVE');
+    assert.notStrictEqual(apiRes.status, 503, 'API must not be blocked when online');
 
-    // 3. Admin /bouboule bypasses maintenance
+    // 3. Admin /bouboule passes through
     const adminRes = middleware(createMockRequest('/bouboule'));
-    assert.strictEqual(adminRes.headers.get('x-middleware-rewrite'), null, 'Admin route must not be rewritten');
-    assert.notStrictEqual(adminRes.status, 503, 'Admin route must not be 503');
-
-    // 4. Static assets bypass maintenance
-    const assetRes = middleware(createMockRequest('/_next/static/chunk.js'));
-    assert.notStrictEqual(assetRes.status, 503);
-    const faviconRes = middleware(createMockRequest('/favicon.ico'));
-    assert.notStrictEqual(faviconRes.status, 503);
+    assert.strictEqual(adminRes.headers.get('x-middleware-rewrite'), null, 'Admin route must pass through');
   });
 
   // =========================================================================
