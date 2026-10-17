@@ -63,8 +63,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
       // Auto-load previously entered email from sovereign local vault if available
       const savedCust = ClientVault.getCustomerInfo();
-      if (savedCust.email && savedCust.email !== 'billing@promptshift.dev') {
+      if (
+        savedCust.email &&
+        !savedCust.email.endsWith('@promptshift.dev') &&
+        savedCust.email.includes('@')
+      ) {
         setCustomerEmail(savedCust.email);
+      } else {
+        setCustomerEmail('');
       }
     }
   }, [isOpen, initialPlan, isFreeBeta]);
@@ -189,7 +195,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
     // 1. Record invoice in ClientVault with localized currency and customer email
     const customer = ClientVault.getCustomerInfo();
-    const finalEmail = customerEmail.trim() || customer.email || 'developer@promptshift.dev';
+    const finalEmail =
+      customerEmail.trim() ||
+      (customer.email && !customer.email.endsWith('@promptshift.dev') ? customer.email : '');
 
     // Persist developer email so Member Space and Sovereign Vault are immediately updated
     ClientVault.saveCustomerInfo({

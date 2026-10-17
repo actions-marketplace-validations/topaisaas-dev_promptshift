@@ -96,7 +96,7 @@ export default function HomePage() {
           status: 'PAID',
           customerName: customer.name || 'Lead Autonomous Software Engineer',
           customerCompany: customer.company || 'Engineering Studio',
-          customerEmail: customer.email || 'developer@promptshift.dev',
+          customerEmail: customer.email && !customer.email.endsWith('@promptshift.dev') ? customer.email : '',
         });
 
         setIsPaymentModalOpen(true);

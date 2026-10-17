@@ -1000,7 +1000,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                     </div>
                     <p className="text-xs text-textMuted mt-0.5">
                       Code: <strong className="text-emerald-400 font-mono">{PromoManager.getVipCode() || 'DEVVIP'}</strong> • Linked to:{' '}
-                      <span className="text-cyan-300 font-medium">{customerInfo.email || 'developer@promptshift.dev'}</span>
+                      <span className="text-cyan-300 font-medium">{customerInfo.email || 'Sovereign Local Vault'}</span>
                     </p>
                     <p className="text-[11px] text-emerald-400/90 mt-1">
                       ✓ Unlimited migrations • Zero file size ceilings • Sovereign RAM Vault active
