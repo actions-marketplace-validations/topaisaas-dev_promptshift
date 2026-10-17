@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import { UniversalTranspiler } from '@/lib/converter/universalTranspiler';
 import { CanonicalProject } from '@/lib/converter/capsSchema';
 import { SecurityGuards } from '@/lib/converter/securityGuards';
+import { MonetizationManager } from '@/lib/config/monetizationConfig';
 
 export async function POST(req: Request) {
   try {
@@ -14,41 +15,9 @@ export async function POST(req: Request) {
     }
 
     const authHeader = req.headers.get('Authorization') || req.headers.get('X-PromptShift-Key');
-    const isAgentCall = req.headers.get('X-Agent-Client') || req.headers.get('User-Agent')?.includes('Agent');
+    const isAgentCall = req.headers.get('X-Agent-Client') || req.headers.get('User-Agent')?.includes('Agent') || body.client === 'cli';
     const fileCount = (project.knowledge_base?.length || 0) + (project.rules?.length || 0) + 1;
-
-    // x402O: HTTP 402 Micropayment / Payment Required for programmatic agent workflows exceeding free quota
-    if (isAgentCall && fileCount > 5 && !authHeader) {
-      return NextResponse.json(
-        {
-          error: 'Payment Required: Project exceeds Free Starter tier (5 files). Please supply a Pro license key or complete checkout.',
-          code: 402,
-          currency: 'USD',
-          pricing: {
-            single_migration_usd: 1.99,
-            pro_monthly_usd: 5.99,
-            team_monthly_usd: 19.99,
-          },
-          polar_checkout_url: 'https://promptshift.dev/#pricing',
-          polar_products: {
-            single_pass: '3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
-            pro_developer: 'f646306b-cddd-4478-8aba-ec282a93397a',
-            team_agency: '9e8ca309-7881-4d7e-bfb0-6e6eda85505b',
-          },
-        },
-        {
-          status: 402,
-          headers: {
-            'X-Payment-Required': 'true',
-            'X-Pricing-Currency': 'USD',
-            'X-Pricing-Single-Usd': '1.99',
-            'X-Pricing-Pro-Usd': '5.99',
-            'X-Polar-Checkout-Url': 'https://promptshift.dev/#pricing',
-            'X-Polar-Product-Id': '3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
-          },
-        }
-      );
-    }
+    const freeLimit = MonetizationManager.getFreeLimit();
 
     // 1. In-RAM Magic Bytes check if any binary attachments are passed
     if (body.rawFiles) {
@@ -66,6 +35,58 @@ export async function POST(req: Request) {
       project as CanonicalProject,
       targetPlatform || 'claude'
     );
+
+    // x402O: Deterministic In-Flow Paywall (HTTP 402 Payment Required) for CLI/Agent calls exceeding free quota
+    if (isAgentCall && fileCount > freeLimit && !authHeader) {
+      const previewLines = result.diff.targetCode.split('\n').slice(0, 12).join('\n');
+      return NextResponse.json(
+        {
+          status: 'PAYMENT_REQUIRED',
+          code: 402,
+          error: `Quota Exceeded: Multi-file architecture detected (${fileCount} files > ${freeLimit} free limit).`,
+          ast_verification: {
+            project_name: result.projectName,
+            source_platform: result.sourcePlatform,
+            target_platform: result.targetPlatform,
+            certified_parity_score: `${result.parityScore}%`,
+            secrets_redacted_in_ram: result.alerts.length,
+            locked_files: Object.keys(result.files),
+            preview_head: previewLines,
+          },
+          in_flow_checkout: {
+            currency: 'USD',
+            single_pass: {
+              price_usd: 1.99,
+              product_id: '3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
+              instant_checkout_url: 'https://polar.sh/checkout/3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
+            },
+            pro_developer_ci_cd: {
+              price_usd: 5.99,
+              product_id: 'f646306b-cddd-4478-8aba-ec282a93397a',
+              instant_checkout_url: 'https://polar.sh/checkout/f646306b-cddd-4478-8aba-ec282a93397a',
+            },
+            team_agency: {
+              price_usd: 19.99,
+              product_id: '9e8ca309-7881-4d7e-bfb0-6e6eda85505b',
+              instant_checkout_url: 'https://polar.sh/checkout/9e8ca309-7881-4d7e-bfb0-6e6eda85505b',
+            },
+            unlock_instructions: 'Pass your Polar Order ID or License Key via header "X-PromptShift-Key: <KEY>" or CLI flag "--key=<KEY>".',
+          },
+        },
+        {
+          status: 402,
+          headers: {
+            'X-Payment-Required': 'true',
+            'X-Pricing-Currency': 'USD',
+            'X-Pricing-Single-Usd': '1.99',
+            'X-Pricing-Pro-Usd': '5.99',
+            'X-Polar-Checkout-Single': 'https://polar.sh/checkout/3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
+            'X-Polar-Checkout-Pro': 'https://polar.sh/checkout/f646306b-cddd-4478-8aba-ec282a93397a',
+            'X-Polar-Product-Id': '3e74e0dd-27da-4b78-8dee-f2e0fa36ed25',
+          },
+        }
+      );
+    }
 
     // 3. Assemble in-memory ZIP
     const zip = new JSZip();

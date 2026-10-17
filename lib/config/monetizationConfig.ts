@@ -24,8 +24,8 @@ export const MONETIZATION_CONFIG: MonetizationConfig = {
   // Master toggle: 'free_beta' for 100% free open public beta, or 'paid' for full commercial checkout.
   mode: 'paid',
 
-  // Free Starter project limit without email
-  freeTierMaxFiles: 5,
+  // Free Starter project limit without email (1 master prompt + 1 rule file; multi-rule architectures trigger paywall)
+  freeTierMaxFiles: 2,
 
   // Branding & copy for Free Beta phase
   betaName: 'PromptShift Open Beta',

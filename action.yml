@@ -1,0 +1,40 @@
+name: 'PromptShift AI Rules Sync & Drift Guard'
+description: 'Deterministic AST transpiler & OWASP secret sanitizer between Cursor (.mdc), Claude Code (CLAUDE.md), Windsurf, and Copilot.'
+author: 'PromptShift Engineering'
+branding:
+  icon: 'terminal'
+  color: 'green'
+inputs:
+  from:
+    description: 'Source AI agent framework (cursor, claude-code, windsurf, copilot, cline, roo-code, aider, gemini)'
+    required: false
+    default: 'cursor'
+  to:
+    description: 'Target AI agent framework (claude-code, cursor, windsurf, copilot, cline, roo-code, aider, gemini)'
+    required: false
+    default: 'claude-code'
+  dir:
+    description: 'Workspace directory path to scan and transpile'
+    required: false
+    default: '.'
+  license_key:
+    description: 'PromptShift Polar.sh Order UUID or License Key (Required for repositories with >2 rule files)'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js Runtime
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Execute PromptShift Deterministic AST Sync
+      shell: bash
+      env:
+        PROMPTSHIFT_LICENSE_KEY: ${{ inputs.license_key }}
+      run: |
+        node ${{ github.action_path }}/packages/cli/bin/promptshift.js \
+          --from="${{ inputs.from }}" \
+          --to="${{ inputs.to }}" \
+          --dir="${{ inputs.dir }}" \
+          --key="${{ inputs.license_key }}"

@@ -54,9 +54,10 @@ export const Dropzone: React.FC<DropzoneProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [overlimitState, setOverlimitState] = useState<OverlimitState | null>(null);
   const [currency, setCurrency] = useState<SupportedCurrency>(() =>
-    typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR'
+    typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD'
   );
   const isFreeBeta = MonetizationManager.isFreeBeta();
+  const freeLimit = MonetizationManager.getFreeLimit();
 
   useEffect(() => {
     if (activeMode) setCurrentMode(activeMode);
@@ -261,8 +262,8 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         fileCount: totalValidFiles,
       });
 
-      // Handle Free Starter limit exceeding (> 5 files)
-      if (currentMode === 'starter' && totalValidFiles > 5) {
+      // Handle Free Starter limit exceeding (> freeLimit files)
+      if (currentMode === 'starter' && totalValidFiles > freeLimit) {
         setOverlimitState({
           projectName,
           masterPrompt,
@@ -276,7 +277,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({
         return;
       }
 
-      // Pro mode or files <= 5: finalize immediately
+      // Pro mode or files <= freeLimit: finalize immediately
       finalizeProject(projectName, masterPrompt, rulesList, knowledgeBase, false);
     } catch (err: any) {
       console.error('File parsing error:', err);
@@ -302,9 +303,9 @@ export const Dropzone: React.FC<DropzoneProps> = ({
 
   const handleResolveKeepStarter = () => {
     if (!overlimitState) return;
-    // Slices to master prompt + top rules (up to 5 files total)
+    // Slices to master prompt + top rule (up to freeLimit files total)
     const masterSlots = overlimitState.masterPrompt ? 1 : 0;
-    const availableSlots = Math.max(0, 5 - masterSlots);
+    const availableSlots = Math.max(0, freeLimit - masterSlots);
     const slicedRules = overlimitState.rulesList.slice(0, availableSlots);
     const remainingForKb = Math.max(0, availableSlots - slicedRules.length);
     const slicedKb = overlimitState.knowledgeBase.slice(0, remainingForKb);

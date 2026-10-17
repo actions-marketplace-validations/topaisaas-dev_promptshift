@@ -1,20 +1,26 @@
 {
   "name": "promptshift",
-  "version": "1.0.0",
-  "description": "Universal 1-Click AI Agent Project Transpiler (Claude, Cursor, OpenAI, Gemini)",
+  "version": "1.1.0",
+  "description": "Deterministic AST Transpiler & STDIO MCP Server for AI Coding Agents (Cursor, Claude Code, Windsurf, Copilot, Cline, Aider)",
   "main": "bin/promptshift.js",
   "bin": {
-    "promptshift": "bin/promptshift.js"
+    "promptshift": "bin/promptshift.js",
+    "promptshift-mcp": "bin/promptshift.js"
   },
   "scripts": {
-    "start": "node bin/promptshift.js"
+    "start": "node bin/promptshift.js",
+    "mcp": "node bin/promptshift.js --mcp"
   },
   "keywords": [
     "promptshift",
+    "mcp",
+    "model-context-protocol",
     "cursor",
     "cursorrules",
     "claude",
     "claude-code",
+    "windsurf",
+    "copilot",
     "openai",
     "gemini",
     "antigravity",

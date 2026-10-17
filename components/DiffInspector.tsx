@@ -84,8 +84,22 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
   const secretsCount = activeFile?.secretsCount !== undefined ? activeFile.secretsCount : result.alerts.length;
 
   const activeFileName = activeFile?.name || 'master_instructions';
+  const isPaywallLocked = !isFree && !hasProAccess && !isVip;
+
+  const displayedTargetCode = isPaywallLocked
+    ? targetCode.split('\n').slice(0, 14).join('\n') +
+      `\n\n# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `# 🔒 IN-FLOW PAYWALL: MULTI-FILE ARCHITECTURE (${fileCount} FILES DETECTED)\n` +
+      `# AST Semantic Parity: ${parityScore}% Verified • ${secretsCount} Secret(s) Redacted in RAM\n` +
+      `# Unlock full ${fileCount}-file repository bundle & unredacted AST output for ${CurrencyManager.getTierPrice('single', currency).formatted}\n` +
+      `# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
+    : targetCode;
 
   const handleCopy = (text: string, side: 'source' | 'target') => {
+    if (side === 'target' && isPaywallLocked) {
+      onExportRequest();
+      return;
+    }
     navigator.clipboard.writeText(text);
     setCopiedSide(side);
     const label = side === 'source' ? 'Source file code' : 'Converted file code';
@@ -97,6 +111,10 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
   };
 
   const handleDownloadSingleFile = () => {
+    if (isPaywallLocked) {
+      onExportRequest();
+      return;
+    }
     const blob = new Blob([targetCode], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -225,17 +243,17 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
               <button
                 onClick={handleDownloadSingleFile}
                 aria-label={`Download single file: ${activeFileName}`}
-                className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none transition-all"
-                title="Download this file only"
+                className="flex items-center gap-1 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none transition-all cursor-pointer"
+                title={isPaywallLocked ? 'Unlock bundle to save file' : 'Download this file only'}
               >
-                <Download className="w-3 h-3" aria-hidden="true" />
-                <span>Save File</span>
+                {isPaywallLocked ? <Lock className="w-3 h-3" aria-hidden="true" /> : <Download className="w-3 h-3" aria-hidden="true" />}
+                <span>{isPaywallLocked ? 'Unlock & Save' : 'Save File'}</span>
               </button>
 
               <button
                 onClick={() => handleCopy(targetCode, 'target')}
                 aria-label={`Copy converted code of ${targetTitle}`}
-                className="flex items-center gap-1.5 text-xs text-textMuted hover:text-white px-2 py-1 rounded-lg hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all"
+                className="flex items-center gap-1.5 text-xs text-textMuted hover:text-white px-2 py-1 rounded-lg hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all cursor-pointer"
               >
                 {copiedSide === 'target' ? (
                   <>
@@ -244,8 +262,8 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>Copy</span>
+                    {isPaywallLocked ? <Lock className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" /> : <Copy className="w-3.5 h-3.5" aria-hidden="true" />}
+                    <span>{isPaywallLocked ? 'Unlock & Copy' : 'Copy'}</span>
                   </>
                 )}
               </button>
@@ -256,7 +274,7 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
             aria-label={`Converted file code: ${targetTitle}`}
             className="p-5 font-mono text-xs text-emerald-300/90 leading-relaxed overflow-x-auto max-h-[500px] bg-[#070b12] focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none"
           >
-            <code>{targetCode}</code>
+            <code>{displayedTargetCode}</code>
           </pre>
         </div>
       </div>
