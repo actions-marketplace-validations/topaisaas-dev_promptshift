@@ -37,7 +37,7 @@ export class EmailDispatcher {
       };
     }
 
-    let emailData: { subject: string; html: string };
+    let emailData: { subject: string; html: string; text?: string };
 
     if (action === 'welcome_account') {
       emailData = EmailTemplates.welcomeAccount(email);
@@ -126,8 +126,10 @@ export class EmailDispatcher {
           body: JSON.stringify({
             sender: { name: 'PromptShift', email: 'notifications@promptshift.dev' },
             to: [{ email }],
+            replyTo: { email: 'support@promptshift.dev', name: 'PromptShift Support' },
             subject: emailData.subject,
             htmlContent: emailData.html,
+            textContent: emailData.text,
           }),
         });
 
