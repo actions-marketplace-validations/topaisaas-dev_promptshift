@@ -48,7 +48,7 @@ export class PolarService {
     const returnUrl = req.returnUrl || `${appUrl}/#pricing`;
 
     try {
-      const response = await fetch('https://api.polar.sh/v1/checkouts/', {
+      const response = await fetch('https://api.polar.sh/v1/checkouts/custom/', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export class PolarService {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          products: [productId],
+          product_id: productId,
           customer_email: req.customerEmail && req.customerEmail.includes('@') ? req.customerEmail : undefined,
           success_url: successUrl,
           return_url: returnUrl,
