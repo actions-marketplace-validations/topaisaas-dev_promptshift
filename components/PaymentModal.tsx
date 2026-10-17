@@ -28,6 +28,7 @@ interface PaymentModalProps {
   projectName: string;
   zipBase64?: string;
   initialPlan?: 'single' | 'pro' | 'team';
+  initialIsPaid?: boolean;
   onOpenPortal?: () => void;
 }
 
@@ -37,6 +38,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   projectName,
   zipBase64,
   initialPlan = 'single',
+  initialIsPaid = false,
   onOpenPortal,
 }) => {
   const isFreeBeta = MonetizationManager.isFreeBeta();
@@ -44,7 +46,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [currency, setCurrency] = useState<SupportedCurrency>(() =>
     typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'EUR'
   );
-  const [isPaid, setIsPaid] = useState(false);
+  const [isPaid, setIsPaid] = useState(initialIsPaid);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastInvoice, setLastInvoice] = useState<VaultInvoice | null>(null);
   const [emailError, setEmailError] = useState('');
@@ -52,12 +54,31 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   // Developer account & email state
   const [customerEmail, setCustomerEmail] = useState('');
 
+  // Listen to Escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Synchronize plan selection, customer email and active currency whenever modal opens
   useEffect(() => {
     if (isOpen) {
       setSelectedPlan(isFreeBeta ? 'pro' : initialPlan);
-      setIsPaid(false);
-      setLastInvoice(null);
+      const invoices = ClientVault.getInvoices();
+      const recentInvoice = invoices.length > 0 ? invoices[0] : null;
+
+      if (initialIsPaid) {
+        setIsPaid(true);
+        setLastInvoice(recentInvoice);
+      } else {
+        setIsPaid(false);
+        setLastInvoice(null);
+      }
       setCurrency(CurrencyManager.getActiveCurrency());
       setEmailError('');
 
@@ -76,7 +97,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         setCustomerEmail('');
       }
     }
-  }, [isOpen, initialPlan, isFreeBeta]);
+  }, [isOpen, initialPlan, initialIsPaid, isFreeBeta]);
 
   // Listen to currency changes dispatched from anywhere in the app
   useEffect(() => {
@@ -268,6 +289,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="payment-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
     >
       <div className="w-full max-w-lg h-[660px] max-h-[92vh] bg-cardBg border border-borderColor rounded-3xl p-6 sm:p-7 shadow-2xl relative flex flex-col justify-between overflow-hidden">
@@ -593,6 +617,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 <Share2 className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
                 <span>Share Migration on X / Twitter</span>
               </a>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <span>Close & Return to Studio</span>
+              </button>
 
               {onOpenPortal && (
                 <button

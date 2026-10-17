@@ -16,7 +16,7 @@ import { PromoManager } from '@/lib/promo/promoManager';
 import { MonetizationManager } from '@/lib/config/monetizationConfig';
 import Link from 'next/link';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
-import { Zap, ShieldCheck, ArrowRightLeft, Sparkles, Layers, Lock } from 'lucide-react';
+import { Zap, ShieldCheck, ArrowRightLeft, Sparkles, Layers, Lock, CheckCircle2, X } from 'lucide-react';
 import JSZip from 'jszip';
 import { DEMO_PRESETS, DemoPreset } from '@/lib/demoPresets';
 
@@ -39,6 +39,8 @@ export default function HomePage() {
     secretsCount?: number;
   } | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [modalInitialPaid, setModalInitialPaid] = useState(false);
+  const [checkoutSuccessNotice, setCheckoutSuccessNotice] = useState<string | null>(null);
   const [paymentPlan, setPaymentPlan] = useState<'single' | 'pro' | 'team'>('pro');
   const [zipBase64, setZipBase64] = useState<string | undefined>(undefined);
   const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
@@ -79,18 +81,23 @@ export default function HomePage() {
         ClientVault.setActivePlan(planParam);
         setActivePlan(planParam);
         setPaymentPlan(planParam);
+        setModalInitialPaid(true);
+
+        const planTitle =
+          planParam === 'team'
+            ? 'Team & Agency Pass'
+            : planParam === 'pro'
+            ? 'Pro Developer Subscription'
+            : 'Single Project Pass';
+
+        setCheckoutSuccessNotice(`Payment confirmed! Your ${planTitle} is now unlocked.`);
 
         // Record verified invoice in Sovereign Vault
         const customer = ClientVault.getCustomerInfo();
         const tierPrice = CurrencyManager.getTierPrice(planParam, CurrencyManager.getActiveCurrency());
         ClientVault.saveInvoice({
           orderId: checkoutId,
-          planName:
-            planParam === 'team'
-              ? 'Team & Agency Pass'
-              : planParam === 'pro'
-              ? 'Pro Developer Subscription'
-              : 'Single Project Pass',
+          planName: planTitle,
           amount: tierPrice.raw.toFixed(2),
           currency: CurrencyManager.getActiveCurrency(),
           paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
@@ -99,6 +106,15 @@ export default function HomePage() {
           customerCompany: customer.company || 'Engineering Studio',
           customerEmail: customer.email && !customer.email.endsWith('@promptshift.dev') ? customer.email : '',
         });
+
+        // Trigger victory celebration
+        try {
+          import('canvas-confetti').then((m) => {
+            m.default({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
+          });
+        } catch {
+          // ignore
+        }
 
         setIsPaymentModalOpen(true);
         // Clean URL to prevent re-trigger on reload
@@ -308,6 +324,24 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center gap-12 py-6">
+      {/* Checkout Success Banner */}
+      {checkoutSuccessNotice && (
+        <div className="w-full max-w-3xl mx-auto p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/50 text-emerald-300 flex items-center justify-between gap-3 shadow-lg animate-fadeIn">
+          <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <span>{checkoutSuccessNotice}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCheckoutSuccessNotice(null)}
+            className="p-1 rounded-lg text-emerald-400 hover:text-white hover:bg-emerald-500/20 text-xs transition-colors cursor-pointer"
+            aria-label="Dismiss notice"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="text-center flex flex-col items-center gap-4 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyanGlow text-xs font-bold tracking-wide">
@@ -523,6 +557,7 @@ export default function HomePage() {
         hasProject={Boolean(project && zipBase64)}
         onSelectPlan={(plan) => {
           setPaymentPlan(plan);
+          setModalInitialPaid(false);
           setIsPaymentModalOpen(true);
         }}
         onStartFree={() => {
@@ -551,10 +586,14 @@ export default function HomePage() {
       {/* Payment / Export & Subscription Modal */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
+        onClose={() => {
+          setIsPaymentModalOpen(false);
+          setModalInitialPaid(false);
+        }}
         projectName={transpileResult ? transpileResult.projectName : 'Universal AI Project'}
         zipBase64={zipBase64}
         initialPlan={paymentPlan}
+        initialIsPaid={modalInitialPaid}
       />
 
       {/* Footer */}
