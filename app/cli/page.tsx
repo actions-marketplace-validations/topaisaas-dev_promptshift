@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Navbar } from '@/components/Navbar';
 import { Terminal, Copy, Shield, Cpu, Zap, CheckCircle2 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -44,14 +43,11 @@ export default function CliPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-200">
+    <div className="w-full max-w-5xl mx-auto px-4 py-2">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Navbar />
-
-      <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-xs text-slate-400 mb-8 font-mono">
           <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>
@@ -215,21 +211,6 @@ export default function CliPage() {
             Launch Visual Converter
           </Link>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-[#05060A] py-8 text-xs text-slate-400">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>© {new Date().getFullYear()} PromptShift.dev • Universal AI Project Bridge</div>
-          <div className="flex items-center space-x-6">
-            <Link href="/terms" className="hover:text-slate-200">Terms</Link>
-            <Link href="/privacy" className="hover:text-slate-200">Privacy</Link>
-            <Link href="/security" className="hover:text-slate-200">Security</Link>
-            <Link href="/cli" className="hover:text-cyan-400 font-semibold">CLI Tool</Link>
-            <a href="mailto:contact@promptshift.dev" className="hover:text-cyan-400">Contact</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

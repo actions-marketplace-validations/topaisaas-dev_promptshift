@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CONVERSION_PAIRS, ConversionPairData } from '@/lib/seo/conversionPairs';
-import { Navbar } from '@/components/Navbar';
 
 interface PageProps {
   params: Promise<{ pair: string }>;
@@ -175,14 +174,13 @@ export default async function ConversionPairPage({ params }: PageProps) {
   const otherPairs = Object.values(CONVERSION_PAIRS).filter((p) => p.slug !== data.slug);
 
   return (
-    <div className="min-h-screen bg-[#07090E] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-200">
+    <div className="w-full max-w-6xl mx-auto px-4 py-2">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Navbar />
 
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-12 w-full">
+      <div className="w-full">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-xs text-slate-400 mb-8 font-mono">
           <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>
@@ -434,22 +432,7 @@ export default async function ConversionPairPage({ params }: PageProps) {
             ))}
           </div>
         </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-[#05060A] py-8 text-xs text-slate-400">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            © {new Date().getFullYear()} PromptShift.dev • Universal AI Project Bridge
-          </div>
-          <div className="flex items-center space-x-6">
-            <Link href="/terms" className="hover:text-slate-200 transition-colors">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-slate-200 transition-colors">Privacy Policy</Link>
-            <Link href="/security" className="hover:text-slate-200 transition-colors">Security Whitepaper</Link>
-            <a href="mailto:contact@promptshift.dev" className="hover:text-cyan-400 transition-colors">Contact</a>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

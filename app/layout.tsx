@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 
@@ -261,13 +262,26 @@ export default function RootLayout({
         <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 focus:outline-none">
           {children}
         </main>
-        <footer className="w-full border-t border-borderColor py-8 text-center text-xs text-textMuted bg-darkBg">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <span>&copy; 2026 PromptShift (promptshift.dev). All rights reserved.</span>
-            <span className="hidden sm:inline">•</span>
-            <span>Zero Server Storage (In-RAM Only)</span>
-            <span className="hidden sm:inline">•</span>
-            <span>Local Browser Sandbox (No Tracking Cookies)</span>
+        <footer className="w-full border-t border-borderColor py-8 px-6 text-xs text-textMuted bg-darkBg">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-semibold text-slate-300">&copy; 2026 PromptShift.dev</span>
+              <span>•</span>
+              <span>Universal AI Project Bridge</span>
+              <span>•</span>
+              <span className="text-emerald-400 font-mono">Zero Server Storage (In-RAM Only)</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-xs">
+              <Link href="/terms" className="hover:text-cyan-400 transition-colors">Terms & EULA</Link>
+              <span>•</span>
+              <Link href="/privacy" className="hover:text-cyan-400 transition-colors">Privacy</Link>
+              <span>•</span>
+              <Link href="/security" className="hover:text-emerald-400 transition-colors">Security & DPA</Link>
+              <span>•</span>
+              <Link href="/cli" className="hover:text-cyan-400 font-semibold transition-colors">CLI</Link>
+              <span>•</span>
+              <a href="mailto:contact@promptshift.dev" className="hover:text-cyan-400 transition-colors">Support</a>
+            </div>
           </div>
         </footer>
       </body>
