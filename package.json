@@ -2,6 +2,7 @@
   "name": "promptshift",
   "version": "1.0.0",
   "private": true,
+  "bin": "./packages/cli/bin/promptshift.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
