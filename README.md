@@ -117,11 +117,11 @@ Leaked credentials are substituted in-place with `[REDACTED_API_KEY]`.
 
 - **Free Starter:** Up to 2 rule files completely free forever (1 master context + 1 specialized rule).
 - **Single Deposit Pass ($1.99 one-time):** Lifetime unlock for a single repository migration.
-  👉 [Direct Checkout Link](https://polar.sh/checkout/3e74e0dd-27da-4b78-8dee-f2e0fa36ed25)
+  👉 [Direct Checkout Link](https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E)
 - **Pro Developer ($5.99/mo):** Unlimited rule files, priority AST compilation, and CLI unlocks.
-  👉 [Direct Checkout Link](https://polar.sh/checkout/f646306b-cddd-4478-8aba-ec282a93397a)
+  👉 [Direct Checkout Link](https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a)
 - **Team CI/CD & Agency ($19.99/mo):** Multi-seat license keys for GitHub Actions CI/CD drift guards.
-  👉 [Direct Checkout Link](https://polar.sh/checkout/9e8ca309-7881-4d7e-bfb0-6e6eda85505b)
+  👉 [Direct Checkout Link](https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC)
 
 ---
 

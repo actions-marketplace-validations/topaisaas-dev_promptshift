@@ -39,6 +39,19 @@ export class PolarService {
     }
   }
 
+  public static getPermanentCheckoutLink(plan: 'single' | 'pro' | 'team'): string {
+    switch (plan) {
+      case 'single':
+        return 'https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E';
+      case 'pro':
+        return 'https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a';
+      case 'team':
+        return 'https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC';
+      default:
+        return 'https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E';
+    }
+  }
+
   public static async createCheckout(req: PolarCheckoutRequest): Promise<PolarCheckoutResponse> {
     const token = this.getAccessToken();
     const productId = this.getProductId(req.plan);
@@ -71,9 +84,9 @@ export class PolarService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Polar API Checkout Error:', response.status, errorText);
-        // Fallback to direct hosted checkout URL
+        // Fallback to permanent hosted checkout link
         return {
-          checkoutUrl: `https://polar.sh/checkout/${productId}${req.customerEmail ? `?customer_email=${encodeURIComponent(req.customerEmail)}` : ''}`,
+          checkoutUrl: this.getPermanentCheckoutLink(req.plan),
           checkoutId: `polar_direct_${Date.now()}`,
         };
       }
@@ -86,7 +99,7 @@ export class PolarService {
     } catch (err) {
       console.error('Polar Checkout Exception:', err);
       return {
-        checkoutUrl: `https://polar.sh/checkout/${productId}`,
+        checkoutUrl: this.getPermanentCheckoutLink(req.plan),
         checkoutId: `polar_err_fallback_${Date.now()}`,
       };
     }

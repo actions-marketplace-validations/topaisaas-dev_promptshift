@@ -54,9 +54,9 @@ Add to your `claude_desktop_config.json`:
 
 ## 💳 Commercial Access & Quotas
 - **Free Starter**: Up to 2 rule files completely free forever.
-- **Single Deposit Pass ($1.99 one-time)**: [Instant Checkout](https://polar.sh/checkout/3e74e0dd-27da-4b78-8dee-f2e0fa36ed25)
-- **Pro Developer ($5.99/mo)**: [Instant Checkout](https://polar.sh/checkout/f646306b-cddd-4478-8aba-ec282a93397a)
-- **Team CI/CD ($19.99/mo)**: [Instant Checkout](https://polar.sh/checkout/9e8ca309-7881-4d7e-bfb0-6e6eda85505b)
+- **Single Deposit Pass ($1.99 one-time)**: [Instant Checkout](https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E)
+- **Pro Developer ($5.99/mo)**: [Instant Checkout](https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a)
+- **Team CI/CD ($19.99/mo)**: [Instant Checkout](https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC)
 
 Unlock via CLI:
 ```bash
