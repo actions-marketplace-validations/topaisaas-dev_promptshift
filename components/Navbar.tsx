@@ -140,7 +140,17 @@ export const Navbar: React.FC = () => {
           {/* Customer Portal / Account Button - Positioned to the right of Currency with gap */}
           <div className="ml-2 sm:ml-3 flex items-center gap-2">
             {activePlan !== 'free' && (
-              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-black tracking-wide uppercase">
+              <span
+                className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase border ${
+                  activePlan === 'team'
+                    ? 'bg-purple-500/15 border-purple-500/40 text-purple-300'
+                    : activePlan === 'pro'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                    : activePlan === 'vip'
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    : 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
+                }`}
+              >
                 ★ {activePlan} active
               </span>
             )}

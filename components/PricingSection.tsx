@@ -201,6 +201,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
             <button
               onClick={() => {
+                if (activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip') return;
                 if (!hasProject) {
                   if (onSelectPro) {
                     onSelectPro();
@@ -211,10 +212,23 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                   onSelectPlan('pro');
                 }
               }}
-              className="w-full mt-8 py-3 rounded-xl font-black text-xs bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black shadow-neonCyan hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
+              className={`w-full mt-8 py-3 rounded-xl font-black text-xs transition-all ${
+                activePlan === 'pro'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default shadow-none'
+                  : activePlan === 'team'
+                  ? 'bg-purple-950/40 text-purple-300 border border-purple-500/30 cursor-default shadow-none opacity-60'
+                  : activePlan === 'vip'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default shadow-none'
+                  : 'bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black shadow-neonCyan hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+              }`}
             >
               {activePlan === 'pro'
                 ? 'Pro Pass Active (Beta Member)'
+                : activePlan === 'team'
+                ? 'Included in Team Plan'
+                : activePlan === 'vip'
+                ? 'VIP Access Active'
                 : !hasProject
                 ? 'Upload Project to Claim Pro Pass'
                 : 'Claim Free Pro Pass'}
@@ -313,15 +327,23 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
             <button
               onClick={() => {
+                if (activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip') return;
                 if (!hasProject) {
                   onStartFree();
                 } else {
                   onSelectPlan('single');
                 }
               }}
-              className="w-full mt-6 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white border border-emerald-500/40 font-bold text-xs transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+              disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
+              className={`w-full mt-6 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'
+                  ? 'bg-slate-800/60 text-slate-400 border border-slate-700/60 cursor-default opacity-60 shadow-none'
+                  : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white border border-emerald-500/40 cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+              }`}
             >
-              {!hasProject
+              {activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'
+                ? 'Included in Subscription'
+                : !hasProject
                 ? `Upload Project First (${singlePrice.formatted})`
                 : `Get Single Pass (${singlePrice.formatted})`}
             </button>
@@ -371,13 +393,24 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
             <button
               onClick={() => onSelectPlan('pro')}
+              disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-black text-xs transition-all ${
                 activePlan === 'pro'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default shadow-none'
+                  : activePlan === 'team'
+                  ? 'bg-purple-950/40 text-purple-300 border border-purple-500/30 cursor-default shadow-none opacity-60'
+                  : activePlan === 'vip'
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default shadow-none'
                   : 'bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black shadow-neonCyan hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
               }`}
             >
-              {activePlan === 'pro' ? 'Current Plan (Pro Active)' : `Subscribe Pro (${proPrice.formatted})`}
+              {activePlan === 'pro'
+                ? 'Current Plan (Pro Active)'
+                : activePlan === 'team'
+                ? 'Included in Team Plan'
+                : activePlan === 'vip'
+                ? 'Included in VIP Access'
+                : `Subscribe Pro (${proPrice.formatted})`}
             </button>
           </div>
 
@@ -421,14 +454,22 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
             <button
               onClick={() => onSelectPlan('team')}
-              disabled={activePlan === 'team'}
+              disabled={activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-bold text-xs border transition-all ${
                 activePlan === 'team'
                   ? 'bg-purple-600/30 text-purple-300 border-purple-400/50 cursor-default shadow-sm'
+                  : activePlan === 'vip'
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-default shadow-none'
                   : 'bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-white border-purple-500/40 cursor-pointer hover:scale-[1.02]'
               }`}
             >
-              {activePlan === 'team' ? 'Current Plan (Team Active)' : `Upgrade Team (${teamPrice.formatted})`}
+              {activePlan === 'team'
+                ? 'Current Plan (Team Active)'
+                : activePlan === 'vip'
+                ? 'Included in VIP Access'
+                : activePlan === 'pro'
+                ? `Upgrade to Team (${teamPrice.formatted})`
+                : `Upgrade Team (${teamPrice.formatted})`}
             </button>
           </div>
         </div>

@@ -212,8 +212,8 @@ export default function HomePage() {
         fileCount,
         sizeBytes,
         parityScore: finalResult.parityScore || 98.5,
-        isFreeTier: isVip || fileCount <= 5,
-        planTier: isVip ? 'vip' : fileCount <= 5 ? 'free' : 'single',
+        isFreeTier: isVip || activePlan !== 'free' || fileCount <= MonetizationManager.getFreeLimit(),
+        planTier: activePlan,
         currency,
         secretsCount: finalResult.alerts ? finalResult.alerts.length : 0,
       });
@@ -270,8 +270,8 @@ export default function HomePage() {
         fileCount,
         sizeBytes,
         parityScore: finalResult.parityScore || 98.5,
-        isFreeTier: isVip || fileCount <= MonetizationManager.getFreeLimit(),
-        planTier: isVip ? 'vip' : fileCount <= MonetizationManager.getFreeLimit() ? 'free' : 'single',
+        isFreeTier: isVip || activePlan !== 'free' || fileCount <= MonetizationManager.getFreeLimit(),
+        planTier: activePlan,
         currency,
         secretsCount: finalResult.alerts ? finalResult.alerts.length : 0,
       });

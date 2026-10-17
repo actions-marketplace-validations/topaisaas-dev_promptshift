@@ -304,6 +304,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     AuthManager.signOut();
     setCurrentUser(null);
     setIsGuestBypass(false);
+    setAuthView('signin');
     setAuthPassword('');
     setAuthConfirmPassword('');
   };
@@ -340,16 +341,25 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            {currentUser && (
+            {currentUser ? (
               <button
                 onClick={handleSignOut}
                 aria-label="Sign out of customer portal"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-red-400 hover:text-red-300 border border-slate-800 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 hover:text-red-300 border border-red-500/30 transition-colors cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Sign Out</span>
+                <span>Sign Out</span>
               </button>
-            )}
+            ) : isGuestBypass ? (
+              <button
+                onClick={() => setIsGuestBypass(false)}
+                aria-label="Exit guest mode and return to sign in"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-cyan-400 hover:text-cyan-300 border border-slate-700 transition-colors cursor-pointer"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Sign In / Lock</span>
+              </button>
+            ) : null}
             <button
               onClick={onClose}
               aria-label="Close customer portal"
@@ -985,7 +995,7 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 )}
               </div>
             )}
-            {activePlan === 'vip' || PromoManager.isVipActive() ? (
+            {activePlan === 'vip' ? (
               <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-teal-950/40 border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
@@ -1212,6 +1222,26 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 [Admin] Purge Vault
               </button>
             )}
+
+            {currentUser ? (
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-all cursor-pointer"
+                title="Sign out of your account"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            ) : isGuestBypass ? (
+              <button
+                onClick={() => setIsGuestBypass(false)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-cyan-200 border border-slate-700 text-xs font-bold transition-all cursor-pointer"
+                title="Lock sandbox and return to sign in"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Sign In / Lock Vault</span>
+              </button>
+            ) : null}
 
             <button
               onClick={onClose}
