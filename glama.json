@@ -1,32 +1,17 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "promptshift-mcp",
-  "version": "1.1.0",
-  "description": "Deterministic AST Transpiler & OWASP Secret Sanitizer for AI Coding Agents (Cursor .mdc, Claude Code CLAUDE.md, Windsurf .windsurfrules, GitHub Copilot, Cline, Roo Code, Aider).",
-  "homepage": "https://promptshift.dev",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/topaisaas-dev/promptshift"
-  },
-  "license": "MIT",
-  "categories": [
-    "developer-tools",
-    "code-migration",
-    "security"
-  ],
-  "tools": [
-    {
-      "name": "promptshift_transpile",
-      "description": "Deterministically transpile AI coding agent configuration files between Cursor, Claude Code, Windsurf, Copilot, Cline, Roo Code, and Aider with 98.5% AST structural parity."
-    },
-    {
-      "name": "promptshift_sanitize_secrets",
-      "description": "Scan and redact exposed API keys (OpenAI, Anthropic, AWS, GitHub, Stripe) before committing agent instruction files."
-    }
-  ],
+  "name": "promptshift",
+  "title": "PromptShift — Universal AI Rules Transpiler",
+  "description": "Bi-directional rules and master prompt transpiler between Cursor, Claude Code, and Copilot with 98.5% certified AST parity and in-RAM secret redaction.",
+  "repository": "https://github.com/topaisaas-dev/promptshift",
+  "website": "https://promptshift.dev",
   "command": "npx",
-  "args": [
-    "promptshift-cli",
-    "--mcp"
-  ]
+  "args": ["-y", "promptshift", "--mcp"],
+  "env": {
+    "PROMPTSHIFT_LICENSE_KEY": {
+      "description": "Optional Polar.sh Order ID or Pro Developer License Key to transpile repositories with >2 modular rules",
+      "required": false
+    }
+  },
+  "tags": ["cursor", "claude-code", "cursorrules", "transpiler", "developer-tools", "ai-rules"]
 }

@@ -1,40 +1,43 @@
-name: 'PromptShift AI Rules Sync & Drift Guard'
-description: 'Deterministic AST transpiler & OWASP secret sanitizer between Cursor (.mdc), Claude Code (CLAUDE.md), Windsurf, and Copilot.'
-author: 'PromptShift Engineering'
-branding:
-  icon: 'terminal'
-  color: 'green'
+name: 'PromptShift AI Rules Transpiler & AST Parity Guard'
+description: 'Bi-directional AST transpiler & secret sanitization guard for AI coding assistants (Cursor, Claude Code, Windsurf, Copilot).'
+author: 'PromptShift Engineering Team <contact@promptshift.dev>'
+
 inputs:
-  from:
-    description: 'Source AI agent framework (cursor, claude-code, windsurf, copilot, cline, roo-code, aider, gemini)'
+  target:
+    description: 'Target AI ecosystem to transpile to (claude, cursor, openai, gemini)'
     required: false
-    default: 'cursor'
-  to:
-    description: 'Target AI agent framework (claude-code, cursor, windsurf, copilot, cline, roo-code, aider, gemini)'
-    required: false
-    default: 'claude-code'
-  dir:
-    description: 'Workspace directory path to scan and transpile'
-    required: false
-    default: '.'
-  license_key:
-    description: 'PromptShift Polar.sh Order UUID or License Key (Required for repositories with >2 rule files)'
+    default: 'claude'
+  key:
+    description: 'Polar.sh Order ID or Pro Developer License Key (unlocks >2 files & automated CI workflows)'
     required: false
     default: ''
+  check_only:
+    description: 'Only detect drift and unmasked secrets without writing files to disk (dry-run)'
+    required: false
+    default: 'false'
+
+outputs:
+  source_ecosystem:
+    description: 'The detected source ecosystem (cursor, claude, gemini, openai)'
+  parity_score:
+    description: 'The certified AST semantic parity score (e.g. 98.5%)'
+  redacted_secrets:
+    description: 'Total number of sensitive credentials masked in RAM'
+
 runs:
   using: 'composite'
   steps:
-    - name: Setup Node.js Runtime
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - name: Execute PromptShift Deterministic AST Sync
+    - name: Run PromptShift Transpiler & Parity Verification
       shell: bash
       env:
-        PROMPTSHIFT_LICENSE_KEY: ${{ inputs.license_key }}
+        PROMPTSHIFT_LICENSE_KEY: ${{ inputs.key }}
       run: |
-        node ${{ github.action_path }}/packages/cli/bin/promptshift.js \
-          --from="${{ inputs.from }}" \
-          --to="${{ inputs.to }}" \
-          --dir="${{ inputs.dir }}" \
-          --key="${{ inputs.license_key }}"
+        EXTRA_FLAGS=""
+        if [ "${{ inputs.check_only }}" = "true" ]; then
+          EXTRA_FLAGS="--dry-run"
+        fi
+        node "${{ github.action_path }}/packages/cli/bin/promptshift.js" --to="${{ inputs.target }}" $EXTRA_FLAGS
+
+branding:
+  icon: 'arrow-right-circle'
+  color: 'cyan'
