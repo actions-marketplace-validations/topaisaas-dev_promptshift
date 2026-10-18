@@ -51,6 +51,16 @@ export class ClientVault {
   public static getConversions(): VaultConversion[] {
     if (typeof window === 'undefined') return [];
     try {
+      const explicitPlan = localStorage.getItem(ACTIVE_PLAN_KEY);
+      const session = localStorage.getItem('promptshift_auth_session');
+      // If client explicitly signed out (active plan is 'free' and no active auth session)
+      // do not leak stale conversions from past sessions
+      if (explicitPlan === 'free' && !session) {
+        if (localStorage.getItem(CONVERSIONS_KEY)) {
+          localStorage.removeItem(CONVERSIONS_KEY);
+        }
+        return [];
+      }
       const raw = localStorage.getItem(CONVERSIONS_KEY);
       if (!raw) return [];
       return JSON.parse(raw);
@@ -93,12 +103,39 @@ export class ClientVault {
   public static getInvoices(): VaultInvoice[] {
     if (typeof window === 'undefined') return [];
     try {
+      const explicitPlan = localStorage.getItem(ACTIVE_PLAN_KEY);
+      const session = localStorage.getItem('promptshift_auth_session');
+      // If client explicitly signed out (active plan is 'free' and no active auth session)
+      // do not leak stale invoices from past signed-out sessions into the clean sandbox
+      if (explicitPlan === 'free' && !session) {
+        if (localStorage.getItem(INVOICES_KEY)) {
+          localStorage.removeItem(INVOICES_KEY);
+        }
+        return [];
+      }
       const raw = localStorage.getItem(INVOICES_KEY);
       if (!raw) return [];
       return JSON.parse(raw);
     } catch {
       return [];
     }
+  }
+
+  /**
+   * Deletes a specific invoice receipt from local storage
+   */
+  public static deleteInvoice(id: string): void {
+    if (typeof window === 'undefined') return;
+    const filtered = this.getInvoices().filter((inv) => inv.id !== id);
+    localStorage.setItem(INVOICES_KEY, JSON.stringify(filtered));
+  }
+
+  /**
+   * Clears all invoices from local storage
+   */
+  public static clearInvoices(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(INVOICES_KEY);
   }
 
   /**

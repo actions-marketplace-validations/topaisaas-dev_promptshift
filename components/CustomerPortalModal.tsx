@@ -188,6 +188,18 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
     setConversions(ClientVault.getConversions());
   };
 
+  const handleDeleteInvoice = (id: string) => {
+    ClientVault.deleteInvoice(id);
+    setInvoices(ClientVault.getInvoices());
+  };
+
+  const handleClearAllInvoices = () => {
+    if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete all invoices from this local browser vault?')) {
+      ClientVault.clearInvoices();
+      setInvoices([]);
+    }
+  };
+
   const handleSaveCustomerInfo = (e: React.FormEvent) => {
     e.preventDefault();
     ClientVault.saveCustomerInfo(customerInfo);
@@ -311,7 +323,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
   const isSessionActive = Boolean(
     currentUser ||
     (activePlan && activePlan !== 'free') ||
-    (customerInfo.email && customerInfo.email.trim().length > 0)
+    (customerInfo.email && customerInfo.email.trim().length > 0) ||
+    invoices.length > 0
   );
 
   const handleSignOut = () => {
@@ -952,9 +965,21 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
 
             {/* Invoices List */}
             <div className="flex flex-col gap-2">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">
-                Official Receipts & Downloadable PDF Invoices
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Official Receipts & Downloadable PDF Invoices
+                </span>
+                {invoices.length > 0 && (
+                  <button
+                    onClick={handleClearAllInvoices}
+                    className="text-[11px] text-red-400 hover:text-red-300 hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+                    title="Remove all invoice receipts from local storage"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Clear All Invoices</span>
+                  </button>
+                )}
+              </div>
 
               {invoices.length === 0 ? (
                 <div className="p-8 text-center text-textMuted text-xs flex flex-col items-center gap-2 bg-slate-900/40 rounded-2xl border border-borderColor">
@@ -990,8 +1015,8 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <span className="text-base font-black text-white">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-black text-white mr-1">
                           {inv.currency === 'EUR' ? '€' : inv.currency === 'GBP' ? '£' : inv.currency === 'JPY' ? '¥' : '$'}
                           {inv.amount} {inv.currency || 'USD'}
                         </span>
@@ -1001,6 +1026,14 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                         >
                           <Download className="w-3.5 h-3.5" />
                           <span>Download Clean PDF</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteInvoice(inv.id)}
+                          aria-label={`Delete invoice ${inv.invoiceNumber} from vault`}
+                          title="Remove invoice from vault"
+                          className="p-2 text-textMuted hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>

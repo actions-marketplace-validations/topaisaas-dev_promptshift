@@ -271,6 +271,11 @@ async function runAllTests() {
     assert.strictEqual(b2bInv.poNumber, 'PO-2026-9941');
     assert.strictEqual(b2bInv.isReverseCharge, true);
 
+    // Verify individual invoice deletion
+    const beforeCount = ClientVault.getInvoices().length;
+    ClientVault.deleteInvoice(inv.id);
+    assert.strictEqual(ClientVault.getInvoices().length, beforeCount - 1, 'deleteInvoice must remove single invoice');
+
     console.log('✓ Test 11: Invoices, tax calculations, B2B procurement PO, and sovereign client vault verified.');
   }
 

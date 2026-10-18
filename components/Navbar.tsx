@@ -25,6 +25,7 @@ export const Navbar: React.FC = () => {
   const [authUser, setAuthUser] = useState<{ email: string } | null>(null);
   const [customerEmail, setCustomerEmail] = useState('');
   const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
+  const [hasInvoices, setHasInvoices] = useState(false);
 
   React.useEffect(() => {
     CurrencyManager.initFromIp().then((curr) => {
@@ -36,6 +37,10 @@ export const Navbar: React.FC = () => {
     if (cust?.email && !cust.email.endsWith('@promptshift.dev')) {
       setCustomerEmail(cust.email);
     }
+    const checkInvoices = () => {
+      setHasInvoices(ClientVault.getInvoices().length > 0);
+    };
+    checkInvoices();
 
     const handler = (e: Event) => {
       const customEvent = e as CustomEvent<SupportedCurrency>;
@@ -51,26 +56,30 @@ export const Navbar: React.FC = () => {
         setAuthUser(null);
         setCustomerEmail('');
       }
+      checkInvoices();
     };
 
     const planHandler = (e: Event) => {
       const custom = e as CustomEvent<UserPlanTier>;
       if (custom.detail) setActivePlan(custom.detail);
       else setActivePlan(ClientVault.getActivePlan());
+      checkInvoices();
     };
 
     window.addEventListener('promptshift_currency_changed', handler);
     window.addEventListener('promptshift_auth_changed', authHandler);
     window.addEventListener('promptshift_plan_changed', planHandler);
+    window.addEventListener('promptshift_vault_purged', checkInvoices);
 
     return () => {
       window.removeEventListener('promptshift_currency_changed', handler);
       window.removeEventListener('promptshift_auth_changed', authHandler);
       window.removeEventListener('promptshift_plan_changed', planHandler);
+      window.removeEventListener('promptshift_vault_purged', checkInvoices);
     };
   }, []);
 
-  const isSessionActive = Boolean(authUser || (activePlan && activePlan !== 'free') || customerEmail);
+  const isSessionActive = Boolean(authUser || (activePlan && activePlan !== 'free') || customerEmail || hasInvoices);
 
   const handleSignOut = () => {
     const user = AuthManager.getCurrentUser() || authUser;
@@ -87,6 +96,7 @@ export const Navbar: React.FC = () => {
     setAuthUser(null);
     setActivePlan('free');
     setCustomerEmail('');
+    setHasInvoices(false);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('promptshift_auth_changed', { detail: { email: null } }));
       window.dispatchEvent(new CustomEvent('promptshift_plan_changed', { detail: 'free' }));
