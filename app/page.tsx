@@ -220,6 +220,26 @@ export default function HomePage() {
     }
   };
 
+  // URL Query Parameters Detection (target ecosystem & demo preloading from SEO landing pages)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetParam = urlParams.get('target');
+      if (targetParam && ['claude', 'openai', 'cursor', 'gemini'].includes(targetParam)) {
+        setCurrentTargetPlatform(targetParam as 'claude' | 'openai' | 'cursor' | 'gemini');
+      }
+      const sourceParam = urlParams.get('source');
+      if (urlParams.get('demo') === '1' || urlParams.get('demo') === 'true') {
+        const matchingPreset = DEMO_PRESETS.find(
+          (p) => (!sourceParam || p.sourceKey === sourceParam) && (!targetParam || p.targetKey === targetParam)
+        ) || DEMO_PRESETS[0];
+        if (matchingPreset) {
+          handleProjectReady(matchingPreset.project, (targetParam as any) || matchingPreset.targetKey);
+        }
+      }
+    }
+  }, []);
+
   const handleTargetSwitch = async (newPlatform: 'claude' | 'openai' | 'cursor' | 'gemini') => {
     setCurrentTargetPlatform(newPlatform);
     if (!project) return;

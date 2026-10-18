@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Terminal, Copy, Shield, Cpu, Zap, CheckCircle2 } from 'lucide-react';
+import { PageTracker } from '@/components/PageTracker';
 
 export const metadata: Metadata = {
   title: 'PromptShift CLI — Instant In-Terminal AI Project Transpiler (npx promptshift)',
@@ -48,6 +49,7 @@ export default function CliPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <PageTracker path="/cli" />
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-xs text-slate-400 mb-8 font-mono">
           <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>

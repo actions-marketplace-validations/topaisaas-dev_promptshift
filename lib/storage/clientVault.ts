@@ -148,7 +148,7 @@ export class ClientVault {
 
     const newInvoice: VaultInvoice = {
       ...invoice,
-      id: `inv_${Date.now()}`,
+      id: `inv_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       invoiceNumber: invNumber,
       timestamp: new Date().toISOString(),
     };

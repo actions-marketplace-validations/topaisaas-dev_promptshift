@@ -30,9 +30,9 @@
 ---
 
 ## 4. Context Budget & Sharding Analysis
-- **Estimated Volume**: ~13,660 tokens
+- **Estimated Volume**: ~13,669 tokens
 - **Claude Target**: 6.8% of context window (Strategy: `direct_context_injection`)
-- **OpenAI Custom GPT Target**: 170.8% of instruction budget (Strategy: `vector_rag_sharding`)
+- **OpenAI Custom GPT Target**: 170.9% of instruction budget (Strategy: `vector_rag_sharding`)
 
 ---
 

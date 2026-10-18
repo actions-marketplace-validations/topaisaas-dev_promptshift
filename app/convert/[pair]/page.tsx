@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CONVERSION_PAIRS, ConversionPairData } from '@/lib/seo/conversionPairs';
+import { PageTracker } from '@/components/PageTracker';
 
 interface PageProps {
   params: Promise<{ pair: string }>;
@@ -179,6 +180,7 @@ export default async function ConversionPairPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <PageTracker path={`/convert/${data.slug}`} />
 
       <div className="w-full">
         {/* Breadcrumbs */}
@@ -210,7 +212,7 @@ export default async function ConversionPairPage({ params }: PageProps) {
           {/* Quick CTA to Converter */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href={`/?source=${data.sourceKey}&target=${data.targetKey}`}
+              href={`/?source=${data.sourceKey}&target=${data.targetKey}&demo=1`}
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-base shadow-lg shadow-cyan-500/25 transition-all transform hover:-translate-y-0.5 text-center"
             >
               🚀 Launch 1-Click Converter ({data.sourceName} → {data.targetName})
