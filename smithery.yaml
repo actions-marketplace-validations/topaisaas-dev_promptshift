@@ -1,23 +1,10 @@
-# Smithery.ai MCP Registry Manifest — PromptShift AST Transpiler & Secret Sanitizer
+# Smithery configuration file for PromptShift MCP Server
+# https://smithery.ai/docs/config
 startCommand:
   type: stdio
-  configSchema:
-    type: object
-    required: []
-    properties:
-      licenseKey:
-        type: string
-        description: "Optional Polar.sh Order ID or Pro License Key to unlock repositories with >2 rule files ($1.99 Single Pass or $5.99/mo Pro)."
-  commandFunction:
-    |-
-    (config) => ({
-      command: 'node',
-      args: [
-        'packages/cli/bin/promptshift.js',
-        '--mcp',
-        ...(config && config.licenseKey ? [`--key=${config.licenseKey}`] : [])
-      ],
-      env: {
-        PROMPTSHIFT_LICENSE_KEY: (config && config.licenseKey) ? config.licenseKey : ''
-      }
-    })
+  config:
+    command: npx
+    args:
+      - "-y"
+      - "promptshift"
+      - "--mcp"
