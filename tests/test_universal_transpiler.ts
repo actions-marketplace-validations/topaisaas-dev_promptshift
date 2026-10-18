@@ -589,7 +589,29 @@ async function runAllTests() {
     console.log('✓ Test 15: Free Public Beta, Early Adopter Pro Pass, Paid Transition & Multi-Currency zero formatting verified.');
   }
 
-  console.log('\n🎉 ALL 15 UNIVERSAL TRANSPILER INTEGRATION TESTS PASSED 100%!');
+  // --- TEST 16: Google Search Console Automation & Zero-Dependency JWT Interface ---
+  {
+    const { GoogleSearchConsoleService } = await import('../lib/seo/googleSearchConsole');
+    assert.strictEqual(typeof GoogleSearchConsoleService.submitSitemap, 'function', 'submitSitemap must exist');
+    assert.strictEqual(typeof GoogleSearchConsoleService.querySearchAnalytics, 'function', 'querySearchAnalytics must exist');
+    assert.strictEqual(typeof GoogleSearchConsoleService.requestUrlIndexing, 'function', 'requestUrlIndexing must exist');
+
+    // Without env vars, getCredentials() safely returns null without throwing
+    const creds = GoogleSearchConsoleService.getCredentials();
+    assert.strictEqual(creds, null, 'Credentials must default to null when env vars are unset');
+
+    // Attempting getAccessToken without credentials must safely throw informative error
+    try {
+      await GoogleSearchConsoleService.getAccessToken();
+      assert.fail('Should have thrown when credentials are unset');
+    } catch (err: any) {
+      assert(err.message.includes('credentials are not configured'), 'Must indicate missing credentials');
+    }
+
+    console.log('✓ Test 16: Google Search Console programmatic automation interface verified.');
+  }
+
+  console.log('\n🎉 ALL 16 UNIVERSAL TRANSPILER INTEGRATION TESTS PASSED 100%!');
 }
 
 runAllTests();

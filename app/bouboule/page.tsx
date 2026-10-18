@@ -72,6 +72,48 @@ export default function AdminDashboardPage() {
   const [filterSize, setFilterSize] = useState<'all' | 'under5' | 'sixTo15' | 'sixteenTo50' | 'over50'>('all');
   const [isFilterOpen, setIsFilterOpen] = useState(true);
 
+  // Google Search Console & SEO API Automation
+  const [seoStatus, setSeoStatus] = useState<any>(null);
+  const [seoLoading, setSeoLoading] = useState(false);
+  const [seoFeedback, setSeoFeedback] = useState<string | null>(null);
+
+  const checkSeoApi = async () => {
+    setSeoLoading(true);
+    setSeoFeedback(null);
+    try {
+      const res = await fetch('/api/seo/search-console');
+      const data = await res.json();
+      setSeoStatus(data);
+      if (data.configured) {
+        setSeoFeedback(`Connecté au compte de service : ${data.serviceAccount}`);
+      } else {
+        setSeoFeedback(data.message || 'Compte de service non configuré.');
+      }
+    } catch (e: any) {
+      setSeoFeedback(`Erreur : ${e.message}`);
+    } finally {
+      setSeoLoading(false);
+    }
+  };
+
+  const triggerSitemapSubmit = async () => {
+    setSeoLoading(true);
+    setSeoFeedback(null);
+    try {
+      const res = await fetch('/api/seo/search-console', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submit-sitemap' }),
+      });
+      const data = await res.json();
+      setSeoFeedback(data.message || (data.success ? 'Sitemap envoyé avec succès !' : data.error));
+    } catch (e: any) {
+      setSeoFeedback(`Erreur : ${e.message}`);
+    } finally {
+      setSeoLoading(false);
+    }
+  };
+
   // Check persisted admin session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -1231,6 +1273,117 @@ Try it with your project: https://promptshift.dev
                 )}
               </tbody>
             </table>
+          </div>
+        </section>
+
+        {/* Google Search Console & Automated SEO Panel */}
+        <section className="p-6 rounded-3xl bg-cardBg border border-borderColor shadow-xl flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-borderColor">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-neonCyan">
+                <Globe2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-extrabold text-white flex items-center gap-2">
+                  Google Search Console & Indexation Autonome (API)
+                  <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                    Propriété Déployée
+                  </span>
+                </h2>
+                <p className="text-xs text-textMuted mt-0.5">
+                  Vérification de propriété HTML, soumission automatisée de sitemaps et requêtes d'indexation instantanée Google.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <a
+                href="https://search.google.com/search-console"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors"
+              >
+                <span>Rouvrir Search Console</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Vector 1: Root HTML file */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono text-slate-400">Vecteur 1 : Racine</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> En ligne
+                </span>
+              </div>
+              <div className="text-xs font-mono text-cyan-300 truncate">
+                /google195fa2438b836f4f.html
+              </div>
+              <div className="text-[10px] text-textMuted">
+                Fichier de validation officiel à la racine de promptshift.dev.
+              </div>
+            </div>
+
+            {/* Vector 2: Sitemap prefix */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono text-slate-400">Vecteur 2 : Préfixe Sitemap</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> En ligne
+                </span>
+              </div>
+              <div className="text-xs font-mono text-cyan-300 truncate">
+                /sitemap.xml/google...html
+              </div>
+              <div className="text-[10px] text-textMuted">
+                Couvre l'URL-préfixe de validation si configuré sous ce chemin.
+              </div>
+            </div>
+
+            {/* Vector 3: Meta Tag */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono text-slate-400">Vecteur 3 : Balise Meta</span>
+                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Active
+                </span>
+              </div>
+              <div className="text-xs font-mono text-cyan-300 truncate">
+                &lt;meta google-site-verification&gt;
+              </div>
+              <div className="text-[10px] text-textMuted">
+                Présente dans le code HTML statique servi par Vercel Edge.
+              </div>
+            </div>
+          </div>
+
+          {/* Action triggers */}
+          <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={checkSeoApi}
+                disabled={seoLoading}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-semibold border border-slate-700 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {seoLoading ? 'Vérification...' : '🔍 Tester Connexion API Search Console'}
+              </button>
+
+              <button
+                onClick={triggerSitemapSubmit}
+                disabled={seoLoading}
+                className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-mono text-xs font-semibold border border-cyan-500/40 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                📡 Soumettre Sitemap (API)
+              </button>
+            </div>
+
+            {seoFeedback && (
+              <div className="text-xs font-mono text-slate-300 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 max-w-md truncate">
+                {seoFeedback}
+              </div>
+            )}
           </div>
         </section>
 
