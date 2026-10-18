@@ -29,10 +29,26 @@ import {
   Database,
   Eye,
   Trash2,
+  Filter,
+  SlidersHorizontal,
+  Download,
+  Search,
+  Server,
+  Cloud,
+  Cpu,
+  Activity,
+  Scale,
+  CheckCircle2,
 } from 'lucide-react';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
 import { AnalyticsAggregator } from '@/lib/analytics/analyticsAggregator';
-import { AnalyticsEvent, AnalyticsPeriod, MetricSummary } from '@/lib/analytics/analyticsTypes';
+import {
+  AnalyticsEvent,
+  AnalyticsPeriod,
+  MetricSummary,
+  TelemetryFilter,
+  EventType,
+} from '@/lib/analytics/analyticsTypes';
 
 const ADMIN_STORAGE_AUTH = 'promptshift_admin_session';
 
@@ -45,6 +61,16 @@ export default function AdminDashboardPage() {
   const [isCopiedPost, setIsCopiedPost] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
+
+  // Advanced Telemetry Filters
+  const [filterQuery, setFilterQuery] = useState('');
+  const [filterEventType, setFilterEventType] = useState<EventType | 'all'>('all');
+  const [filterSource, setFilterSource] = useState<string>('all');
+  const [filterTarget, setFilterTarget] = useState<string>('all');
+  const [filterPlan, setFilterPlan] = useState<'all' | 'free' | 'single' | 'pro' | 'team' | 'vip'>('all');
+  const [filterCountry, setFilterCountry] = useState<string>('all');
+  const [filterSize, setFilterSize] = useState<'all' | 'under5' | 'sixTo15' | 'sixteenTo50' | 'over50'>('all');
+  const [isFilterOpen, setIsFilterOpen] = useState(true);
 
   // Check persisted admin session on mount
   useEffect(() => {
@@ -94,10 +120,85 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Compute live summary & optimization tips
+  // Compile active telemetry filter
+  const telemetryFilter: TelemetryFilter = useMemo(() => ({
+    period,
+    searchQuery: filterQuery,
+    eventType: filterEventType,
+    sourcePlatform: filterSource,
+    targetPlatform: filterTarget,
+    planTier: filterPlan,
+    country: filterCountry,
+    sizeCategory: filterSize,
+  }), [period, filterQuery, filterEventType, filterSource, filterTarget, filterPlan, filterCountry, filterSize]);
+
+  // Compute live summary & optimization tips with telemetry filters applied
   const summary: MetricSummary = useMemo(() => {
-    return AnalyticsAggregator.aggregate(events, period);
+    return AnalyticsAggregator.aggregate(events, telemetryFilter);
+  }, [events, telemetryFilter]);
+
+  // Filtered events list for audit table
+  const filteredEvents = useMemo(() => {
+    return AnalyticsAggregator.filterEvents(events, telemetryFilter);
+  }, [events, telemetryFilter]);
+
+  // Filtered conversions list for audit table
+  const conversionEventsFiltered = useMemo(() => {
+    return filteredEvents.filter((e) => e.type === 'conversion_completed');
+  }, [filteredEvents]);
+
+  // Total raw events in the period
+  const periodTotalEvents = useMemo(() => {
+    return AnalyticsAggregator.filterEventsByPeriod(events, period);
   }, [events, period]);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filterQuery.trim()) count++;
+    if (filterEventType !== 'all') count++;
+    if (filterSource !== 'all') count++;
+    if (filterTarget !== 'all') count++;
+    if (filterPlan !== 'all') count++;
+    if (filterCountry !== 'all') count++;
+    if (filterSize !== 'all') count++;
+    return count;
+  }, [filterQuery, filterEventType, filterSource, filterTarget, filterPlan, filterCountry, filterSize]);
+
+  const resetFilters = () => {
+    setFilterQuery('');
+    setFilterEventType('all');
+    setFilterSource('all');
+    setFilterTarget('all');
+    setFilterPlan('all');
+    setFilterCountry('all');
+    setFilterSize('all');
+  };
+
+  const exportFilteredCsv = () => {
+    const headers = ['id', 'timestamp', 'type', 'source', 'target', 'title', 'files', 'bytes', 'parity', 'secrets', 'plan', 'country'];
+    const rows = filteredEvents.map((e) => [
+      e.id,
+      e.timestamp,
+      e.type,
+      e.sourcePlatform || '',
+      e.targetPlatform || '',
+      `"${(e.projectTitleAnon || '').replace(/"/g, '""')}"`,
+      e.fileCount || 0,
+      e.sizeBytes || 0,
+      e.parityScore || 0,
+      e.secretsCount || 0,
+      e.planTier || 'free',
+      e.country || '',
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `promptshift_telemetry_${period}_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const tips = useMemo(() => {
     return AnalyticsAggregator.generateOptimizationTips(summary);
@@ -292,6 +393,199 @@ Try it with your project: https://promptshift.dev
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
+        {/* Advanced Telemetry Filter Bar */}
+        <section className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-xl flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <SlidersHorizontal className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-sm font-bold text-white">Filtre Télémétrie Multidimensionnel</h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                    {filteredEvents.length} / {periodTotalEvents.length} événements
+                  </span>
+                  {activeFiltersCount > 0 && (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                      {activeFiltersCount} filtre{activeFiltersCount > 1 ? 's' : ''} actif{activeFiltersCount > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-textMuted mt-0.5">
+                  Filtrez les flux de données temps réel pour isoler les segments et calibrer vos décisions agiles
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={resetFilters}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-700"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Réinitialiser</span>
+                </button>
+              )}
+              <button
+                onClick={exportFilteredCsv}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 hover:text-cyan-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border border-cyan-500/30 shadow-sm"
+                title="Exporter les données filtrées au format CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Exporter CSV</span>
+              </button>
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title={isFilterOpen ? "Réduire les filtres" : "Développer les filtres"}
+              >
+                <Filter className="w-4 h-4 text-cyan-400" />
+              </button>
+            </div>
+          </div>
+
+          {isFilterOpen && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+              {/* Filter 1: Search query */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recherche Projet / ID</label>
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    value={filterQuery}
+                    onChange={(e) => setFilterQuery(e.target.value)}
+                    placeholder="Nom anonyme, ID, tech..."
+                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Filter 2: Event Type */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Type d'Événement</label>
+                <select
+                  value={filterEventType}
+                  onChange={(e) => setFilterEventType(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Tous les événements</option>
+                  <option value="conversion_completed">Conversions réussies</option>
+                  <option value="page_view">Visites de page (Page Views)</option>
+                  <option value="project_upload">Uploads de projet</option>
+                  <option value="cli_token_copied">Usage Token CLI</option>
+                  <option value="invoice_downloaded">Téléchargements Facture</option>
+                </select>
+              </div>
+
+              {/* Filter 3: Target Platform */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Écosystème Cible</label>
+                <select
+                  value={filterTarget}
+                  onChange={(e) => setFilterTarget(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Toutes les cibles</option>
+                  <option value="claude">Anthropic Claude (CLAUDE.md)</option>
+                  <option value="cursor">Cursor IDE (.cursorrules / .mdc)</option>
+                  <option value="openai">OpenAI Custom GPT</option>
+                  <option value="gemini">Google Gemini / Antigravity</option>
+                </select>
+              </div>
+
+              {/* Filter 4: Source Platform */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Écosystème Source</label>
+                <select
+                  value={filterSource}
+                  onChange={(e) => setFilterSource(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Toutes les sources</option>
+                  <option value="cursor">Cursor</option>
+                  <option value="claude">Claude</option>
+                  <option value="antigravity">Google Antigravity</option>
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </div>
+
+              {/* Filter 5: Plan Tier */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Palier de Licence / Plan</label>
+                <select
+                  value={filterPlan}
+                  onChange={(e) => setFilterPlan(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Tous les plans</option>
+                  <option value="free">Free Starter (≤ 2 fichiers)</option>
+                  <option value="single">Single Project Pass ($1.99)</option>
+                  <option value="pro">Pro Developer ($5.99/mo)</option>
+                  <option value="team">Team & Agency ($19.99/mo)</option>
+                  <option value="vip">VIP Promo / Early Adopter</option>
+                </select>
+              </div>
+
+              {/* Filter 6: Size Category */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Complexité / Fichiers</label>
+                <select
+                  value={filterSize}
+                  onChange={(e) => setFilterSize(e.target.value as any)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Toutes tailles</option>
+                  <option value="under5">Micro (≤ 2 fichiers - Gratuit)</option>
+                  <option value="sixTo15">Standard (3 à 15 fichiers)</option>
+                  <option value="sixteenTo50">Avancé (16 à 50 fichiers)</option>
+                  <option value="over50">Enterprise (&gt; 50 fichiers)</option>
+                </select>
+              </div>
+
+              {/* Filter 7: Country */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Origine Géographique</label>
+                <select
+                  value={filterCountry}
+                  onChange={(e) => setFilterCountry(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
+                >
+                  <option value="all">Tous les pays</option>
+                  <option value="FR">🇫🇷 France (FR)</option>
+                  <option value="US">🇺🇸 États-Unis (US)</option>
+                  <option value="DE">🇩🇪 Allemagne (DE)</option>
+                  <option value="GB">🇬🇧 Royaume-Uni (GB)</option>
+                  <option value="CA">🇨🇦 Canada (CA)</option>
+                  <option value="JP">🇯🇵 Japon (JP)</option>
+                </select>
+              </div>
+
+              {/* Filter Active Reset Summary */}
+              <div className="flex flex-col justify-end">
+                <div className="p-2 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                  <span className="font-mono text-[11px]">
+                    Sélection : <strong className="text-cyan-400">{filteredEvents.length}</strong> evts
+                  </span>
+                  {activeFiltersCount > 0 ? (
+                    <button
+                      onClick={resetFilters}
+                      className="text-[10px] text-amber-400 hover:underline cursor-pointer font-bold"
+                    >
+                      Effacer {activeFiltersCount} filtres
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-slate-600 font-mono">Vue globale</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* KPI Grid */}
         <section aria-label="Key Performance Indicators">
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
@@ -386,6 +680,180 @@ Try it with your project: https://promptshift.dev
               </div>
               <p className="text-[10px] text-textMuted mt-1">
                 {summary.fileCountDistribution.over50Files + summary.fileCountDistribution.sixteenTo50Files + summary.fileCountDistribution.sixTo15Files} projects &gt; 5 files
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Agile Arbitrage Decision Matrix */}
+        <section className="p-6 rounded-3xl bg-cardBg border border-cyan-500/30 shadow-2xl relative overflow-hidden flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-black flex items-center justify-center font-black shadow-neonCyan">
+                <Scale className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-black text-white">Matrice d'Arbitrage Décisionnel Agile</h2>
+                  <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Sprint Decision Matrix
+                  </span>
+                </div>
+                <p className="text-xs text-textMuted mt-0.5">
+                  Analyse des signaux réels, arbitrage des dilemmes A vs B et déclenchement d'actions agiles concrètes.
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-mono text-cyan-400 self-start md:self-auto">
+              5 Axes Stratégiques Calibrés
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-slate-800">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
+                <tr>
+                  <th className="py-3 px-4 w-[16%]">Axe / Pilier</th>
+                  <th className="py-3 px-4 w-[14%]">Métrique Observée</th>
+                  <th className="py-3 px-4 w-[20%]">Signal & Diagnostic</th>
+                  <th className="py-3 px-4 w-[22%]">Dilemme (Option A vs B)</th>
+                  <th className="py-3 px-4 w-[20%]">Arbitrage Agile & Action</th>
+                  <th className="py-3 px-4 w-[8%] text-center">Urgence</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/80 font-sans text-xs">
+                {summary.arbitrageMatrix.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-900/40 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-white align-top">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                        <span className="font-mono text-[11px] text-cyan-300">{item.pillarLabel}</span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 align-top">
+                      <div className="font-semibold text-slate-200">{item.observedMetric}</div>
+                      <div className="text-xs font-mono font-bold text-emerald-400 mt-0.5">{item.currentValue}</div>
+                    </td>
+                    <td className="py-3.5 px-4 text-textMuted text-[11px] leading-relaxed align-top">
+                      {item.diagnostic}
+                    </td>
+                    <td className="py-3.5 px-4 align-top text-[11px] space-y-1.5">
+                      <div className="p-2 rounded-lg bg-slate-950/70 border border-slate-800 text-slate-400">
+                        <strong className="text-slate-300">A:</strong> {item.tradeoffA.replace(/^Option A : /, '')}
+                      </div>
+                      <div className="p-2 rounded-lg bg-cyan-950/30 border border-cyan-500/20 text-cyan-200">
+                        <strong className="text-cyan-400">B:</strong> {item.tradeoffB.replace(/^Option B : /, '')}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 align-top text-[11px]">
+                      <div className="font-bold text-cyan-300 mb-1">{item.recommendedArbitrage}</div>
+                      <div className="p-2 rounded-lg bg-emerald-950/30 border border-emerald-500/20 text-emerald-300 text-[10px] font-mono">
+                        ⚡ <strong>Action :</strong> {item.immediateAgileAction}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 align-top text-center">
+                      <span
+                        className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full inline-block ${
+                          item.urgency === 'critical'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            : item.urgency === 'high'
+                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        }`}
+                      >
+                        {item.urgency}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Edge Infrastructure & Delivery Telemetry Panel (Cloudflare + Vercel) */}
+        <section className="p-6 rounded-3xl bg-slate-900/60 border border-borderColor shadow-xl flex flex-col gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <Cloud className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-bold text-white">Télémétrie Edge Infrastructure (Cloudflare Anycast + Vercel Analytics)</h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                    100% GRATUIT & SOUVERAIN
+                  </span>
+                </div>
+                <p className="text-xs text-textMuted mt-0.5">
+                  Surveillance des performances CDN, économie de bande passante et bots IA autorisés
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Edge Anycast 0$ Egress</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Cloudflare Cache Hit */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider">Cloudflare Cache Hit</span>
+                <Server className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-cyanGlow">{summary.edgeStats.cloudflareCacheHitRatio}%</span>
+                <span className="text-[10px] text-emerald-400 font-bold">CDN Anycast</span>
+              </div>
+              <p className="text-[10px] text-textMuted mt-1">
+                {summary.edgeStats.edgeBandwidthSavedMB} MB servis sans solliciter le serveur
+              </p>
+            </div>
+
+            {/* Card 2: AI Bot Crawlers */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider">Indexation GEO (AI Bots)</span>
+                <Cpu className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-white">{summary.edgeStats.aiBotsAllowedCount}</span>
+                <span className="text-[10px] text-emerald-300 font-mono">crawlers IA</span>
+              </div>
+              <p className="text-[10px] text-textMuted mt-1">
+                ClaudeBot, GPTBot, PerplexityBot indexant llms.txt
+              </p>
+            </div>
+
+            {/* Card 3: Vercel Serverless Runtime */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider">Vercel Serverless CPU</span>
+                <Activity className="w-4 h-4 text-purple-400" />
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-purple-300">~{summary.edgeStats.vercelAverageExecutionDurationMs}ms</span>
+                <span className="text-[10px] text-textMuted font-mono">in-RAM</span>
+              </div>
+              <p className="text-[10px] text-textMuted mt-1">
+                {summary.edgeStats.vercelServerlessInvocations} exécutions • 0$ de dépassement
+              </p>
+            </div>
+
+            {/* Card 4: Core Web Vitals */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider">Core Web Vitals</span>
+                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-emerald-400">{summary.edgeStats.coreWebVitalsLcpSec}s</span>
+                <span className="text-[10px] text-emerald-300 font-mono">LCP (Fast)</span>
+              </div>
+              <p className="text-[10px] text-textMuted mt-1">
+                INP: {summary.edgeStats.coreWebVitalsInpMs}ms • CLS: {summary.edgeStats.coreWebVitalsCls.toFixed(2)}
               </p>
             </div>
           </div>
@@ -691,8 +1159,8 @@ Try it with your project: https://promptshift.dev
                 Live stream of transpiled projects (Zero code stored • Pure anonymous telemetry)
               </p>
             </div>
-            <span className="text-xs font-mono text-textMuted">
-              {summary.recentEvents.length} conversions displayed
+            <span className="text-xs font-mono text-cyan-400">
+              {conversionEventsFiltered.length} conversion{conversionEventsFiltered.length > 1 ? 's' : ''} filtrée{conversionEventsFiltered.length > 1 ? 's' : ''}
             </span>
           </div>
 
@@ -711,14 +1179,14 @@ Try it with your project: https://promptshift.dev
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                {summary.recentEvents.length === 0 ? (
+                {conversionEventsFiltered.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-6 text-center text-textMuted">
-                      No recent conversions recorded for this period.
+                      Aucune conversion ne correspond aux critères de filtrage actifs ({period}).
                     </td>
                   </tr>
                 ) : (
-                  summary.recentEvents.map((ev) => (
+                  conversionEventsFiltered.slice(0, 50).map((ev) => (
                     <tr key={ev.id} className="hover:bg-slate-900/40 transition-colors">
                       <td className="py-2.5 px-4 text-textMuted whitespace-nowrap">
                         {new Date(ev.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - {new Date(ev.timestamp).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}

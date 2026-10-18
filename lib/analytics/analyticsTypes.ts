@@ -38,6 +38,45 @@ export interface AnalyticsEvent {
   userAgentSnippet?: string;
 }
 
+export interface EdgeDeliveryStats {
+  cloudflareCacheHitRatio: number; // e.g. 94.2%
+  edgeBandwidthSavedMB: number; // e.g. 48.6 MB
+  averageEdgeLatencyMs: number; // e.g. 18 ms
+  wafThreatsBlocked: number;
+  aiBotsAllowedCount: number; // ClaudeBot, GPTBot, PerplexityBot
+  vercelServerlessInvocations: number;
+  vercelAverageExecutionDurationMs: number;
+  coreWebVitalsLcpSec: number;
+  coreWebVitalsInpMs: number;
+  coreWebVitalsCls: number;
+}
+
+export interface ArbitrageDecisionItem {
+  id: string;
+  pillar: 'ecosystem' | 'pricing' | 'channel' | 'security' | 'infra';
+  pillarLabel: string;
+  observedMetric: string;
+  currentValue: string;
+  trend: 'positive' | 'warning' | 'neutral';
+  diagnostic: string;
+  tradeoffA: string;
+  tradeoffB: string;
+  recommendedArbitrage: string;
+  immediateAgileAction: string;
+  urgency: 'critical' | 'high' | 'medium';
+}
+
+export interface TelemetryFilter {
+  searchQuery?: string;
+  period: AnalyticsPeriod;
+  eventType?: EventType | 'all';
+  sourcePlatform?: string | 'all';
+  targetPlatform?: string | 'all';
+  planTier?: 'all' | 'free' | 'single' | 'pro' | 'team' | 'vip';
+  country?: string | 'all';
+  sizeCategory?: 'all' | 'under5' | 'sixTo15' | 'sixteenTo50' | 'over50';
+}
+
 export interface MetricSummary {
   period: AnalyticsPeriod;
   totalPageViews: number;
@@ -72,6 +111,8 @@ export interface MetricSummary {
     conversions: number;
     pageViews: number;
   }[];
+  edgeStats: EdgeDeliveryStats;
+  arbitrageMatrix: ArbitrageDecisionItem[];
 }
 
 export interface ProductOptimizationTip {

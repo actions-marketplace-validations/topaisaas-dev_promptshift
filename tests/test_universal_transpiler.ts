@@ -478,6 +478,19 @@ async function runAllTests() {
     assert.strictEqual(summaryToday.targetPlatformShare.cursor, 1);
     assert.strictEqual(summaryToday.targetPlatformShare.openai, 1);
 
+    // Verify Agile Arbitrage Matrix & Edge Telemetry
+    assert.strictEqual(summaryToday.arbitrageMatrix.length, 5, 'Must generate exactly 5 strategic arbitrage items');
+    assert(summaryToday.edgeStats.cloudflareCacheHitRatio >= 90, 'Must report Cloudflare edge cache metrics');
+    assert(summaryToday.edgeStats.coreWebVitalsLcpSec > 0, 'Must report Core Web Vitals');
+
+    // Verify multi-criteria telemetry filtering
+    const cursorFilter = AnalyticsAggregator.filterEvents(mockEvents, {
+      period: 'today',
+      targetPlatform: 'cursor',
+    });
+    assert.strictEqual(cursorFilter.length, 1);
+    assert.strictEqual(cursorFilter[0].id, '4');
+
     // Verify product tips generation
     const tips = AnalyticsAggregator.generateOptimizationTips(summaryToday);
     assert(tips.length >= 3, 'Must generate at least 3 actionable product tips');
