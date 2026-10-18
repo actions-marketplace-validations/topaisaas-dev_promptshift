@@ -152,11 +152,6 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const handlePolarCheckout = async () => {
-    if (selectedPlan === 'single' && !hasProject) {
-      setEmailError('Please upload your project in the converter first before purchasing a Single Pass.');
-      return;
-    }
-
     const emailToUse = customerEmail.trim();
     if (!emailToUse || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailToUse)) {
       setEmailError('Please enter your email so Polar can deliver your receipt and license key.');
