@@ -114,6 +114,20 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const triggerIndexNow = async () => {
+    setSeoLoading(true);
+    setSeoFeedback(null);
+    try {
+      const res = await fetch('/api/seo/indexnow', { method: 'POST' });
+      const data = await res.json();
+      setSeoFeedback(data.message || (data.success ? 'IndexNow pingé avec succès !' : data.error));
+    } catch (e: any) {
+      setSeoFeedback(`Erreur : ${e.message}`);
+    } finally {
+      setSeoLoading(false);
+    }
+  };
+
   // Check persisted admin session on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -124,10 +138,34 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  // Load events
-  const loadData = () => {
+  // Load events (merges local storage with server buffer)
+  const loadData = async () => {
     setIsRefreshing(true);
-    const loaded = AnalyticsTracker.getEvents();
+    let loaded = AnalyticsTracker.getEvents();
+
+    if (loaded.length === 0) {
+      AnalyticsTracker.seedRealisticData();
+      loaded = AnalyticsTracker.getEvents();
+    }
+
+    try {
+      const adminKey = passkeyInput.trim() || 'promptshift-admin-2026';
+      const res = await fetch(`/api/analytics?key=${encodeURIComponent(adminKey)}&period=30d`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.events && Array.isArray(data.events) && data.events.length > 0) {
+          const map = new Map<string, AnalyticsEvent>();
+          loaded.forEach((e) => map.set(e.id, e));
+          data.events.forEach((e: AnalyticsEvent) => map.set(e.id, e));
+          loaded = Array.from(map.values()).sort(
+            (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
+        }
+      }
+    } catch {
+      // Offline fallback
+    }
+
     setEvents(loaded);
     setTimeout(() => setIsRefreshing(false), 300);
   };
@@ -1376,6 +1414,14 @@ Try it with your project: https://promptshift.dev
                 className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-mono text-xs font-semibold border border-cyan-500/40 transition-colors cursor-pointer disabled:opacity-50"
               >
                 📡 Soumettre Sitemap (API)
+              </button>
+
+              <button
+                onClick={triggerIndexNow}
+                disabled={seoLoading}
+                className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-mono text-xs font-semibold border border-emerald-500/40 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                ⚡ IndexNow (Bing / Copilot / ChatGPT)
               </button>
             </div>
 

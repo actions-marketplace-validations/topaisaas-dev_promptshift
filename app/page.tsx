@@ -508,6 +508,15 @@ export default function HomePage() {
                   onFreeDownload={handleFreeDownload}
                   activeFile={selectedFileItem || undefined}
                   onExportRequest={() => {
+                    AnalyticsTracker.track({
+                      type: 'checkout_initiated',
+                      planTier: isFreeBeta ? 'pro' : 'single',
+                      currency,
+                      fileCount: totalFileCount,
+                      sourcePlatform: (project?.metadata?.source_platform as any) || 'gemini',
+                      targetPlatform: currentTargetPlatform,
+                      projectTitleAnon: project?.metadata?.title || 'project',
+                    });
                     setPaymentPlan(isFreeBeta ? 'pro' : 'single');
                     setIsPaymentModalOpen(true);
                   }}

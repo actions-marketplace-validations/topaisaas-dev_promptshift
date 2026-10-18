@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
       summary,
       tips,
       serverEventsCount: serverEventsBuffer.length,
+      events: serverEventsBuffer,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
