@@ -109,7 +109,7 @@ export class PolarService {
     payload: string,
     headers: { id?: string | null; timestamp?: string | null; signature?: string | null }
   ): boolean {
-    const secret = process.env.POLAR_WEBHOOK_SECRET || 'whsec_lG1GRADrrY+H9oalyd2MMWbceMpLgJi6KZj3MCtd2Hk=';
+    const secret = process.env.POLAR_WEBHOOK_SECRET || 'whsec_7fmNASsusuiVMgPloGjwg3jptlgtPVno7abJKKp2VHg=';
     if (!secret || !headers.id || !headers.timestamp || !headers.signature) {
       return false;
     }
