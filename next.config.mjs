@@ -5,6 +5,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml/google195fa2438b836f4f.html',
+        destination: '/google195fa2438b836f4f.html',
+      },
+    ];
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

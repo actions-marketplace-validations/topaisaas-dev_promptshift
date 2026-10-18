@@ -75,6 +75,9 @@ export const metadata: Metadata = {
     images: ['/assets/official_logo.jpg'],
   },
   category: 'technology',
+  verification: {
+    google: 'google195fa2438b836f4f',
+  },
 };
 
 const jsonLdSchemas = [

@@ -16,11 +16,25 @@ import type { NextRequest } from 'next/server';
 export const IS_MAINTENANCE_MODE = false;
 
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // 0. Google Search Console Site Verification (serves both root and prefix /sitemap.xml/)
+  if (
+    pathname === '/google195fa2438b836f4f.html' ||
+    pathname === '/sitemap.xml/google195fa2438b836f4f.html'
+  ) {
+    return new NextResponse('google-site-verification: google195fa2438b836f4f.html\n', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  }
+
   if (!IS_MAINTENANCE_MODE) {
     return NextResponse.next();
   }
-
-  const { pathname } = request.nextUrl;
 
   // 1. Whitelist static files and Next.js internal assets
   if (
