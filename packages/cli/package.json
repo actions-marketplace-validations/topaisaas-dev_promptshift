@@ -1,6 +1,6 @@
 {
   "name": "promptshift",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Deterministic AST Transpiler & STDIO MCP Server for AI Coding Agents (Cursor, Claude Code, Windsurf, Copilot, Cline, Aider)",
   "main": "bin/promptshift.js",
   "bin": {

@@ -298,11 +298,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             <button
               onClick={() => {
                 if (activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip') return;
-                if (!hasProject) {
-                  onStartFree();
-                } else {
-                  onSelectPlan('single');
-                }
+                onSelectPlan('single');
               }}
               disabled={activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'}
               className={`w-full mt-6 py-2.5 rounded-xl font-bold text-xs transition-all ${
@@ -313,8 +309,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             >
               {activePlan === 'pro' || activePlan === 'team' || activePlan === 'vip'
                 ? 'Included in Subscription'
-                : !hasProject
-                ? `Upload Project First (${singlePrice.formatted})`
                 : `Get Single Pass (${singlePrice.formatted})`}
             </button>
           </div>

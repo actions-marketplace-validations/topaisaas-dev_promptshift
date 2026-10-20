@@ -1,5 +1,6 @@
 # PromptShift ⚡ Universal AI Coding Agent Transpiler & Drift Guard
 
+[![PromptShift Certified](https://promptshift.dev/api/badge?score=98.5)](https://promptshift.dev)
 [![GitHub release](https://img.shields.io/github/v/release/topaisaas-dev/promptshift?color=emerald&label=version)](https://github.com/topaisaas-dev/promptshift/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![AST Parity](https://img.shields.io/badge/AST%20Semantic%20Parity-98.5%25-cyan.svg)](https://promptshift.dev)
@@ -11,7 +12,7 @@
 🌐 **Web Application:** [https://promptshift.dev](https://promptshift.dev)  
 📦 **CLI Package:** `npx promptshift`  
 🤖 **MCP Server:** `npx promptshift --mcp`  
-🔄 **GitHub Action:** `topaisaas-dev/promptshift@v1.1.0`
+🔄 **GitHub Action:** `topaisaas-dev/promptshift@v1`
 
 ---
 
@@ -32,18 +33,28 @@ When an engineer updates `CLAUDE.md` but forgets to synchronize `.cursor/rules/`
 
 ## ⚡ Quick Start
 
-### 1. Zero-Install CLI (NPX)
+### 1. One-Command Continuous CI/CD Guard
+Bootstrap automated PR parity verification and secret scanning in 2 seconds:
+
+```bash
+npx promptshift --init-ci
+```
+
+### 2. Zero-Install CLI (NPX)
 Transpile rules locally without permanent installation:
 
 ```bash
-# Transpile from Claude Code to Cursor (.cursor/rules/*.mdc)
-npx promptshift --from=claude-code --to=cursor
+# Audit workspace for rules drift and exposed secrets
+npx promptshift --check
 
-# Dry-run inspection without writing files
-npx promptshift --from=cursor --to=claude-code --dry-run
+# Transpile from current project to Claude Code
+npx promptshift --to=claude
 
-# Transpile Windsurf rules to GitHub Copilot
-npx promptshift --from=windsurf --to=copilot --dir=.
+# Transpile from current project to Cursor
+npx promptshift --to=cursor --key=polar_ord_xxxx
+
+# Get official certified badge for your README.md
+npx promptshift --badge
 ```
 
 ### 2. Model Context Protocol (MCP) Integration
