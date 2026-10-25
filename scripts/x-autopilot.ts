@@ -123,6 +123,52 @@ function generateOAuthHeader(
   return `OAuth ${headerParams}`;
 }
 
+function parseAndFormatXApiError(status: number, body: any, contextLabel: string): string {
+  const title = body?.title || 'Unknown Error';
+  const detail = body?.detail || JSON.stringify(body);
+  const type = body?.type || '';
+
+  let actionableAdvice = '';
+
+  if (status === 402 || detail.includes('credits depleted') || type.includes('credits-depleted')) {
+    actionableAdvice = `
+--------------------------------------------------------------------------------
+🚨 ROOT CAUSE: X Developer Account balance is $0.00 (Pay-Per-Use Tier).
+🔧 3-MINUTE REMEDY:
+  1. Open X Developer Console: https://developer.x.com
+  2. Navigate to "Billing" or "Projects & Apps" -> "Billing / Credits".
+  3. Attach an eligible credit/debit card to claim your $20 in FREE starter promotional credits!
+  4. ($20 promotional credits covers >1,300 text-only posts, which powers over a full year of posts).
+  5. Once active, re-run the GitHub Actions workflow.
+--------------------------------------------------------------------------------`;
+  } else if (status === 403 && (detail.includes('oauth1') || detail.includes('permissions') || type.includes('oauth1-permissions'))) {
+    actionableAdvice = `
+--------------------------------------------------------------------------------
+🚨 ROOT CAUSE: Access Token lacks write permissions (OAuth 1.0a "Read-only" token).
+🔧 2-MINUTE REMEDY:
+  1. Open https://developer.x.com -> Projects & Apps -> Select the App.
+  2. Under "User authentication settings", confirm permissions are set to "Read and write".
+  3. Go to the "Keys and Tokens" tab.
+  4. Next to "Access Token and Secret", click "Regenerate" (crucial: existing tokens don't upgrade automatically!).
+  5. Update GitHub Secrets: ${contextLabel === 'booster' ? 'X_3K_ACCESS_TOKEN and X_3K_ACCESS_TOKEN_SECRET' : 'X_ACCESS_TOKEN and X_ACCESS_TOKEN_SECRET'}.
+--------------------------------------------------------------------------------`;
+  } else if (status === 401) {
+    actionableAdvice = `
+--------------------------------------------------------------------------------
+🚨 ROOT CAUSE: Invalid or revoked API credentials.
+🔧 REMEDY: Verify that API Key, API Secret, Access Token, and Access Token Secret match the same application.
+--------------------------------------------------------------------------------`;
+  } else if (status === 429) {
+    actionableAdvice = `
+--------------------------------------------------------------------------------
+🚨 ROOT CAUSE: Rate Limit Reached (429).
+🔧 REMEDY: The Twitter API 15-minute rate limit window will reset automatically.
+--------------------------------------------------------------------------------`;
+  }
+
+  return `[${contextLabel.toUpperCase()}] X API HTTP ${status} (${title}): ${detail}\n${actionableAdvice}`;
+}
+
 async function postTweet(
   text: string,
   replyToId?: string,
@@ -165,7 +211,8 @@ async function postTweet(
   const body: any = await response.json();
 
   if (!response.ok) {
-    throw new Error(`X API Error (${response.status}): ${JSON.stringify(body)}`);
+    const formattedError = parseAndFormatXApiError(response.status, body, 'main');
+    throw new Error(formattedError);
   }
 
   return { id: body.data?.id };
@@ -190,6 +237,10 @@ async function retweet(
       headers: { 'Authorization': meAuth, 'User-Agent': 'PromptShift-3K-Booster/1.0' }
     });
     const meData: any = await meRes.json();
+    if (!meRes.ok) {
+      const formattedError = parseAndFormatXApiError(meRes.status, meData, 'booster-user-lookup');
+      throw new Error(formattedError);
+    }
     targetUserId = meData.data?.id;
   }
 
@@ -219,7 +270,8 @@ async function retweet(
 
   const body: any = await response.json();
   if (!response.ok) {
-    throw new Error(`X Retweet API Error (${response.status}): ${JSON.stringify(body)}`);
+    const formattedError = parseAndFormatXApiError(response.status, body, 'booster');
+    throw new Error(formattedError);
   }
 
   return { retweeted: Boolean(body.data?.retweeted) };
