@@ -1,0 +1,266 @@
+/**
+ * PromptShift X (Twitter) Autonomous DevRel Publisher
+ * 100% Zero-Dependency Node.js engine for X API v2
+ * Uses native crypto for OAuth 1.0a HMAC-SHA1 signatures.
+ * 
+ * Flow:
+ * 1. Posts technical proof-of-work main tweet (high organic reach, zero external links).
+ * 2. Immediately posts thread auto-reply with promptshift.dev & Polar checkout link.
+ * 3. Persists run state to data/x_posts_history.json to prevent duplicate broadcasts.
+ */
+
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import { X_POSTS_CATALOG, type XPost } from './x-posts-catalog.ts';
+import { pathToFileURL } from 'url';
+
+const HISTORY_FILE = path.join(process.cwd(), 'data', 'x_posts_history.json');
+
+interface PostHistoryEntry {
+  id: string;
+  category: string;
+  postedAt: string;
+  mainTweetId: string;
+  replyTweetId?: string;
+  simulated?: boolean;
+}
+
+interface PostsHistory {
+  lastRun: string;
+  totalBroadcasts: number;
+  history: PostHistoryEntry[];
+}
+
+function loadHistory(): PostsHistory {
+  if (fs.existsSync(HISTORY_FILE)) {
+    try {
+      const content = fs.readFileSync(HISTORY_FILE, 'utf-8');
+      return JSON.parse(content);
+    } catch {
+      // Fallback on parse failure
+    }
+  }
+  return {
+    lastRun: new Date().toISOString(),
+    totalBroadcasts: 0,
+    history: []
+  };
+}
+
+function saveHistory(history: PostsHistory): void {
+  const dir = path.dirname(HISTORY_FILE);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2), 'utf-8');
+}
+
+/**
+ * Generates OAuth 1.0a HMAC-SHA1 Authorization Header (RFC 5849)
+ * Zero external dependency implementation.
+ */
+function generateOAuthHeader(
+  method: string,
+  url: string,
+  consumerKey: string,
+  consumerSecret: string,
+  accessToken: string,
+  accessTokenSecret: string
+): string {
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key: consumerKey,
+    oauth_nonce: crypto.randomBytes(16).toString('hex'),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_token: accessToken,
+    oauth_version: '1.0'
+  };
+
+  // Sort parameters alphabetically by key
+  const paramKeys = Object.keys(oauthParams).sort();
+  const paramString = paramKeys
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(oauthParams[k])}`)
+    .join('&');
+
+  const baseString = [
+    method.toUpperCase(),
+    encodeURIComponent(url),
+    encodeURIComponent(paramString)
+  ].join('&');
+
+  const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(accessTokenSecret)}`;
+  const signature = crypto
+    .createHmac('sha1', signingKey)
+    .update(baseString)
+    .digest('base64');
+
+  oauthParams.oauth_signature = signature;
+
+  const headerParams = Object.keys(oauthParams)
+    .sort()
+    .map(k => `${encodeURIComponent(k)}="${encodeURIComponent(oauthParams[k])}"`)
+    .join(', ');
+
+  return `OAuth ${headerParams}`;
+}
+
+async function postTweet(
+  text: string,
+  replyToId?: string,
+  creds?: {
+    consumerKey: string;
+    consumerSecret: string;
+    accessToken: string;
+    accessTokenSecret: string;
+  }
+): Promise<{ id: string }> {
+  if (!creds) {
+    throw new Error('Missing X API credentials');
+  }
+
+  const endpoint = 'https://api.twitter.com/2/tweets';
+  const authHeader = generateOAuthHeader(
+    'POST',
+    endpoint,
+    creds.consumerKey,
+    creds.consumerSecret,
+    creds.accessToken,
+    creds.accessTokenSecret
+  );
+
+  const payload: any = { text };
+  if (replyToId) {
+    payload.reply = { in_reply_to_tweet_id: replyToId };
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': authHeader,
+      'Content-Type': 'application/json',
+      'User-Agent': 'PromptShift-DevRel-Autopilot/1.0'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const body: any = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`X API Error (${response.status}): ${JSON.stringify(body)}`);
+  }
+
+  return { id: body.data?.id };
+}
+
+export async function runAutopilot(): Promise<void> {
+  const args = process.argv.slice(2);
+  const isForceDryRun = args.includes('--dry-run') || process.env.DRY_RUN === 'true';
+
+  const consumerKey = process.env.X_API_KEY || process.env.TWITTER_API_KEY || '';
+  const consumerSecret = process.env.X_API_SECRET || process.env.TWITTER_API_SECRET || '';
+  const accessToken = process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN || '';
+  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET || process.env.TWITTER_ACCESS_TOKEN_SECRET || '';
+
+  const hasCredentials = Boolean(consumerKey && consumerSecret && accessToken && accessTokenSecret);
+  const isDryRun = isForceDryRun || !hasCredentials;
+
+  console.log('====================================================');
+  console.log('🤖 PromptShift X (Twitter) Autonomous DevRel Engine');
+  console.log(`Execution Mode: ${isDryRun ? '🧪 DRY-RUN (Simulation)' : '🚀 LIVE BROADCAST'}`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log('====================================================\n');
+
+  if (!hasCredentials && !isForceDryRun) {
+    console.warn('⚠️ Missing X API credentials in environment.');
+    console.warn('Required variables: X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET');
+    console.warn('Falling back to safe DRY-RUN verification.\n');
+  }
+
+  // 1. Load History & Filter Available Posts
+  const history = loadHistory();
+  const postedIds = new Set(history.history.map(h => h.id));
+
+  let candidate = X_POSTS_CATALOG.find(p => !postedIds.has(p.id));
+
+  // If all posts have been broadcast, restart rotation cycle
+  if (!candidate) {
+    console.log('🔄 All 12 posts have completed a full broadcasting cycle. Resetting rotation.');
+    history.history = [];
+    candidate = X_POSTS_CATALOG[0];
+  }
+
+  console.log(`Selected Post ID: [${candidate.id}] (Category: ${candidate.category})`);
+  console.log('----------------------------------------------------');
+  console.log('📝 MAIN TWEET (Reach Maximized, Zero URLs):');
+  console.log(candidate.mainTweet);
+  console.log(`Length: ${candidate.mainTweet.length} / 280 chars`);
+  console.log('----------------------------------------------------');
+  console.log('💬 AUTO-REPLY TWEET (Conversion Link & Polar Pass):');
+  console.log(candidate.replyTweet);
+  console.log(`Length: ${candidate.replyTweet.length} / 280 chars`);
+  console.log('----------------------------------------------------\n');
+
+  if (isDryRun) {
+    console.log('🧪 [DRY-RUN] Simulating broadcast without calling external API.');
+    const mockMainId = 'mock_main_' + Date.now();
+    const mockReplyId = 'mock_reply_' + Date.now();
+
+    history.lastRun = new Date().toISOString();
+    history.totalBroadcasts += 1;
+    history.history.push({
+      id: candidate.id,
+      category: candidate.category,
+      postedAt: new Date().toISOString(),
+      mainTweetId: mockMainId,
+      replyTweetId: mockReplyId,
+      simulated: true
+    });
+
+    saveHistory(history);
+    console.log(`✅ Simulation successfully recorded in data/x_posts_history.json`);
+    return;
+  }
+
+  // 2. Live Broadcast
+  try {
+    const creds = { consumerKey, consumerSecret, accessToken, accessTokenSecret };
+    
+    console.log('📡 Step 1: Broadcasting main tweet...');
+    const mainResult = await postTweet(candidate.mainTweet, undefined, creds);
+    console.log(`✅ Main tweet published! ID: ${mainResult.id}`);
+
+    // Wait 2 seconds before replying to avoid race conditions
+    await new Promise(r => setTimeout(r, 2000));
+
+    console.log('📡 Step 2: Broadcasting auto-reply thread...');
+    const replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+    console.log(`✅ Auto-reply published! ID: ${replyResult.id}`);
+
+    history.lastRun = new Date().toISOString();
+    history.totalBroadcasts += 1;
+    history.history.push({
+      id: candidate.id,
+      category: candidate.category,
+      postedAt: new Date().toISOString(),
+      mainTweetId: mainResult.id,
+      replyTweetId: replyResult.id,
+      simulated: false
+    });
+
+    saveHistory(history);
+    console.log('\n🎉 Autonomous DevRel dispatch completed with 100% success.');
+  } catch (error: any) {
+    console.error('❌ Broadcast failed:', error.message);
+    process.exit(1);
+  }
+}
+
+// Direct execution check
+const isDirectRun = Boolean(process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href);
+if (isDirectRun || process.argv.length > 1) {
+  runAutopilot().catch(err => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}
