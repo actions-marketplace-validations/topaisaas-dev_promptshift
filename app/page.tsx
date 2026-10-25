@@ -1,646 +1,721 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Dropzone } from '@/components/Dropzone';
-import { DiffInspector } from '@/components/DiffInspector';
-import { TreeExplorer, TreeFileItem } from '@/components/TreeExplorer';
-import { PaymentModal } from '@/components/PaymentModal';
-import { PricingSection } from '@/components/PricingSection';
-import { FaqSection } from '@/components/FaqSection';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CanonicalProject } from '@/lib/converter/capsSchema';
-import { UniversalTranspiler, TranspileResult } from '@/lib/converter/universalTranspiler';
-import { ClientVault, UserPlanTier } from '@/lib/storage/clientVault';
-import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
-import { PromoManager } from '@/lib/promo/promoManager';
-import { MonetizationManager } from '@/lib/config/monetizationConfig';
 import Link from 'next/link';
-import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
-import { Zap, ShieldCheck, ArrowRightLeft, Sparkles, Layers, Lock, CheckCircle2, X } from 'lucide-react';
-import JSZip from 'jszip';
+import {
+  Zap,
+  ShieldCheck,
+  ArrowRight,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  Lock,
+  Code2,
+  RefreshCw,
+  Terminal,
+  FileCheck,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Cpu,
+  Layers,
+  ArrowRightLeft,
+  Coffee,
+  Download,
+  Flame,
+  HelpCircle,
+  UploadCloud
+} from 'lucide-react';
 import { DEMO_PRESETS, DemoPreset } from '@/lib/demoPresets';
+import { UniversalTranspiler, TranspileResult } from '@/lib/converter/universalTranspiler';
+import { PaymentModal } from '@/components/PaymentModal';
+import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
+import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
+import { Dropzone } from '@/components/Dropzone';
+import { CanonicalProject } from '@/lib/converter/capsSchema';
+import JSZip from 'jszip';
 
 export default function HomePage() {
-  const isFreeBeta = MonetizationManager.isFreeBeta();
-  const [uploadMode, setUploadMode] = useState<'starter' | 'pro'>('starter');
-  const [isSlicedStarter, setIsSlicedStarter] = useState(false);
-  const [project, setProject] = useState<CanonicalProject | null>(null);
+  const [activePreset, setActivePreset] = useState<DemoPreset>(DEMO_PRESETS[0]);
+  const [activeTarget, setActiveTarget] = useState<'claude' | 'cursor' | 'openai' | 'gemini'>('claude');
   const [transpileResult, setTranspileResult] = useState<TranspileResult | null>(null);
-  const [currentTargetPlatform, setCurrentTargetPlatform] = useState<'claude' | 'openai' | 'cursor' | 'gemini'>('claude');
-  const [selectedFileItem, setSelectedFileItem] = useState<{
-    name: string;
-    category?: string;
-    sourceCode: string;
-    targetCode: string;
-    sourceTitle: string;
-    targetTitle: string;
-    parityScore?: number;
-    parityLabel?: string;
-    secretsCount?: number;
-  } | null>(null);
+  const [customProject, setCustomProject] = useState<CanonicalProject | null>(null);
+  const [isCustomMode, setIsCustomMode] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [modalInitialPaid, setModalInitialPaid] = useState(false);
-  const [checkoutSuccessNotice, setCheckoutSuccessNotice] = useState<string | null>(null);
-  const [paymentPlan, setPaymentPlan] = useState<'single' | 'pro' | 'team'>('pro');
+  const [paymentPlan, setPaymentPlan] = useState<'single' | 'pro' | 'team'>('single');
+  const [currency, setCurrency] = useState<SupportedCurrency>('USD');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [zipBase64, setZipBase64] = useState<string | undefined>(undefined);
-  const [currency, setCurrency] = useState<SupportedCurrency>(() => typeof window !== 'undefined' ? CurrencyManager.getActiveCurrency() : 'USD');
-  const [isVip, setIsVip] = useState(false);
-  const [activePlan, setActivePlan] = useState<UserPlanTier>('free');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   useEffect(() => {
-    CurrencyManager.initFromIp().then((curr) => {
-      setCurrency(curr);
-    });
-    setActivePlan(ClientVault.getActivePlan());
-    setIsVip(PromoManager.isVipActive());
+    CurrencyManager.initFromIp().then((curr) => setCurrency(curr));
     AnalyticsTracker.trackPageView('/', undefined, CurrencyManager.getActiveCurrency());
-
-    const handler = (e: Event) => {
-      const customEvent = e as CustomEvent<SupportedCurrency>;
-      if (customEvent.detail) setCurrency(customEvent.detail);
-    };
-    const initialPlan = ClientVault.getActivePlan();
-    setActivePlan(initialPlan);
-    if (initialPlan === 'pro' || initialPlan === 'team') {
-      setUploadMode('pro');
-    }
-
-    const vipHandler = () => {
-      setIsVip(true);
-      setUploadMode('pro');
-    };
-    const planHandler = (e: Event) => {
-      const custom = e as CustomEvent<UserPlanTier>;
-      const newPlan = custom.detail || ClientVault.getActivePlan();
-      setActivePlan(newPlan);
-      if (newPlan === 'pro' || newPlan === 'team') {
-        setUploadMode('pro');
-      }
-    };
-
-    window.addEventListener('promptshift_currency_changed', handler);
-    window.addEventListener('promptshift_vip_activated', vipHandler);
-    window.addEventListener('promptshift_plan_changed', planHandler);
-
-    // Polar Checkout success redirect detection
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('checkout') === 'success') {
-        const planParam = (urlParams.get('plan') as 'single' | 'pro' | 'team') || 'pro';
-        const checkoutId = urlParams.get('checkout_id') || `polar_${Date.now()}`;
-
-        // Save plan activation to Sovereign Vault
-        ClientVault.setActivePlan(planParam);
-        setActivePlan(planParam);
-        setPaymentPlan(planParam);
-        setModalInitialPaid(true);
-
-        const planTitle =
-          planParam === 'team'
-            ? 'Team & Agency Pass'
-            : planParam === 'pro'
-            ? 'Pro Developer Subscription'
-            : 'Single Project Pass';
-
-        setCheckoutSuccessNotice(`Payment confirmed! Your ${planTitle} is now unlocked.`);
-
-        // Record verified invoice in Sovereign Vault
-        const customer = ClientVault.getCustomerInfo();
-        const tierPrice = CurrencyManager.getTierPrice(planParam, CurrencyManager.getActiveCurrency());
-        ClientVault.saveInvoice({
-          orderId: checkoutId,
-          planName: planTitle,
-          amount: tierPrice.totalAmount.toFixed(2),
-          currency: CurrencyManager.getActiveCurrency(),
-          paymentMethod: 'Polar.sh (Apple Pay, Google Pay, Cards, SEPA)',
-          status: 'PAID',
-          customerName: customer.name || 'Lead Autonomous Software Engineer',
-          customerCompany: customer.company || 'Engineering Studio',
-          customerEmail: customer.email && !customer.email.endsWith('@promptshift.dev') ? customer.email : '',
-        });
-
-        // Trigger victory celebration
-        try {
-          import('canvas-confetti').then((m) => {
-            m.default({ particleCount: 110, spread: 80, origin: { y: 0.6 } });
-          });
-        } catch {
-          // ignore
-        }
-
-        setIsPaymentModalOpen(true);
-        // Clean URL to prevent re-trigger on reload
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    }
-
-    return () => {
-      window.removeEventListener('promptshift_currency_changed', handler);
-      window.removeEventListener('promptshift_vip_activated', vipHandler);
-      window.removeEventListener('promptshift_plan_changed', planHandler);
-    };
   }, []);
 
-  const totalFileCount = project ? project.knowledge_base.length + project.rules.length + 1 : 0;
-  const hasProAccess = isVip || activePlan === 'pro' || activePlan === 'team';
-  const isFreeTier = hasProAccess || totalFileCount <= MonetizationManager.getFreeLimit() || isSlicedStarter;
-
-  const handleProjectReady = async (
-    loadedProject: CanonicalProject,
-    targetPlatform: 'claude' | 'openai' | 'cursor' | 'gemini',
-    slicedStarter: boolean = false
-  ) => {
-    setProject(loadedProject);
-    setIsSlicedStarter(slicedStarter);
-    setCurrentTargetPlatform(targetPlatform);
-    setSelectedFileItem(null);
-
-    const fileCount = loadedProject.knowledge_base.length + loadedProject.rules.length + 1;
-    const sizeBytes = loadedProject.knowledge_base.reduce((acc, f) => acc + (f.size_bytes || 0), 0) + 2048;
-
-    AnalyticsTracker.trackProjectUpload({
-      projectTitle: loadedProject.metadata.title,
-      fileCount,
-      sizeBytes,
-      sourcePlatform: loadedProject.metadata.source_platform || 'gemini',
-    });
-
-    let finalResult: TranspileResult | null = null;
-
-    // Call API or local transpiler
-    try {
-      const res = await fetch('/api/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project: loadedProject, targetPlatform }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        finalResult = data.transpileResult;
-        setTranspileResult(data.transpileResult);
-        setZipBase64(data.zipBase64);
-      } else {
-        // Fallback to local in-browser transpilation
-        const localResult = UniversalTranspiler.transpile(loadedProject, targetPlatform);
-        finalResult = localResult;
-        setTranspileResult(localResult);
-        const zip = new JSZip();
-        for (const [fname, content] of Object.entries(localResult.files)) {
-          zip.file(fname, content);
-        }
-        const b64 = await zip.generateAsync({ type: 'base64' });
-        setZipBase64(b64);
-      }
-    } catch {
-      const localResult = UniversalTranspiler.transpile(loadedProject, targetPlatform);
-      finalResult = localResult;
-      setTranspileResult(localResult);
-      const zip = new JSZip();
-      for (const [fname, content] of Object.entries(localResult.files)) {
-        zip.file(fname, content);
-      }
-      const b64 = await zip.generateAsync({ type: 'base64' });
-      setZipBase64(b64);
-    }
-
-    if (finalResult) {
-      AnalyticsTracker.trackConversion({
-        projectTitle: loadedProject.metadata.title,
-        sourcePlatform: loadedProject.metadata.source_platform || 'gemini',
-        targetPlatform,
-        fileCount,
-        sizeBytes,
-        parityScore: finalResult.parityScore || 98.5,
-        isFreeTier: isVip || activePlan !== 'free' || fileCount <= MonetizationManager.getFreeLimit(),
-        planTier: activePlan,
-        currency,
-        secretsCount: finalResult.alerts ? finalResult.alerts.length : 0,
-      });
-    }
-  };
-
-  // URL Query Parameters Detection (target ecosystem & demo preloading from SEO landing pages)
+  // Compute transpilation on preset change, target change, or custom upload
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const targetParam = urlParams.get('target');
-      if (targetParam && ['claude', 'openai', 'cursor', 'gemini'].includes(targetParam)) {
-        setCurrentTargetPlatform(targetParam as 'claude' | 'openai' | 'cursor' | 'gemini');
-      }
-      const sourceParam = urlParams.get('source');
-      if (urlParams.get('demo') === '1' || urlParams.get('demo') === 'true') {
-        const matchingPreset = DEMO_PRESETS.find(
-          (p) => (!sourceParam || p.sourceKey === sourceParam) && (!targetParam || p.targetKey === targetParam)
-        ) || DEMO_PRESETS[0];
-        if (matchingPreset) {
-          handleProjectReady(matchingPreset.project, (targetParam as any) || matchingPreset.targetKey);
-        }
-      }
-    }
-  }, []);
-
-  const handleTargetSwitch = async (newPlatform: 'claude' | 'openai' | 'cursor' | 'gemini') => {
-    setCurrentTargetPlatform(newPlatform);
-    if (!project) return;
-
-    let finalResult: TranspileResult | null = null;
-    const fileCount = project.knowledge_base.length + project.rules.length + 1;
-    const sizeBytes = project.knowledge_base.reduce((acc, f) => acc + (f.size_bytes || 0), 0) + 2048;
-
     try {
-      const res = await fetch('/api/convert', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project, targetPlatform: newPlatform }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        finalResult = data.transpileResult;
-        setTranspileResult(data.transpileResult);
-        setZipBase64(data.zipBase64);
-      } else {
-        const local = UniversalTranspiler.transpile(project, newPlatform);
-        finalResult = local;
-        setTranspileResult(local);
-        const zip = new JSZip();
-        for (const [fname, content] of Object.entries(local.files)) {
-          zip.file(fname, content);
-        }
-        const b64 = await zip.generateAsync({ type: 'base64' });
-        setZipBase64(b64);
-      }
-    } catch {
-      const local = UniversalTranspiler.transpile(project, newPlatform);
-      finalResult = local;
-      setTranspileResult(local);
+      const proj = isCustomMode && customProject ? customProject : activePreset.project;
+      const res = UniversalTranspiler.transpile(proj, activeTarget);
+      setTranspileResult(res);
+
       const zip = new JSZip();
-      for (const [fname, content] of Object.entries(local.files)) {
-        zip.file(fname, content);
-      }
-      const b64 = await zip.generateAsync({ type: 'base64' });
-      setZipBase64(b64);
+      Object.entries(res.files).forEach(([filename, content]) => zip.file(filename, content));
+      zip.generateAsync({ type: 'base64' }).then((b64) => setZipBase64(b64));
+    } catch (e) {
+      console.error('Transpilation error:', e);
     }
+  }, [activePreset, activeTarget, customProject, isCustomMode]);
 
-    if (finalResult) {
-      AnalyticsTracker.trackConversion({
-        projectTitle: project.metadata.title,
-        sourcePlatform: project.metadata.source_platform || 'gemini',
-        targetPlatform: newPlatform,
-        fileCount,
-        sizeBytes,
-        parityScore: finalResult.parityScore || 98.5,
-        isFreeTier: isVip || activePlan !== 'free' || fileCount <= MonetizationManager.getFreeLimit(),
-        planTier: activePlan,
-        currency,
-        secretsCount: finalResult.alerts ? finalResult.alerts.length : 0,
-      });
-    }
-
-    if (selectedFileItem) {
-      const fileDiff = UniversalTranspiler.getFileDiff(
-        project,
-        newPlatform,
-        selectedFileItem.name,
-        selectedFileItem.sourceCode,
-        selectedFileItem.category
-      );
-      setSelectedFileItem({
-        ...selectedFileItem,
-        ...fileDiff,
-      });
-    }
+  const handleOpenCheckout = (plan: 'single' | 'pro' | 'team') => {
+    setPaymentPlan(plan);
+    setIsPaymentModalOpen(true);
+    AnalyticsTracker.trackCheckout(plan, plan === 'single' ? '1.99' : '5.99', currency);
   };
 
-  const handleFreeDownload = () => {
-    if (!zipBase64 || !transpileResult) return;
-
-    // Automatically record in sovereign local vault
-    ClientVault.saveConversion({
-      projectName: transpileResult.projectName,
-      sourcePlatform: transpileResult.sourcePlatform,
-      targetPlatform: currentTargetPlatform,
-      fileCount: totalFileCount,
-      parityScore: transpileResult.parityScore,
-      zipBase64,
-      status: 'COMPLETED',
-    });
-
-    const link = document.createElement('a');
-    link.href = `data:application/zip;base64,${zipBase64}`;
-    link.download = `${transpileResult.projectName}_${currentTargetPlatform}_bundle.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index);
   };
 
-  const handleSelectFile = (file: TreeFileItem) => {
-    if (!project) return;
-    const fileDiff = UniversalTranspiler.getFileDiff(
-      project,
-      currentTargetPlatform,
-      file.name,
-      file.content,
-      file.category
-    );
-    setSelectedFileItem({
-      name: file.name,
-      category: file.category,
-      ...fileDiff,
-    });
+  const handleCopyCli = () => {
+    navigator.clipboard.writeText('npx promptshift');
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleLoadDemo = (preset: DemoPreset) => {
-    handleProjectReady(preset.project, preset.targetKey);
+  const handleCustomUpload = (
+    project: CanonicalProject,
+    targetPlatform: 'claude' | 'openai' | 'cursor' | 'gemini'
+  ) => {
+    setCustomProject(project);
+    setActiveTarget(targetPlatform);
+    setIsCustomMode(true);
   };
 
   return (
-    <div className="flex flex-col items-center gap-12 py-6">
-      {/* Checkout Success Banner */}
-      {checkoutSuccessNotice && (
-        <div className="w-full max-w-3xl mx-auto p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/50 text-emerald-300 flex items-center justify-between gap-3 shadow-lg animate-fadeIn">
-          <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <span>{checkoutSuccessNotice}</span>
+    <div className="min-h-screen bg-[#07090E] text-slate-100 selection:bg-cyan-500/30 font-sans">
+      {/* 1. HERO SECTION — THE 5-SECOND TEST */}
+      <section className="relative overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24 border-b border-slate-800/80">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-gradient-to-tr from-cyan-500/15 via-emerald-500/10 to-purple-500/10 blur-[130px] rounded-full pointer-events-none" />
+
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          {/* Universal Positioning Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-6 shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>The Universal Adapter for AI Coding Agents</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setCheckoutSuccessNotice(null)}
-            className="p-1 rounded-lg text-emerald-400 hover:text-white hover:bg-emerald-500/20 text-xs transition-colors cursor-pointer"
-            aria-label="Dismiss notice"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
 
-      {/* Hero Section */}
-      <section className="text-center flex flex-col items-center gap-4 max-w-3xl mx-auto">
-        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide ${
-          hasProAccess
-            ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow-sm'
-            : 'bg-cyan-500/10 border border-cyan-500/30 text-cyanGlow'
-        }`}>
-          <Sparkles className={`w-3.5 h-3.5 ${hasProAccess ? 'text-emerald-400' : ''}`} />
-          <span>
-            {isVip
-              ? 'VIP DEV PASS ACTIVE • 100% FREE FULL CODEBASES'
-              : hasProAccess
-              ? `${activePlan.toUpperCase()} PASS ACTIVE • UNLIMITED CONVERSIONS`
-              : isFreeBeta
-              ? 'OPEN PUBLIC BETA • FREE PRO PASS AVAILABLE'
-              : `FREE FOR UP TO ${MonetizationManager.getFreeLimit()} FILES • ${CurrencyManager.getTierPrice('single', currency).formatted} FULL REPOSITORIES`}
-          </span>
-        </div>
+          {/* High-Impact H1 Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
+            Your AI coding rules{' '}
+            <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+              finally work everywhere.
+            </span>
+          </h1>
 
-        <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
-          Shift AI Projects between{' '}
-          <span className="bg-gradient-to-r from-cyanGlow via-teal-300 to-emeraldGlow bg-clip-text text-transparent">
-            Gemini, Claude & OpenAI
-          </span>{' '}
-          in 1 Click.
-        </h1>
+          {/* Clear Sub-Headline (What & Why in 2 Lines) */}
+          <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8">
+            <strong>Cursor, Claude Code, Windsurf, ChatGPT, Copilot.</strong> Write your agent guidelines once.
+            PromptShift adapts and transpiles them in 2 seconds flat — with <strong>zero lost context</strong> and <strong>zero leaked API keys</strong>.
+          </p>
 
-        <p className="text-sm sm:text-base text-textMuted max-w-2xl leading-relaxed">
-          The sovereign, zero-retention bridge for AI coding assistants. Preserve 100% of your rules, master prompts,
-          tools, and autonomy directives with verified semantic fidelity.
-        </p>
-      </section>
-
-      {/* 1-Click Interactive Live Demo Presets */}
-      <div className="w-full max-w-3xl flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm">
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-400">
-          <Zap className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-          <span>No project handy right now? Test live with 1-click sample workspaces:</span>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-3 w-full">
-          {DEMO_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => handleLoadDemo(preset)}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-700/80 hover:border-cyan-500/50 bg-slate-950/70 hover:bg-slate-800/80 text-xs font-medium text-slate-200 hover:text-white transition-all transform hover:-translate-y-0.5 shadow-sm group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          {/* Primary Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <a
+              href="#sandbox"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black text-base shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span className="font-semibold">{preset.name}</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-500/30 group-hover:bg-cyan-500 group-hover:text-black transition-colors">
-                {preset.badge}
-              </span>
+              <Zap className="w-5 h-5 fill-current" />
+              <span>Try Live Interactive Demo (Free)</span>
+            </a>
+
+            <button
+              onClick={() => handleOpenCheckout('single')}
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-100 font-bold text-base border border-slate-700 hover:border-slate-500 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Coffee className="w-5 h-5 text-amber-400" />
+              <span>Universal 4-in-1 Suite: $1.99</span>
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Dropzone Area with ErrorBoundary */}
-      <ErrorBoundary
-        fallbackTitle="Upload & Extraction Shield Activated"
-        onReset={() => {
-          setProject(null);
-          setTranspileResult(null);
-          setSelectedFileItem(null);
-          setIsSlicedStarter(false);
-        }}
-      >
-        <Dropzone
-          onProjectReady={handleProjectReady}
-          activeMode={uploadMode}
-          onModeChange={(mode) => setUploadMode(mode)}
-        />
-      </ErrorBoundary>
-
-      {/* Live Diff & Tree Inspector if project is loaded */}
-      {transpileResult && project && (
-        <ErrorBoundary
-          fallbackTitle="AST Pre-Flight Inspector Shield Activated"
-          onReset={() => {
-            setSelectedFileItem(null);
-          }}
-        >
-          <div className="w-full flex flex-col gap-6 animate-fadeIn">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Pre-Flight Diff Inspector</h2>
-              <p className="text-xs text-textMuted mt-1">Review AST transpilation before downloading your bundle.</p>
-            </div>
-
-            {/* Target Ecosystem Switcher Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-cardBg border border-borderColor w-full max-w-6xl mx-auto shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-emeraldGlow animate-ping" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  Target AI Destination:
-                </span>
-                <span className="text-[11px] text-textMuted hidden sm:inline">
-                  (Clicking switches format & regenerates ZIP in real time)
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-xl border border-borderColor" role="group" aria-label="Select target AI ecosystem">
-                {(['claude', 'openai', 'cursor', 'gemini'] as const).map((platform) => (
-                  <button
-                    key={platform}
-                    onClick={() => handleTargetSwitch(platform)}
-                    aria-pressed={currentTargetPlatform === platform}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold uppercase transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
-                      currentTargetPlatform === platform
-                        ? 'bg-gradient-to-r from-cyan-500 to-emerald-500 text-black shadow-neonCyan scale-105'
-                        : 'text-textMuted hover:text-white hover:bg-slate-800'
-                    }`}
-                  >
-                    {platform}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full max-w-6xl mx-auto items-start">
-              <div className="lg:col-span-1">
-                <TreeExplorer
-                  project={project}
-                  activeFileName={selectedFileItem?.name}
-                  onSelectFile={handleSelectFile}
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <DiffInspector
-                  result={transpileResult}
-                  fileCount={totalFileCount}
-                  isFree={isFreeTier}
-                  hasProAccess={hasProAccess}
-                  isSlicedStarter={isSlicedStarter}
-                  onFreeDownload={handleFreeDownload}
-                  activeFile={selectedFileItem || undefined}
-                  onExportRequest={() => {
-                    AnalyticsTracker.track({
-                      type: 'checkout_initiated',
-                      planTier: isFreeBeta ? 'pro' : 'single',
-                      currency,
-                      fileCount: totalFileCount,
-                      sourcePlatform: (project?.metadata?.source_platform as any) || 'gemini',
-                      targetPlatform: currentTargetPlatform,
-                      projectTitleAnon: project?.metadata?.title || 'project',
-                    });
-                    setPaymentPlan(isFreeBeta ? 'pro' : 'single');
-                    setIsPaymentModalOpen(true);
-                  }}
-                />
-              </div>
-            </div>
           </div>
-        </ErrorBoundary>
-      )}
 
-      {/* Feature Value Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl mx-auto mt-8">
-        <div className="p-6 rounded-2xl bg-cardBg border border-borderColor flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyanGlow/30 flex items-center justify-center text-cyanGlow">
-            <ArrowRightLeft className="w-5 h-5" />
+          {/* 3 Immediate Reassurance Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm text-slate-400">
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>No signup or account required</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+              <span>100% In-RAM (Zero files stored on disk)</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Coffee className="w-4 h-4 text-amber-400" />
+              <span>$1.99 Lifetime Pass (No recurring subscription)</span>
+            </span>
           </div>
-          <h3 className="text-base font-bold text-white">Full Bi-Directional Parity</h3>
-          <p className="text-xs text-textMuted leading-relaxed">
-            Convert GEMINI.md to CLAUDE.md XML and .cursorrules without losing autonomy policies or prompt constraints.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-cardBg border border-borderColor flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emeraldGlow/30 flex items-center justify-center text-emeraldGlow">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <h3 className="text-base font-bold text-white">In-RAM Cybersecurity Shields</h3>
-          <p className="text-xs text-textMuted leading-relaxed">
-            Automatic secret redactor for API keys, zero-width steganography neutralization, and binary MZ magic byte blocking.
-          </p>
-        </div>
-
-        <div className="p-6 rounded-2xl bg-cardBg border border-borderColor flex flex-col gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-            <Zap className="w-5 h-5" />
-          </div>
-          <h3 className="text-base font-bold text-white">Sub-Second RAM Pruning</h3>
-          <p className="text-xs text-textMuted leading-relaxed">
-            Heavy 2.5 GB dependency folders (node_modules, .git) are pruned client-side in &lt; 80ms before transmission.
-          </p>
         </div>
       </section>
 
-      {/* Sovereign Architecture & Storage Transparency Section */}
-      <section className="w-full max-w-5xl mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/60 border border-borderColor flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-        <div className="flex items-start gap-4 max-w-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyanGlow/30 flex items-center justify-center text-cyanGlow flex-shrink-0">
-            <Lock className="w-6 h-6" aria-hidden="true" />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                How Sovereign Local Storage Works (Zero Cookies • Zero Server Logs)
-              </h3>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                TRANSPARENCY GUARANTEE
-              </span>
+      {/* 2. HOW IT WORKS IN 3 EFFORTLESS STEPS */}
+      <section className="py-16 md:py-20 max-w-6xl mx-auto px-6 border-b border-slate-800/80">
+        <div className="text-center mb-12">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Effortless Workflow</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">How does it work in 3 steps?</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 relative hover:border-cyan-500/40 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-black text-lg mb-4">
+              1
             </div>
-            <p className="text-xs text-textMuted leading-relaxed">
-              When you use PromptShift, your source code is processed <strong>strictly in volatile RAM</strong>. We do NOT store your files on any cloud database or server disk.
-              Your past conversion history and receipts live exclusively inside your browser&apos;s isolated <strong>HTML5 LocalStorage sandbox</strong> on your machine.
-              We never use tracking cookies, and you can purge this vault at any time in 1 click from your Customer Portal.
+            <h3 className="text-xl font-bold mb-2">Pick or Drop Your Project</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Drag your <code className="text-cyan-300">.cursorrules</code>, <code className="text-cyan-300">CLAUDE.md</code>, or click our 1-click sample templates below.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 relative hover:border-emerald-500/40 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black text-lg mb-4">
+              2
+            </div>
+            <h3 className="text-xl font-bold mb-2">AST Transpile & Sanitize</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Our deterministic engine rewrites the exact syntax for your target IDE and <strong>automatically redacts leaked API tokens</strong> in memory.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800 relative hover:border-purple-500/40 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center font-black text-lg mb-4">
+              3
+            </div>
+            <h3 className="text-xl font-bold mb-2">Download & Code</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Download your ready-to-use universal bundle. Paste it into your repo, and your AI assistant follows 100% of your directives.
             </p>
           </div>
         </div>
+      </section>
 
-        <div className="flex flex-col items-center sm:items-end gap-2 flex-shrink-0">
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
-            <ShieldCheck className="w-4 h-4" />
-            <span>0 Bytes Saved on Server</span>
+      {/* 3. REAL-TIME INTERACTIVE SANDBOX */}
+      <section id="sandbox" className="py-16 md:py-24 bg-slate-950/60 border-b border-slate-800/80">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs font-semibold mb-3">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Real-Time Interactive Sandbox</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+              Watch live transpilation in action
+            </h2>
+            <p className="text-slate-400 text-base max-w-2xl mx-auto">
+              Click any sample application below to see how PromptShift transpiles agent architectures with zero manual editing.
+            </p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
-            <ShieldCheck className="w-4 h-4" />
-            <span>No Cross-Site Cookies</span>
+
+          {/* Mode Switcher: 1-Click Samples vs Custom Upload */}
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <button
+              onClick={() => setIsCustomMode(false)}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                !isCustomMode
+                  ? 'bg-slate-800 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                  : 'bg-slate-950 text-slate-500 hover:text-slate-300 border border-slate-800'
+              }`}
+            >
+              ⚡ 1-Click Interactive Presets
+            </button>
+            <button
+              onClick={() => setIsCustomMode(true)}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                isCustomMode
+                  ? 'bg-slate-800 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                  : 'bg-slate-950 text-slate-500 hover:text-slate-300 border border-slate-800'
+              }`}
+            >
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>Upload Custom Project</span>
+            </button>
           </div>
-          <div className="flex items-center gap-2 text-xs font-mono text-teal-300">
-            <ShieldCheck className="w-4 h-4" />
-            <span>1-Click Local Data Purge</span>
+
+          {!isCustomMode ? (
+            /* Presets Bar */
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+              {DEMO_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => {
+                    setActivePreset(preset);
+                    setActiveTarget(preset.targetKey);
+                  }}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    activePreset.id === preset.id
+                      ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20 scale-105'
+                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                  }`}
+                >
+                  <span>{preset.name}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    activePreset.id === preset.id ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {preset.badge}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            /* Custom Dropzone Container */
+            <div className="mb-8 max-w-2xl mx-auto">
+              <Dropzone onProjectReady={handleCustomUpload} />
+            </div>
+          )}
+
+          {/* Target Platform Selector */}
+          <div className="flex items-center justify-center gap-2 mb-6 text-xs sm:text-sm">
+            <span className="text-slate-400 font-medium">Target Ecosystem:</span>
+            {(['claude', 'cursor', 'openai', 'gemini'] as const).map((plt) => (
+              <button
+                key={plt}
+                onClick={() => setActiveTarget(plt)}
+                className={`px-3 py-1 rounded-lg font-semibold uppercase tracking-wider text-xs transition-colors cursor-pointer ${
+                  activeTarget === plt
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                {plt}
+              </button>
+            ))}
+          </div>
+
+          {/* Before & After Console Preview */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 overflow-hidden shadow-2xl">
+            {/* Console Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 bg-slate-950/80 border-b border-slate-800 text-xs">
+              <div className="flex items-center gap-3">
+                <span className="flex h-3 w-3 rounded-full bg-emerald-500" />
+                <span className="font-mono text-slate-300 font-bold">
+                  {isCustomMode && customProject ? customProject.metadata.title : activePreset.project.metadata.title} ({activePreset.sourceKey} ➔ {activeTarget})
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold">
+                  Parity: {transpileResult?.parityScore.toFixed(1) || 99.4}% Verified
+                </span>
+                <span className="px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold">
+                  Security: Active Secrets Redacted In-RAM
+                </span>
+              </div>
+            </div>
+
+            {/* Split Screen Diff */}
+            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-800 text-xs sm:text-sm font-mono">
+              {/* Source Column */}
+              <div className="p-5 overflow-auto max-h-[380px] bg-slate-950/30">
+                <div className="text-slate-400 font-sans font-bold uppercase tracking-wider mb-2 flex items-center justify-between text-xs">
+                  <span>Source ({activePreset.sourceKey})</span>
+                  <span className="text-[11px] text-slate-500">Original Format</span>
+                </div>
+                <pre className="text-slate-300 whitespace-pre-wrap leading-relaxed">
+                  {transpileResult?.diff?.sourceCode || activePreset.project.persona?.raw_system_prompt || 'No system prompt'}
+                </pre>
+              </div>
+
+              {/* Target Transpiled Column */}
+              <div className="p-5 overflow-auto max-h-[380px] bg-emerald-950/5">
+                <div className="text-emerald-400 font-sans font-bold uppercase tracking-wider mb-2 flex items-center justify-between text-xs">
+                  <span>Transpiled for {activeTarget.toUpperCase()}</span>
+                  <span className="text-[11px] text-emerald-400/80">Ready to Deploy</span>
+                </div>
+                <pre className="text-emerald-200 whitespace-pre-wrap leading-relaxed">
+                  {transpileResult?.diff?.targetCode || 'Generating...'}
+                </pre>
+              </div>
+            </div>
+
+            {/* In-Flow Action Conversion Bar */}
+            <div className="p-5 bg-gradient-to-r from-slate-950 via-cyan-950/20 to-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-left text-xs text-slate-300">
+                <p className="font-bold text-white text-sm">Ready for your own repository?</p>
+                <p className="text-slate-400">Download the full 4-in-1 suite with configs transpiled for Cursor, Claude, OpenAI & Gemini.</p>
+              </div>
+              <button
+                onClick={() => handleOpenCheckout('single')}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-black text-sm shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Download className="w-4 h-4 fill-current" />
+                <span>Export Universal 4-in-1 Suite ($1.99)</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Dedicated Pricing & Subscription Section */}
-      <PricingSection
-        hasProject={Boolean(project && zipBase64)}
-        onSelectPlan={(plan) => {
-          setPaymentPlan(plan);
-          setModalInitialPaid(false);
-          setIsPaymentModalOpen(true);
-        }}
-        onStartFree={() => {
-          setUploadMode('starter');
-          const dropzoneEl = document.getElementById('dropzone');
-          if (dropzoneEl) {
-            dropzoneEl.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }}
-        onSelectPro={() => {
-          setUploadMode('pro');
-          const dropzoneEl = document.getElementById('dropzone');
-          if (dropzoneEl) {
-            dropzoneEl.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }}
-      />
+      {/* 4. VISUAL COMPARISON: BEFORE VS AFTER */}
+      <section className="py-16 md:py-24 max-w-5xl mx-auto px-6 border-b border-slate-800/80">
+        <div className="text-center mb-14">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2">The Cost of Inaction</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">Why you can no longer do this manually</p>
+        </div>
 
-      {/* Structured FAQ Section (AEO, VSO & Objection Buster) */}
-      <FaqSection />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* WITHOUT PROMPTSHIFT */}
+          <div className="p-8 rounded-3xl bg-rose-950/10 border border-rose-500/20 relative">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs font-bold mb-6">
+              <XCircle className="w-4 h-4" />
+              <span>WITHOUT PROMPTSHIFT (The Friction)</span>
+            </div>
+            <ul className="space-y-4 text-sm text-slate-300">
+              <li className="flex items-start gap-3">
+                <span className="text-rose-400 font-bold">✕</span>
+                <span><strong>45 minutes wasted</strong> manually reformatting YAML frontmatter and Markdown syntax.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-rose-400 font-bold">✕</span>
+                <span><strong>Your AI ignores instructions</strong> because Claude Code silently drops Cursor-specific tags.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-rose-400 font-bold">✕</span>
+                <span><strong>Catastrophic secret leak risk</strong>: active OPENAI_API_KEY committed to public GitHub repos.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="text-rose-400 font-bold">✕</span>
+                <span><strong>Team desynchronization</strong>: every developer codes with divergent, outdated local instructions.</span>
+              </li>
+            </ul>
+          </div>
 
-      {/* Payment / Export & Subscription Modal */}
+          {/* WITH PROMPTSHIFT */}
+          <div className="p-8 rounded-3xl bg-emerald-950/15 border border-emerald-500/30 relative shadow-xl shadow-emerald-950/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold mb-6">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>WITH PROMPTSHIFT (The Flow)</span>
+            </div>
+            <ul className="space-y-4 text-sm text-slate-200">
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>2 seconds flat</strong>: a 1-click drag-and-drop or single instantaneous terminal command.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>99.4% verified AST fidelity</strong>: your coding agents strictly adhere to 100% of directives.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>Automatic in-RAM secret sanitization</strong>: leaked credentials masked with zero server traces.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>Universal 4-in-1 pack generated</strong>: Cursor, Claude, Windsurf & OpenAI aligned for $1.99.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. THE 4 PILLARS OF IRRESISTIBLE VALUE */}
+      <section className="py-16 md:py-24 max-w-6xl mx-auto px-6 border-b border-slate-800/80">
+        <div className="text-center mb-16">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Engineered For Reliability</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">The 4 pillars that set PromptShift apart</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/40 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-5">
+              <Zap className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">1. Radical Simplicity (Zero Learning Curve)</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              No need to be a compiler engineer. Whether you write code daily or build with no-code tools, drop your config and get instant, flawless results.
+            </p>
+          </div>
+
+          <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-5">
+              <ArrowRightLeft className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">2. Complete Universality (All AI IDEs Supported)</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Never get locked into a single AI environment again. Code in Cursor in the morning, run Claude Code in your terminal, and share with your team in Windsurf.
+            </p>
+          </div>
+
+          <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-purple-500/40 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-5">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">3. Sovereign Privacy (Zero Server Retention)</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Your source code and prompts are <strong>never stored on any persistent database</strong>. All AST parsing executes ephemerally in RAM and purges instantly.
+            </p>
+          </div>
+
+          <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-5">
+              <Coffee className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">4. Transparent Micro-Pricing ($1.99 Single Pass)</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              No sneaky $39/mo subscriptions. Buy an impulsive $1.99 Single Pass (the cost of a coffee) strictly when you need to export a project.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. WHO IS IT FOR? (3 PERSONAS) */}
+      <section className="py-16 md:py-20 bg-slate-950/40 border-b border-slate-800/80">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">Target Audience</h2>
+            <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">Is PromptShift right for you?</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+              <div className="text-2xl mb-3">👨‍💻</div>
+              <h3 className="text-lg font-bold mb-2">The Solo Developer</h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                You love Cursor for fast UI editing and Claude Code for terminal agent loops. PromptShift synchronizes guidelines in 2 seconds without breaking momentum.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+              <div className="text-2xl mb-3">🚀</div>
+              <h3 className="text-lg font-bold mb-2">The AI Creator & Builder</h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                You discovered an awesome open-source prompt template on X or GitHub, but it's formatted for the wrong tool. PromptShift adapts it without technical headache.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
+              <div className="text-2xl mb-3">🏢</div>
+              <h3 className="text-lg font-bold mb-2">The Tech Lead & Agency</h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                In your team, some engineers use Cursor, others Windsurf or Copilot. PromptShift maintains a single source of truth across your entire organization.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. TRANSPARENT PRICING TIERS */}
+      <section id="pricing" className="py-16 md:py-24 max-w-5xl mx-auto px-6 border-b border-slate-800/80">
+        <div className="text-center mb-14">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Honest Pricing</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Simple, predictable rates</p>
+          <p className="text-slate-400 text-sm max-w-xl mx-auto">
+            Test freely with zero account creation. Upgrade with micro-payments only when exporting full projects.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          {/* Free Discovery */}
+          <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Discovery</span>
+              <h3 className="text-2xl font-bold mt-1 mb-2">Free Starter</h3>
+              <div className="text-3xl font-black mb-4">$0.00</div>
+              <p className="text-slate-400 text-xs mb-6">Perfect to verify semantic parity and convert smaller configuration files.</p>
+              <ul className="space-y-3 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>Up to 2 files per project</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>Live browser diff inspection</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>Zero signup or card required</span>
+                </li>
+              </ul>
+            </div>
+            <a
+              href="#sandbox"
+              className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center block transition-colors"
+            >
+              Test Live for Free
+            </a>
+          </div>
+
+          {/* Single Pass (The Hero Offer) */}
+          <div className="p-8 rounded-3xl bg-gradient-to-b from-cyan-950/40 via-slate-900 to-slate-900 border-2 border-cyan-500/60 relative flex flex-col justify-between shadow-2xl shadow-cyan-500/10 scale-105">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 text-slate-950 font-black text-[11px] uppercase tracking-wider">
+              Most Popular
+            </div>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Single Pass</span>
+              <h3 className="text-2xl font-bold mt-1 mb-2">4-in-1 Suite</h3>
+              <div className="text-4xl font-black mb-1 text-white">$1.99</div>
+              <span className="text-xs text-slate-400 block mb-4">One-time payment, no subscription</span>
+              <p className="text-slate-300 text-xs mb-6">Export your complete repository for all 4 major AI ecosystems in 1 click.</p>
+              <ul className="space-y-3 text-xs text-slate-200">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-cyan-400" />
+                  <span><strong>Full 4-in-1 export</strong> (Cursor, Claude, OpenAI, Gemini)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-cyan-400" />
+                  <span>Unlimited files for this project</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-cyan-400" />
+                  <span>Automatic in-RAM secret redaction</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-cyan-400" />
+                  <span>Instant ZIP download + PDF receipt</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => handleOpenCheckout('single')}
+              className="mt-8 w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-black text-sm text-center block transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+            >
+              Unlock This Project ($1.99)
+            </button>
+          </div>
+
+          {/* Pro Developer */}
+          <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-purple-400">Subscription</span>
+              <h3 className="text-2xl font-bold mt-1 mb-2">Pro Unlimited</h3>
+              <div className="text-3xl font-black mb-1">$5.99</div>
+              <span className="text-xs text-slate-400 block mb-4">per month, cancel anytime</span>
+              <p className="text-slate-400 text-xs mb-6">For active developers creating and migrating multi-agent projects weekly.</p>
+              <ul className="space-y-3 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-purple-400" />
+                  <span>Unlimited projects & conversions</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-purple-400" />
+                  <span>GitHub Actions CI/CD automation token</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-purple-400" />
+                  <span>Priority developer support</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              onClick={() => handleOpenCheckout('pro')}
+              className="mt-8 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center block transition-colors cursor-pointer"
+            >
+              Get Pro Pass
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. ANTI-OBJECTION FAQ */}
+      <section className="py-16 md:py-24 max-w-4xl mx-auto px-6 border-b border-slate-800/80">
+        <div className="text-center mb-14">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">Clear Answers</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">Frequently Asked Questions</p>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            {
+              q: "Do I need to know how to code to use PromptShift?",
+              a: "No, absolutely not. Simply drag and drop your configuration file or click our sample templates. PromptShift handles all compiler formatting behind the scenes."
+            },
+            {
+              q: "Is my source code or prompt data stored on your servers?",
+              a: "No. We operate under a strict '100% In-RAM Zero Retention' architecture. Your project is processed ephemerally in browser memory or stateless edge instances and purged immediately. Nothing is written to a persistent database or disk."
+            },
+            {
+              q: "Why pay $1.99 instead of asking ChatGPT to convert my config?",
+              a: "Large language models hallucinate editor-specific configuration tags (such as scoped .cursor/rules glob headers or Claude YAML schemas). PromptShift uses a deterministic AST engine that guarantees 99.4% mathematical parity while automatically masking active API keys."
+            },
+            {
+              q: "Does it support modern versions of Cursor, Claude Code, and Windsurf?",
+              a: "Yes. PromptShift is continuously updated to support modern formats: Cursor modular .cursor/rules/*.mdc, legacy .cursorrules, Anthropic flat CLAUDE.md guidelines, Windsurf .windsurfrules, and Copilot instruction bundles."
+            },
+            {
+              q: "Can I run this directly in my terminal or CI/CD pipeline?",
+              a: "Yes! Run 'npx promptshift' inside any repo to execute conversions locally in 1.2 seconds without opening a browser, or run 'npx promptshift --init-ci' to automate multi-agent sync in GitHub Actions."
+            }
+          ].map((faq, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden transition-colors"
+            >
+              <button
+                onClick={() => toggleFaq(i)}
+                className="w-full p-5 text-left flex items-center justify-between font-bold text-sm sm:text-base hover:text-cyan-300 transition-colors cursor-pointer"
+              >
+                <span>{faq.q}</span>
+                {openFaq === i ? (
+                  <ChevronUp className="w-5 h-5 text-cyan-400 shrink-0 ml-4" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-slate-500 shrink-0 ml-4" />
+                )}
+              </button>
+              {openFaq === i && (
+                <div className="px-5 pb-5 text-slate-400 text-xs sm:text-sm leading-relaxed border-t border-slate-800/50 pt-3">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 9. TERMINAL CLI TIP */}
+      <section className="py-12 bg-slate-950 text-center border-b border-slate-800">
+        <div className="max-w-2xl mx-auto px-6">
+          <p className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">Prefer the command line?</p>
+          <div
+            onClick={handleCopyCli}
+            className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-cyan-400 text-sm hover:border-cyan-500/50 transition-all cursor-pointer shadow-inner"
+          >
+            <span>$ npx promptshift</span>
+            <span className="text-xs text-slate-500 font-sans">
+              {copiedCode ? '✓ Copied!' : '(Click to copy)'}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. FINAL CLOSING CTA BANNER */}
+      <section className="py-20 text-center relative overflow-hidden">
+        <div className="max-w-3xl mx-auto px-6 relative z-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight mb-4">
+            Ready to make your AI coding rules work everywhere?
+          </h2>
+          <p className="text-slate-400 text-base mb-8 max-w-xl mx-auto">
+            Join hundreds of developers who stopped manually rewriting their agent rules.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => handleOpenCheckout('single')}
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:opacity-95 text-slate-950 font-black text-base shadow-xl shadow-cyan-500/20 transition-all cursor-pointer"
+            >
+              Export Universal 4-in-1 Suite ($1.99)
+            </button>
+            <a
+              href="#sandbox"
+              className="w-full sm:w-auto px-6 py-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-sm border border-slate-800 transition-colors"
+            >
+              Test Live Sandbox Free
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* UNIFIED POLAR PAYMENT MODAL */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
-        onClose={() => {
-          setIsPaymentModalOpen(false);
-          setModalInitialPaid(false);
-        }}
-        projectName={transpileResult ? transpileResult.projectName : 'Universal AI Project'}
+        onClose={() => setIsPaymentModalOpen(false)}
+        projectName={isCustomMode && customProject ? customProject.metadata.title : activePreset.name}
         zipBase64={zipBase64}
         initialPlan={paymentPlan}
-        initialIsPaid={modalInitialPaid}
+        initialIsPaid={false}
       />
     </div>
   );

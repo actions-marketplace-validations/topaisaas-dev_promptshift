@@ -160,13 +160,13 @@ export const Navbar: React.FC = () => {
             <span>Security & DPA</span>
           </button>
 
-          <Link
-            href="/discover"
+          <a
+            href="/#sandbox"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Mode Découverte</span>
-          </Link>
+            <span>Live Demo</span>
+          </a>
 
           <Link
             href="/cli"

@@ -106,9 +106,9 @@ export default function AdminDashboardPage() {
         body: JSON.stringify({ action: 'submit-sitemap' }),
       });
       const data = await res.json();
-      setSeoFeedback(data.message || (data.success ? 'Sitemap envoyé avec succès !' : data.error));
+      setSeoFeedback(data.message || (data.success ? 'Sitemap submitted successfully!' : data.error));
     } catch (e: any) {
-      setSeoFeedback(`Erreur : ${e.message}`);
+      setSeoFeedback(`Error: ${e.message}`);
     } finally {
       setSeoLoading(false);
     }
@@ -120,9 +120,9 @@ export default function AdminDashboardPage() {
     try {
       const res = await fetch('/api/seo/indexnow', { method: 'POST' });
       const data = await res.json();
-      setSeoFeedback(data.message || (data.success ? 'IndexNow pingé avec succès !' : data.error));
+      setSeoFeedback(data.message || (data.success ? 'IndexNow pinged successfully!' : data.error));
     } catch (e: any) {
-      setSeoFeedback(`Erreur : ${e.message}`);
+      setSeoFeedback(`Error: ${e.message}`);
     } finally {
       setSeoLoading(false);
     }
@@ -488,12 +488,12 @@ Try it with your project: https://promptshift.dev
                   </span>
                   {activeFiltersCount > 0 && (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                      {activeFiltersCount} filtre{activeFiltersCount > 1 ? 's' : ''} actif{activeFiltersCount > 1 ? 's' : ''}
+                      {activeFiltersCount} active filter{activeFiltersCount > 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-textMuted mt-0.5">
-                  Filtrez les flux de données temps réel pour isoler les segments et calibrer vos décisions agiles
+                  Filter real-time telemetry streams to isolate segments and guide decisions
                 </p>
               </div>
             </div>
@@ -505,21 +505,21 @@ Try it with your project: https://promptshift.dev
                   className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-700"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Réinitialiser</span>
+                  <span>Reset</span>
                 </button>
               )}
               <button
                 onClick={exportFilteredCsv}
                 className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-cyan-950/60 text-cyan-300 hover:text-cyan-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border border-cyan-500/30 shadow-sm"
-                title="Exporter les données filtrées au format CSV"
+                title="Export filtered telemetry in CSV format"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Exporter CSV</span>
+                <span>Export CSV</span>
               </button>
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                title={isFilterOpen ? "Réduire les filtres" : "Développer les filtres"}
+                title={isFilterOpen ? "Collapse filters" : "Expand filters"}
               >
                 <Filter className="w-4 h-4 text-cyan-400" />
               </button>
@@ -530,14 +530,14 @@ Try it with your project: https://promptshift.dev
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
               {/* Filter 1: Search query */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recherche Projet / ID</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Search Project / ID</label>
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
                   <input
                     type="text"
                     value={filterQuery}
                     onChange={(e) => setFilterQuery(e.target.value)}
-                    placeholder="Nom anonyme, ID, tech..."
+                    placeholder="Anonymous name, ID, tech..."
                     className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors font-mono"
                   />
                 </div>
@@ -545,30 +545,30 @@ Try it with your project: https://promptshift.dev
 
               {/* Filter 2: Event Type */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Type d'Événement</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Event Type</label>
                 <select
                   value={filterEventType}
                   onChange={(e) => setFilterEventType(e.target.value as any)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Tous les événements</option>
-                  <option value="conversion_completed">Conversions réussies</option>
-                  <option value="page_view">Visites de page (Page Views)</option>
-                  <option value="project_upload">Uploads de projet</option>
-                  <option value="cli_token_copied">Usage Token CLI</option>
-                  <option value="invoice_downloaded">Téléchargements Facture</option>
+                  <option value="all">All Events</option>
+                  <option value="conversion_completed">Successful Conversions</option>
+                  <option value="page_view">Page Views</option>
+                  <option value="project_upload">Project Uploads</option>
+                  <option value="cli_token_copied">CLI Token Usage</option>
+                  <option value="invoice_downloaded">Invoice Downloads</option>
                 </select>
               </div>
 
               {/* Filter 3: Target Platform */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Écosystème Cible</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Target Ecosystem</label>
                 <select
                   value={filterTarget}
                   onChange={(e) => setFilterTarget(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Toutes les cibles</option>
+                  <option value="all">All Targets</option>
                   <option value="claude">Anthropic Claude (CLAUDE.md)</option>
                   <option value="cursor">Cursor IDE (.cursorrules / .mdc)</option>
                   <option value="openai">OpenAI Custom GPT</option>
@@ -578,13 +578,13 @@ Try it with your project: https://promptshift.dev
 
               {/* Filter 4: Source Platform */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Écosystème Source</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Source Ecosystem</label>
                 <select
                   value={filterSource}
                   onChange={(e) => setFilterSource(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Toutes les sources</option>
+                  <option value="all">All Sources</option>
                   <option value="cursor">Cursor</option>
                   <option value="claude">Claude</option>
                   <option value="antigravity">Google Antigravity</option>
@@ -595,14 +595,14 @@ Try it with your project: https://promptshift.dev
 
               {/* Filter 5: Plan Tier */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Palier de Licence / Plan</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">License Tier / Plan</label>
                 <select
                   value={filterPlan}
                   onChange={(e) => setFilterPlan(e.target.value as any)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Tous les plans</option>
-                  <option value="free">Free Starter (≤ 2 fichiers)</option>
+                  <option value="all">All Plans</option>
+                  <option value="free">Free Starter (≤ 2 files)</option>
                   <option value="single">Single Project Pass ($1.99)</option>
                   <option value="pro">Pro Developer ($5.99/mo)</option>
                   <option value="team">Team & Agency ($19.99/mo)</option>
@@ -612,35 +612,35 @@ Try it with your project: https://promptshift.dev
 
               {/* Filter 6: Size Category */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Complexité / Fichiers</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Complexity / Files</label>
                 <select
                   value={filterSize}
                   onChange={(e) => setFilterSize(e.target.value as any)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Toutes tailles</option>
-                  <option value="under5">Micro (≤ 2 fichiers - Gratuit)</option>
-                  <option value="sixTo15">Standard (3 à 15 fichiers)</option>
-                  <option value="sixteenTo50">Avancé (16 à 50 fichiers)</option>
-                  <option value="over50">Enterprise (&gt; 50 fichiers)</option>
+                  <option value="all">All Sizes</option>
+                  <option value="under5">Micro (≤ 2 files - Free)</option>
+                  <option value="sixTo15">Standard (3 to 15 files)</option>
+                  <option value="sixteenTo50">Advanced (16 to 50 files)</option>
+                  <option value="over50">Enterprise (&gt; 50 files)</option>
                 </select>
               </div>
 
               {/* Filter 7: Country */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Origine Géographique</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Geographic Origin</label>
                 <select
                   value={filterCountry}
                   onChange={(e) => setFilterCountry(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono cursor-pointer"
                 >
-                  <option value="all">Tous les pays</option>
+                  <option value="all">All Countries</option>
                   <option value="FR">🇫🇷 France (FR)</option>
-                  <option value="US">🇺🇸 États-Unis (US)</option>
-                  <option value="DE">🇩🇪 Allemagne (DE)</option>
-                  <option value="GB">🇬🇧 Royaume-Uni (GB)</option>
+                  <option value="US">🇺🇸 United States (US)</option>
+                  <option value="DE">🇩🇪 Germany (DE)</option>
+                  <option value="GB">🇬🇧 United Kingdom (GB)</option>
                   <option value="CA">🇨🇦 Canada (CA)</option>
-                  <option value="JP">🇯🇵 Japon (JP)</option>
+                  <option value="JP">🇯🇵 Japan (JP)</option>
                 </select>
               </div>
 

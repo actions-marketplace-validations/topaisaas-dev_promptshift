@@ -10,9 +10,9 @@ export async function GET(request: NextRequest) {
       configured: false,
       message: 'Google Search Console Service Account is not configured in environment variables.',
       instructions: [
-        '1. Créez une clé de compte de service Google Cloud (rôle Propriétaire ou Utilisateur Search Console).',
-        '2. Ajoutez GOOGLE_SERVICE_ACCOUNT_EMAIL et GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY dans .env.local',
-        '3. Ajoutez l\'adresse du compte de service dans Search Console > Paramètres > Utilisateurs et autorisations.',
+        '1. Create a Google Cloud Service Account key (Owner or Search Console User role).',
+        '2. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY into .env.local',
+        '3. Add the service account email in Search Console > Settings > Users and permissions.',
       ],
     });
   }
