@@ -38,6 +38,10 @@ jobs:
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          X_3K_API_KEY: ${{ secrets.X_3K_API_KEY }}
+          X_3K_API_SECRET: ${{ secrets.X_3K_API_SECRET }}
+          X_3K_ACCESS_TOKEN: ${{ secrets.X_3K_ACCESS_TOKEN }}
+          X_3K_ACCESS_TOKEN_SECRET: ${{ secrets.X_3K_ACCESS_TOKEN_SECRET }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: |
           node --experimental-strip-types scripts/x-autopilot.ts
