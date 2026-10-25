@@ -155,6 +155,60 @@ async function postTweet(
   return { id: body.data?.id };
 }
 
+async function retweet(
+  tweetId: string,
+  creds: {
+    consumerKey: string;
+    consumerSecret: string;
+    accessToken: string;
+    accessTokenSecret: string;
+  },
+  userId?: string
+): Promise<{ retweeted: boolean }> {
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const meEndpoint = 'https://api.twitter.com/2/users/me';
+    const meAuth = generateOAuthHeader('GET', meEndpoint, creds.consumerKey, creds.consumerSecret, creds.accessToken, creds.accessTokenSecret);
+    const meRes = await fetch(meEndpoint, {
+      method: 'GET',
+      headers: { 'Authorization': meAuth, 'User-Agent': 'PromptShift-3K-Booster/1.0' }
+    });
+    const meData: any = await meRes.json();
+    targetUserId = meData.data?.id;
+  }
+
+  if (!targetUserId) {
+    throw new Error('Unable to resolve user ID for retweet');
+  }
+
+  const endpoint = `https://api.twitter.com/2/users/${targetUserId}/retweets`;
+  const authHeader = generateOAuthHeader(
+    'POST',
+    endpoint,
+    creds.consumerKey,
+    creds.consumerSecret,
+    creds.accessToken,
+    creds.accessTokenSecret
+  );
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': authHeader,
+      'Content-Type': 'application/json',
+      'User-Agent': 'PromptShift-3K-Booster/1.0'
+    },
+    body: JSON.stringify({ tweet_id: tweetId })
+  });
+
+  const body: any = await response.json();
+  if (!response.ok) {
+    throw new Error(`X Retweet API Error (${response.status}): ${JSON.stringify(body)}`);
+  }
+
+  return { retweeted: Boolean(body.data?.retweeted) };
+}
+
 export async function runAutopilot(): Promise<void> {
   const args = process.argv.slice(2);
   const isForceDryRun = args.includes('--dry-run') || process.env.DRY_RUN === 'true';
@@ -239,6 +293,31 @@ export async function runAutopilot(): Promise<void> {
     const replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
     console.log(`✅ Auto-reply published! ID: ${replyResult.id}`);
 
+    // Step 3: Optional 3K Booster Retweet from personal account
+    const boosterKey = process.env.X_3K_API_KEY || process.env.BOOSTER_API_KEY;
+    const boosterSecret = process.env.X_3K_API_SECRET || process.env.BOOSTER_API_SECRET;
+    const boosterToken = process.env.X_3K_ACCESS_TOKEN || process.env.BOOSTER_ACCESS_TOKEN;
+    const boosterTokenSecret = process.env.X_3K_ACCESS_TOKEN_SECRET || process.env.BOOSTER_ACCESS_TOKEN_SECRET;
+
+    let retweetedByBooster = false;
+    if (boosterKey && boosterSecret && boosterToken && boosterTokenSecret) {
+      console.log('📡 Step 3: Triggering 3K Booster Retweet from personal account (@JeanYvesGarcin)...');
+      try {
+        await new Promise(r => setTimeout(r, 3000));
+        const boosterCreds = {
+          consumerKey: boosterKey,
+          consumerSecret: boosterSecret,
+          accessToken: boosterToken,
+          accessTokenSecret: boosterTokenSecret
+        };
+        const rtResult = await retweet(mainResult.id, boosterCreds);
+        retweetedByBooster = rtResult.retweeted;
+        console.log(`✅ 3K Booster Account retweeted successfully! (retweeted: ${retweetedByBooster})`);
+      } catch (err: any) {
+        console.warn('⚠️ 3K Booster Retweet warning (non-blocking):', err.message);
+      }
+    }
+
     history.lastRun = new Date().toISOString();
     history.totalBroadcasts += 1;
     history.history.push({
@@ -247,7 +326,8 @@ export async function runAutopilot(): Promise<void> {
       postedAt: new Date().toISOString(),
       mainTweetId: mainResult.id,
       replyTweetId: replyResult.id,
-      simulated: false
+      simulated: false,
+      retweetedBy3K: retweetedByBooster
     });
 
     saveHistory(history);
