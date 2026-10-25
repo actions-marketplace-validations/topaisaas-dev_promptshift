@@ -19,6 +19,22 @@ export type { XPost };
 export { X_POSTS_CATALOG };
 
 const HISTORY_FILE = path.join(process.cwd(), 'data', 'x_posts_history.json');
+const ANNUAL_CATALOG_FILE = path.join(process.cwd(), 'data', 'x_annual_posts_catalog.json');
+
+function getCatalog(): XPost[] {
+  if (fs.existsSync(ANNUAL_CATALOG_FILE)) {
+    try {
+      const raw = fs.readFileSync(ANNUAL_CATALOG_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return X_POSTS_CATALOG;
+}
 
 interface PostHistoryEntry {
   id: string;
@@ -234,17 +250,20 @@ export async function runAutopilot(): Promise<void> {
   }
 
   // 1. Load History & Filter Available Posts
+  const catalog = getCatalog();
   const history = loadHistory();
   const postedIds = new Set(history.history.map(h => h.id));
 
-  let candidate = X_POSTS_CATALOG.find(p => !postedIds.has(p.id));
+  let candidate = catalog.find(p => !postedIds.has(p.id));
 
   // If all posts have been broadcast, restart rotation cycle
   if (!candidate) {
-    console.log('🔄 All 12 posts have completed a full broadcasting cycle. Resetting rotation.');
+    console.log(`🔄 All ${catalog.length} posts have completed a full annual broadcasting cycle. Resetting rotation.`);
     history.history = [];
-    candidate = X_POSTS_CATALOG[0];
+    candidate = catalog[0];
   }
+
+  console.log(`Loaded Post Catalog: ${catalog.length} annual posts available (${postedIds.size} already broadcast)`);
 
   console.log(`Selected Post ID: [${candidate.id}] (Category: ${candidate.category})`);
   console.log('----------------------------------------------------');
