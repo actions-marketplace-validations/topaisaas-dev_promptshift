@@ -5,6 +5,10 @@
 # Default Web Crawlers
 User-agent: *
 Allow: /
+Allow: /api/badge
+Allow: /api/openapi.json
+Allow: /api/llms/schema
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /bouboule
 Disallow: /api/
@@ -15,6 +19,10 @@ User-agent: GPTBot
 Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /api/badge
+Allow: /api/openapi.json
+Allow: /api/llms/schema
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /bouboule
 Disallow: /api/
@@ -23,6 +31,10 @@ User-agent: PerplexityBot
 Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /api/badge
+Allow: /api/openapi.json
+Allow: /api/llms/schema
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /bouboule
 Disallow: /api/
@@ -31,6 +43,10 @@ User-agent: ClaudeBot
 Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
+Allow: /api/badge
+Allow: /api/openapi.json
+Allow: /api/llms/schema
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /bouboule
 Disallow: /api/
@@ -38,6 +54,10 @@ Disallow: /api/
 User-agent: Google-Extended
 Allow: /
 Allow: /llms.txt
+Allow: /api/badge
+Allow: /api/openapi.json
+Allow: /api/llms/schema
+Allow: /.well-known/
 Disallow: /admin
 Disallow: /bouboule
 Disallow: /api/

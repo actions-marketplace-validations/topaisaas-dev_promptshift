@@ -689,6 +689,13 @@ async function main() {
     console.log(`\n${green(bold('✔ Done!'))} Successfully shifted to ${green(target.toUpperCase())}.`);
   }
 
+  if (!opts.key) {
+    console.log(`\n${bold('💡 SYNC ALL 4 AI AGENTS IN 1 CLICK:')}`);
+    console.log(`  Synchronize Cursor (.cursorrules) + Claude (CLAUDE.md) + Copilot + Gemini simultaneously:`);
+    console.log(`  👉 ${cyan(POLAR_SINGLE_URL)} ${dim('(Instant $1.99 Single Pass)')}`);
+    console.log(`  Continuous drift guard in CI/CD: ${green('npx promptshift --init-ci')}`);
+  }
+
   console.log(`\n${dim('Web & Cloud Sync:')} https://promptshift.dev\n`);
 }
 

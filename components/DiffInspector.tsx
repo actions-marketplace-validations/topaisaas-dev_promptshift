@@ -337,20 +337,36 @@ export const DiffInspector: React.FC<DiffInspectorProps> = ({
         </div>
 
         {isFree || isVip || hasProAccess ? (
-          <button
-            onClick={onFreeDownload}
-            aria-label={`Download bundle of ${fileCount} files`}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-black text-sm tracking-wide shadow-neonEmerald hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none transition-all cursor-pointer"
-          >
-            <Download className="w-4 h-4" aria-hidden="true" />
-            <span>
-              {isVip
-                ? `Download VIP Bundle (100% FREE • ${fileCount} Files)`
-                : hasProAccess && fileCount > MonetizationManager.getFreeLimit()
-                ? `Download Pro Bundle (${fileCount} Files)`
-                : `Download Free Bundle (${fileCount} ${fileCount === 1 ? 'File' : 'Files'})`}
-            </span>
-          </button>
+          <div className="flex items-center gap-3 flex-wrap">
+            {isFree && !hasProAccess && !isVip && (
+              <button
+                onClick={onExportRequest}
+                aria-label={`Export 4-in-1 universal suite for ${CurrencyManager.getTierPrice('single', currency).formatted}`}
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-black font-extrabold text-sm tracking-wide shadow-neonCyan hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none transition-all cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 fill-current" />
+                <span>Export 4-in-1 Universal Suite ({CurrencyManager.getTierPrice('single', currency).formatted})</span>
+              </button>
+            )}
+            <button
+              onClick={onFreeDownload}
+              aria-label={`Download bundle of ${fileCount} files`}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs tracking-wide transition-all cursor-pointer ${
+                isFree && !hasProAccess && !isVip
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700'
+                  : 'bg-gradient-to-r from-emerald-400 to-teal-400 text-black font-black text-sm shadow-neonEmerald hover:scale-105 active:scale-95'
+              }`}
+            >
+              <Download className="w-4 h-4" aria-hidden="true" />
+              <span>
+                {isVip
+                  ? `Download VIP Bundle (100% FREE • ${fileCount} Files)`
+                  : hasProAccess && fileCount > MonetizationManager.getFreeLimit()
+                  ? `Download Pro Bundle (${fileCount} Files)`
+                  : `Download Free Starter (${fileCount} ${fileCount === 1 ? 'File' : 'Files'})`}
+              </span>
+            </button>
+          </div>
         ) : MonetizationManager.isFreeBeta() ? (
           <button
             onClick={onExportRequest}

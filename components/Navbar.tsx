@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck, Terminal, LogOut } from 'lucide-react';
+import { ShieldCheck, Cpu, Lock, Receipt, GitBranch, FileCheck, User, UserCheck, Terminal, LogOut, Sparkles } from 'lucide-react';
 import { BenchmarkModal } from '@/components/BenchmarkModal';
 import { PaymentModal } from '@/components/PaymentModal';
 import { CustomerPortalModal } from '@/components/CustomerPortalModal';
@@ -159,6 +159,14 @@ export const Navbar: React.FC = () => {
             <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>Security & DPA</span>
           </button>
+
+          <a
+            href="/#sandbox"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Live Demo</span>
+          </a>
 
           <Link
             href="/cli"
