@@ -14,192 +14,27 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
 
-export interface XPost {
-  id: string;
-  category: 'ast-parity' | 'security' | 'ci-cd' | 'multi-agent' | 'terminal';
-  mainTweet: string;
-  replyTweet: string;
-}
-
-export const X_POSTS_CATALOG: XPost[] = [
-  {
-    id: 'post-01-cursor-to-claude-frontmatter',
-    category: 'ast-parity',
-    mainTweet: `Why Cursor rules break Claude Code:
-
-Cursor expects frontmatter:
----
-description: API rules
-globs: *.ts
----
-
-Claude Code expects raw Markdown in CLAUDE.md.
-Nested YAML makes Claude ignore guidelines.
-
-Fix AST in 1 command:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `Convert your entire AI agent project across Cursor, Claude Code, Windsurf & OpenAI in 2 seconds (99.4% AST parity).
-
-⚡ Try live or export the 4-in-1 Suite ($1.99):
-https://promptshift.dev`
-  },
-  {
-    id: 'post-02-context-window-waste',
-    category: 'multi-agent',
-    mainTweet: `Hot take: 90% of developers are burning 18% of their 200k context window before typing a single prompt.
-
-Why? Bloated .cursorrules copy-pasted into CLAUDE.md without semantic deduplication.
-
-Clean your agent context tree:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `PromptShift strips AST noise, deduplicates system prompts, and sanitizes API keys in-RAM with zero retention.
-
-👉 Test with 1 click or get the $1.99 Single Pass:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-03-multi-ide-matrix',
-    category: 'multi-agent',
-    mainTweet: `Windsurf uses .windsurfrules.
-Cursor uses .cursorrules or .cursor/rules/*.mdc.
-Claude Code uses CLAUDE.md.
-GitHub Copilot uses .github/copilot-instructions.md.
-
-Switching tools without rewriting all your agent guidelines:
-$ npx promptshift --source windsurf --target cursor`,
-    replyTweet: `Stop fragmenting your team's agent configurations. One source of truth, transpiled to all 4 major AI IDEs.
-
-⚡ Instant universal conversion ($1.99 / pass):
-https://promptshift.dev`
-  },
-  {
-    id: 'post-04-security-secrets-leak',
-    category: 'security',
-    mainTweet: `Security PSA: 1 out of 8 public AI config files leaked on GitHub contains a hardcoded OPENAI_API_KEY, ANTHROPIC_API_KEY or AWS token.
-
-Before pushing your agent rules, sanitize all secrets in memory:
-$ npx promptshift --source cursor --target claude --sanitize-secrets`,
-    replyTweet: `PromptShift includes an in-RAM deterministic entropy scanner that masks all active tokens with zero server persistence.
-
-🔒 Safe migration in seconds:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-05-scoped-globs-ast',
-    category: 'ast-parity',
-    mainTweet: `Did you know? Cursor .cursor/rules/*.mdc files support scoped \`globs\`, while Claude Code subagents require flat instructions.
-
-Copying them directly causes hallucinated tool executions.
-
-Maintain 99.4% AST integrity:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `Deterministic AST parser built for AI coding agents. No hallucinations, no lost system context.
-
-⚡ Instant 4-in-1 Universal Suite ($1.99):
-https://promptshift.dev`
-  },
-  {
-    id: 'post-06-ci-cd-automation',
-    category: 'ci-cd',
-    mainTweet: `Building an AI coding swarm?
-Syncing rules between Cursor, Claude Code, and Windsurf across a 10-person dev team is a maintenance nightmare.
-
-Automate your agent config pipeline in CI/CD:
-$ npx promptshift --init-ci
-
-Keeps all IDE configs in sync on every git push.`,
-    replyTweet: `Deploy automated CI/CD multi-agent alignment with PromptShift Pro ($29/mo) or single conversion pass ($1.99).
-
-🚀 Check live parity score on your repo:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-07-deterministic-vs-llm',
-    category: 'ast-parity',
-    mainTweet: `Why raw LLM prompt conversion fails:
-LLMs hallucinate YAML frontmatter keys when translating .cursorrules to CLAUDE.md.
-
-PromptShift uses deterministic AST tokenization, preserving 100% of instruction hierarchy.
-
-Benchmark it:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `Deterministic AST transpilation beats prompt-based generation every single time. 99.4% measured parity score.
-
-🧪 Try our interactive AST Diff Inspector:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-08-cursor-to-openai',
-    category: 'multi-agent',
-    mainTweet: `From Cursor to OpenAI Assistant format:
-.cursorrules uses file globs and system role prompts.
-OpenAI Assistants require structured instructions and tool function specs.
-
-Bridge the gap without rewriting:
-$ npx promptshift --source cursor --target openai`,
-    replyTweet: `Universal cross-agent compiler for modern developers. Export to Claude, Cursor, OpenAI & Gemini simultaneously.
-
-👉 Single Pass $1.99 / Team License:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-09-terminal-frictionless',
-    category: 'terminal',
-    mainTweet: `Terminal tip: You don't even need to install PromptShift or open a browser to convert your AI agent projects.
-
-Just run in any repo:
-$ npx promptshift
-
-Auto-detects .cursorrules, CLAUDE.md or .windsurfrules and outputs the target format in 1.2s.`,
-    replyTweet: `Zero dependencies. Zero telemetry retention. Full AST parity score and universal 4-in-1 export.
-
-⚡ Convert online or get your pass:
-https://promptshift.dev`
-  },
-  {
-    id: 'post-10-multi-ide-stack-2026',
-    category: 'multi-agent',
-    mainTweet: `The multi-IDE developer stack in 2026:
-- Cursor for local rapid editing
-- Claude Code for terminal agent loops
-- Windsurf for Cascade multi-file diffs
-
-Your agent instructions shouldn't be locked into one silo:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `Transpile your agent configurations with 99.4% AST parity. Export the 4-in-1 Universal Suite in 1 click.
-
-⚡ Instant developer pass ($1.99):
-https://promptshift.dev`
-  },
-  {
-    id: 'post-11-claude-code-subagents',
-    category: 'terminal',
-    mainTweet: `PSA for Claude Code users:
-Adding \`.cursorrules\` to your repo doesn't instruct Claude Code. It only reads \`CLAUDE.md\`.
-
-Don't let your terminal agent run blind without your project architecture:
-$ npx promptshift --source cursor --target claude`,
-    replyTweet: `One command to synchronize your Cursor guidelines with Claude Code terminal agents.
-
-🧪 Inspect syntax diffs and export live ($1.99):
-https://promptshift.dev`
-  },
-  {
-    id: 'post-12-rule-syntax-linter',
-    category: 'ast-parity',
-    mainTweet: `Why do AI agents ignore your guidelines?
-Most configs fail because of malformed Markdown headings and unsupported frontmatter flags.
-
-Validate and transpile your AI config syntax in seconds:
-$ npx promptshift --source claude --target cursor`,
-    replyTweet: `Keep your AI coding agents obedient, secure, and aligned across all editors.
-
-👉 1-Click Interactive Demo & Universal Pass ($1.99):
-https://promptshift.dev`
-  }
-];
+import { X_POSTS_CATALOG, type XPost } from './x-posts-catalog.ts';
+export type { XPost };
+export { X_POSTS_CATALOG };
 
 const HISTORY_FILE = path.join(process.cwd(), 'data', 'x_posts_history.json');
+const ANNUAL_CATALOG_FILE = path.join(process.cwd(), 'data', 'x_annual_posts_catalog.json');
+
+function getCatalog(): XPost[] {
+  if (fs.existsSync(ANNUAL_CATALOG_FILE)) {
+    try {
+      const raw = fs.readFileSync(ANNUAL_CATALOG_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return X_POSTS_CATALOG;
+}
 
 interface PostHistoryEntry {
   id: string;
@@ -336,6 +171,60 @@ async function postTweet(
   return { id: body.data?.id };
 }
 
+async function retweet(
+  tweetId: string,
+  creds: {
+    consumerKey: string;
+    consumerSecret: string;
+    accessToken: string;
+    accessTokenSecret: string;
+  },
+  userId?: string
+): Promise<{ retweeted: boolean }> {
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const meEndpoint = 'https://api.twitter.com/2/users/me';
+    const meAuth = generateOAuthHeader('GET', meEndpoint, creds.consumerKey, creds.consumerSecret, creds.accessToken, creds.accessTokenSecret);
+    const meRes = await fetch(meEndpoint, {
+      method: 'GET',
+      headers: { 'Authorization': meAuth, 'User-Agent': 'PromptShift-3K-Booster/1.0' }
+    });
+    const meData: any = await meRes.json();
+    targetUserId = meData.data?.id;
+  }
+
+  if (!targetUserId) {
+    throw new Error('Unable to resolve user ID for retweet');
+  }
+
+  const endpoint = `https://api.twitter.com/2/users/${targetUserId}/retweets`;
+  const authHeader = generateOAuthHeader(
+    'POST',
+    endpoint,
+    creds.consumerKey,
+    creds.consumerSecret,
+    creds.accessToken,
+    creds.accessTokenSecret
+  );
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': authHeader,
+      'Content-Type': 'application/json',
+      'User-Agent': 'PromptShift-3K-Booster/1.0'
+    },
+    body: JSON.stringify({ tweet_id: tweetId })
+  });
+
+  const body: any = await response.json();
+  if (!response.ok) {
+    throw new Error(`X Retweet API Error (${response.status}): ${JSON.stringify(body)}`);
+  }
+
+  return { retweeted: Boolean(body.data?.retweeted) };
+}
+
 export async function runAutopilot(): Promise<void> {
   const args = process.argv.slice(2);
   const isForceDryRun = args.includes('--dry-run') || process.env.DRY_RUN === 'true';
@@ -361,17 +250,20 @@ export async function runAutopilot(): Promise<void> {
   }
 
   // 1. Load History & Filter Available Posts
+  const catalog = getCatalog();
   const history = loadHistory();
   const postedIds = new Set(history.history.map(h => h.id));
 
-  let candidate = X_POSTS_CATALOG.find(p => !postedIds.has(p.id));
+  let candidate = catalog.find(p => !postedIds.has(p.id));
 
   // If all posts have been broadcast, restart rotation cycle
   if (!candidate) {
-    console.log('🔄 All 12 posts have completed a full broadcasting cycle. Resetting rotation.');
+    console.log(`🔄 All ${catalog.length} posts have completed a full annual broadcasting cycle. Resetting rotation.`);
     history.history = [];
-    candidate = X_POSTS_CATALOG[0];
+    candidate = catalog[0];
   }
+
+  console.log(`Loaded Post Catalog: ${catalog.length} annual posts available (${postedIds.size} already broadcast)`);
 
   console.log(`Selected Post ID: [${candidate.id}] (Category: ${candidate.category})`);
   console.log('----------------------------------------------------');
@@ -420,6 +312,31 @@ export async function runAutopilot(): Promise<void> {
     const replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
     console.log(`✅ Auto-reply published! ID: ${replyResult.id}`);
 
+    // Step 3: Optional 3K Booster Retweet from personal account
+    const boosterKey = process.env.X_3K_API_KEY || process.env.BOOSTER_API_KEY;
+    const boosterSecret = process.env.X_3K_API_SECRET || process.env.BOOSTER_API_SECRET;
+    const boosterToken = process.env.X_3K_ACCESS_TOKEN || process.env.BOOSTER_ACCESS_TOKEN;
+    const boosterTokenSecret = process.env.X_3K_ACCESS_TOKEN_SECRET || process.env.BOOSTER_ACCESS_TOKEN_SECRET;
+
+    let retweetedByBooster = false;
+    if (boosterKey && boosterSecret && boosterToken && boosterTokenSecret) {
+      console.log('📡 Step 3: Triggering 3K Booster Retweet from personal account (@JeanYvesGarcin)...');
+      try {
+        await new Promise(r => setTimeout(r, 3000));
+        const boosterCreds = {
+          consumerKey: boosterKey,
+          consumerSecret: boosterSecret,
+          accessToken: boosterToken,
+          accessTokenSecret: boosterTokenSecret
+        };
+        const rtResult = await retweet(mainResult.id, boosterCreds);
+        retweetedByBooster = rtResult.retweeted;
+        console.log(`✅ 3K Booster Account retweeted successfully! (retweeted: ${retweetedByBooster})`);
+      } catch (err: any) {
+        console.warn('⚠️ 3K Booster Retweet warning (non-blocking):', err.message);
+      }
+    }
+
     history.lastRun = new Date().toISOString();
     history.totalBroadcasts += 1;
     history.history.push({
@@ -428,7 +345,8 @@ export async function runAutopilot(): Promise<void> {
       postedAt: new Date().toISOString(),
       mainTweetId: mainResult.id,
       replyTweetId: replyResult.id,
-      simulated: false
+      simulated: false,
+      retweetedBy3K: retweetedByBooster
     });
 
     saveHistory(history);
