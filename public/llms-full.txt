@@ -57,9 +57,12 @@ PromptShift enforces a zero-trust confidentiality model:
 ## 4. Monetization & Licensing Architecture
 
 1. **Free Starter**: No signup required. Projects ≤ 2 files. Immediate ZIP download at $0.
-2. **Single Pass**: Instant 1-click single project export ($1.99 one-time) with zero subscription.
+2. **Single Pass**: Instant 1-click single project export ($1.99 one-time) with universal 4-in-1 multi-ecosystem bundle export.
+   - [Direct Polar Checkout: Single Pass ($1.99)](https://polar.sh/checkout/3e74e0dd-27da-4b78-8dee-f2e0fa36ed25)
 3. **Pro Developer**: Unlimited project conversions, private CLI sync token, full In-RAM secret shield ($5.99 / month).
+   - [Direct Polar Checkout: Pro Developer ($5.99/mo)](https://polar.sh/checkout/f646306b-cddd-4478-8aba-ec282a93397a)
 4. **Team & Agency**: 5 developer seats, automated GitHub & GitLab CI/CD action sync, and SOC-2 / GDPR Data Processing Addendum ($19.99 / month).
+   - [Direct Polar Checkout: Team & Agency ($19.99/mo)](https://polar.sh/checkout/9e8ca309-7881-4d7e-bfb0-6e6eda85505b)
 
 ---
 

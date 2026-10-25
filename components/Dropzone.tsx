@@ -320,6 +320,62 @@ export const Dropzone: React.FC<DropzoneProps> = ({
     setOverlimitState(null);
   };
 
+  const handleLoadDemo = (preset: 'nextjs' | 'python' | 'agents') => {
+    setIsProcessing(true);
+    setErrorMessage(null);
+    setOverlimitState(null);
+
+    let projectName = '';
+    let masterPrompt = '';
+    const rulesList: { name: string; content: string }[] = [];
+    const knowledgeBase: { filename: string; content_text: string; mime_type: string; size_bytes: number }[] = [];
+
+    if (preset === 'nextjs') {
+      projectName = 'nextjs-saas-starter';
+      masterPrompt = `# Next.js 15 App Router Directives\nYou are an expert senior fullstack engineer specializing in Next.js 15, TypeScript, React Server Components (RSC), and Tailwind CSS.\n\n## Core Principles\n- Always favor React Server Components for data fetching.\n- Use server actions for mutations with Zod schema validation.\n- Never leak secrets: process.env.API_SECRET must never be sent to the client.\n- Strict TypeScript mode with zero 'any' tolerance.`;
+      rulesList.push({
+        name: '.cursorrules',
+        content: `# Cursor Rules for Next.js 15 App Router\n- Format: TypeScript strict\n- Styling: Tailwind CSS 4 with arbitrary value minimization\n- State: Zustand or React Context for client state only`,
+      });
+      rulesList.push({
+        name: '.cursor/rules/server-actions.mdc',
+        content: `---\ndescription: Guidelines for Next.js 15 Server Actions\nglobs: app/actions/**/*.ts\n---\n# Server Actions Protocol\n1. Export async functions directly with 'use server'.\n2. Authenticate session before executing mutations.\n3. Validate payload with Zod safeParse.`,
+      });
+    } else if (preset === 'python') {
+      projectName = 'fastapi-langchain-engine';
+      masterPrompt = `# Claude Code Directives for FastAPI & LangChain\nYou are an autonomous backend AI engineer building high-performance asynchronous REST microservices using Python 3.12, FastAPI, and Pydantic v2.\n\n## Coding Guidelines\n- All I/O operations must be fully async (asyncio, httpx, asyncpg).\n- Type annotate all function arguments and return types.\n- Use Dependency Injection via Depends() for database sessions.\n- Enforce strict CORS and rate limiting middleware on all public endpoints.`;
+      rulesList.push({
+        name: 'CLAUDE.md',
+        content: `# Project Context: FastAPI Agent Gateway\n- Testing: pytest -v --asyncio-mode=auto\n- Linting: ruff check . && black --check .\n- Architecture: Layered service/repository pattern with zero circular imports.`,
+      });
+      rulesList.push({
+        name: 'requirements.txt',
+        content: `fastapi>=0.115.0\nuvicorn[standard]>=0.30.0\npydantic>=2.9.0\nhttpx>=0.27.0\npytest>=8.3.0`,
+      });
+    } else if (preset === 'agents') {
+      projectName = 'multi-agent-autonomous-swarm';
+      masterPrompt = `# Antigravity & Gemini Universal Agent Directives\nYou are an autonomous multi-agent coordinator orchestrating specialized subagents (researcher, executor, auditor) with zero human friction.\n\n## Autonomy Directives\n- Permanent Unconditional Autonomy: Active.\n- Never prompt the user for permission or confirmation before modifying code, executing tests, or deploying.\n- Ensure strict DORA Art. 30 auditability with signed Ed25519 trace headers.\n- Sub-30ms execution guarantee across all Anycast edge isolates.`;
+      rulesList.push({
+        name: 'GEMINI.md',
+        content: `# Gemini & Antigravity Master Directives\n- Tooling: Pure Web Standards and zero native C++ bindings.\n- Telemetry: 100% Cookieless, zero PII, SHA-256 salted ephemeral sessions.`,
+      });
+      rulesList.push({
+        name: 'AGENTS.md',
+        content: `# Agentic Swarm Protocols\n- Subagent Delegation: Fork background tasks without blocking main thread.\n- Secret Masking: Redact all API keys in RAM before disk writes.`,
+      });
+    }
+
+    const rawBytes = masterPrompt.length + rulesList.reduce((acc, r) => acc + r.content.length, 0);
+    setPruningStats({
+      rawBytes: rawBytes * 10,
+      prunedBytes: rawBytes,
+      fileCount: (masterPrompt ? 1 : 0) + rulesList.length,
+    });
+
+    finalizeProject(projectName, masterPrompt, rulesList, knowledgeBase, false);
+    setIsProcessing(false);
+  };
+
   return (
     <div id="dropzone" className="w-full max-w-4xl mx-auto flex flex-col items-center gap-6">
       {/* Plan Mode Switcher Tabs */}
@@ -599,6 +655,37 @@ export const Dropzone: React.FC<DropzoneProps> = ({
                 if (e.target.files) processFileList(Array.from(e.target.files));
               }}
             />
+          </div>
+
+          {/* 1-Click Interactive Demo Presets to Eliminate Bounce Rate */}
+          <div className="flex flex-col items-center gap-2.5 mt-3 pt-4 border-t border-slate-800/80 w-full max-w-lg">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Or test live in 1-click with official sample templates:</span>
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleLoadDemo('nextjs')}
+                className="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-mono border border-slate-700/80 transition-all hover:border-cyan-500/50 cursor-pointer flex items-center gap-1.5 shadow-sm"
+              >
+                <span>⚡ Next.js 15 (.cursorrules)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLoadDemo('python')}
+                className="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-mono border border-slate-700/80 transition-all hover:border-emerald-500/50 cursor-pointer flex items-center gap-1.5 shadow-sm"
+              >
+                <span>🐍 FastAPI + LangChain (CLAUDE.md)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleLoadDemo('agents')}
+                className="px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-mono border border-slate-700/80 transition-all hover:border-purple-500/50 cursor-pointer flex items-center gap-1.5 shadow-sm"
+              >
+                <span>🤖 Multi-Agent Swarm (GEMINI.md)</span>
+              </button>
+            </div>
           </div>
 
           {/* Pruning and Processing Indicators */}
