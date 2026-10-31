@@ -184,14 +184,21 @@ async function postTweet(
   }
 
   const endpoint = 'https://api.twitter.com/2/tweets';
-  const authHeader = generateOAuthHeader(
-    'POST',
-    endpoint,
-    creds.consumerKey,
-    creds.consumerSecret,
-    creds.accessToken,
-    creds.accessTokenSecret
-  );
+  
+  // Support both OAuth 1.0a (permanent HMAC-SHA1) and OAuth 2.0 User Bearer tokens
+  let authHeader = '';
+  if (creds.accessTokenSecret && creds.consumerKey && creds.consumerSecret) {
+    authHeader = generateOAuthHeader(
+      'POST',
+      endpoint,
+      creds.consumerKey,
+      creds.consumerSecret,
+      creds.accessToken,
+      creds.accessTokenSecret
+    );
+  } else {
+    authHeader = `Bearer ${creds.accessToken}`;
+  }
 
   const payload: any = { text };
   if (replyToId) {
@@ -281,12 +288,31 @@ export async function runAutopilot(): Promise<void> {
   const args = process.argv.slice(2);
   const isForceDryRun = args.includes('--dry-run') || process.env.DRY_RUN === 'true';
 
-  const consumerKey = process.env.X_API_KEY || process.env.TWITTER_API_KEY || '';
-  const consumerSecret = process.env.X_API_SECRET || process.env.TWITTER_API_SECRET || '';
-  const accessToken = process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN || '';
-  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET || process.env.TWITTER_ACCESS_TOKEN_SECRET || '';
+  // Resolve primary broadcast credentials (falls back to 3K Booster account if primary X_* keys are unset)
+  const consumerKey =
+    process.env.X_API_KEY ||
+    process.env.X_3K_API_KEY ||
+    process.env.TWITTER_API_KEY ||
+    '';
+  const consumerSecret =
+    process.env.X_API_SECRET ||
+    process.env.X_3K_API_SECRET ||
+    process.env.TWITTER_API_SECRET ||
+    '';
+  const accessToken =
+    process.env.X_ACCESS_TOKEN ||
+    process.env.X_3K_ACCESS_TOKEN ||
+    process.env.TWITTER_ACCESS_TOKEN ||
+    '';
+  const accessTokenSecret =
+    process.env.X_ACCESS_TOKEN_SECRET ||
+    process.env.X_3K_ACCESS_TOKEN_SECRET ||
+    process.env.TWITTER_ACCESS_TOKEN_SECRET ||
+    '';
 
-  const hasCredentials = Boolean(consumerKey && consumerSecret && accessToken && accessTokenSecret);
+  const hasCredentials = Boolean(
+    (consumerKey && consumerSecret && accessToken && accessTokenSecret) || accessToken
+  );
   const isDryRun = isForceDryRun || !hasCredentials;
 
   console.log('====================================================');
