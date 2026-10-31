@@ -1,6 +1,6 @@
 {
-  "lastRun": "2026-10-31T18:40:29.095Z",
-  "totalBroadcasts": 2,
+  "lastRun": "2026-10-31T22:39:57.912Z",
+  "totalBroadcasts": 3,
   "history": [
     {
       "id": "post-d001-morning",
@@ -17,6 +17,15 @@
       "postedAt": "2026-10-31T18:40:29.095Z",
       "mainTweetId": "2116601192432422991",
       "replyTweetId": "2116601201861271935",
+      "simulated": false,
+      "retweetedBy3K": true
+    },
+    {
+      "id": "post-d002-morning",
+      "category": "token-optimization",
+      "postedAt": "2026-10-31T22:39:57.912Z",
+      "mainTweetId": "2116661459170001259",
+      "replyTweetId": "2116661468670185897",
       "simulated": false,
       "retweetedBy3K": true
     }
