@@ -4,6 +4,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/topaisaas-dev/promptshift?color=emerald&label=version)](https://github.com/topaisaas-dev/promptshift/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![AST Parity](https://img.shields.io/badge/AST%20Semantic%20Parity-98.5%25-cyan.svg)](https://promptshift.dev)
+[![Glama MCP Server](https://glama.ai/mcp/servers/topaisaas-dev/promptshift/badge)](https://glama.ai/mcp/servers/topaisaas-dev/promptshift)
 [![Zero-Data-Retention](https://img.shields.io/badge/Privacy-Zero--Data--Retention-green.svg)](https://promptshift.dev/security)
 [![MCP Compatible](https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg)](https://modelcontextprotocol.io)
 
@@ -58,7 +59,7 @@ npx promptshift --badge
 ```
 
 ### 2. Model Context Protocol (MCP) Integration
-PromptShift includes a native STDIO JSON-RPC 2.0 MCP server compatible with **Claude Desktop**, **Cursor**, **Smithery.ai**, and **Glama.ai**.
+PromptShift includes a native STDIO JSON-RPC 2.0 MCP server compatible with **Claude Desktop**, **Cursor**, **Glama.ai**, and **Smithery.ai**.
 
 #### Claude Desktop Configuration (`claude_desktop_config.json`)
 ```json
@@ -66,15 +67,23 @@ PromptShift includes a native STDIO JSON-RPC 2.0 MCP server compatible with **Cl
   "mcpServers": {
     "promptshift": {
       "command": "npx",
-      "args": ["promptshift", "--mcp"]
+      "args": ["-y", "promptshift", "--mcp"]
     }
   }
 }
 ```
 
-#### Exposed MCP Tools:
+#### Docker Container Execution (Glama Firecracker & Local MicroVMs)
+```bash
+# Build and run the lightweight MCP server via Docker
+docker build -t promptshift .
+docker run -i --rm promptshift
+```
+
+#### Exposed MCP Tools (TDQS 5-Star Grade A):
 - `promptshift_transpile`: Deterministically compiles rules between Cursor, Claude Code, Windsurf, Copilot, Cline, and Aider with 98.5% AST parity.
-- `promptshift_sanitize_secrets`: Automatically redacts exposed OpenAI, Anthropic, AWS, GitHub, and Stripe API keys before commits.
+- `promptshift_sanitize_secrets`: Automatically redacts exposed OpenAI, Anthropic, AWS, GitHub, and Stripe API keys in-RAM before commits.
+- `promptshift_validate_ast`: Measures semantic AST fidelity and prompt drift percentage between source and target instruction documents.
 
 ---
 
