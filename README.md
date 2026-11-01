@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/topaisaas-dev/promptshift?color=emerald&label=version)](https://github.com/topaisaas-dev/promptshift/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![AST Parity](https://img.shields.io/badge/AST%20Semantic%20Parity-98.5%25-cyan.svg)](https://promptshift.dev)
-[![Glama MCP Server](https://glama.ai/mcp/servers/topaisaas-dev/promptshift/badge)](https://glama.ai/mcp/servers/topaisaas-dev/promptshift)
+[![PromptShift MCP server](https://glama.ai/mcp/servers/topaisaas-dev/promptshift/badge)](https://glama.ai/mcp/servers/topaisaas-dev/promptshift)
 [![Zero-Data-Retention](https://img.shields.io/badge/Privacy-Zero--Data--Retention-green.svg)](https://promptshift.dev/security)
 [![MCP Compatible](https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg)](https://modelcontextprotocol.io)
 

@@ -1,36 +1,7 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "promptshift",
-  "title": "PromptShift — Universal AI Rules Transpiler",
-  "description": "Bi-directional rules and master prompt transpiler between Cursor, Claude Code, and Copilot with 98.5% certified AST parity and in-RAM secret redaction.",
   "maintainers": [
-    "topaisaas-dev"
-  ],
-  "status": "stable",
-  "type": "mcp_server",
-  "transport": [
-    "stdio",
-    "http"
-  ],
-  "dockerfile": "Dockerfile",
-  "repository": "https://github.com/topaisaas-dev/promptshift",
-  "website": "https://promptshift.dev",
-  "command": "node",
-  "args": [
-    "bin/promptshift.js"
-  ],
-  "env": {
-    "PROMPTSHIFT_LICENSE_KEY": {
-      "description": "Optional Polar.sh Order ID or Pro Developer License Key to transpile repositories with >2 modular rules",
-      "required": false
-    }
-  },
-  "tags": [
-    "cursor",
-    "claude-code",
-    "cursorrules",
-    "transpiler",
-    "developer-tools",
-    "ai-rules"
+    "topaisaas-dev",
+    "jyg3"
   ]
 }
