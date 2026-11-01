@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "bin": "./packages/cli/bin/promptshift.js",
+  "bin": {
+    "promptshift": "bin/promptshift.js",
+    "promptshift-mcp": "bin/promptshift.js"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

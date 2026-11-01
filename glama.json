@@ -15,11 +15,9 @@
   "dockerfile": "Dockerfile",
   "repository": "https://github.com/topaisaas-dev/promptshift",
   "website": "https://promptshift.dev",
-  "command": "npx",
+  "command": "node",
   "args": [
-    "-y",
-    "promptshift",
-    "--mcp"
+    "bin/promptshift.js"
   ],
   "env": {
     "PROMPTSHIFT_LICENSE_KEY": {

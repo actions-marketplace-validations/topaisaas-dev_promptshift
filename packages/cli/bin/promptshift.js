@@ -335,6 +335,19 @@ function startMcpServer() {
       return;
     }
 
+    if (req.method === 'ping') {
+      sendJsonRpc({
+        jsonrpc: '2.0',
+        id: req.id,
+        result: {},
+      });
+      return;
+    }
+
+    if (req.method === 'notifications/initialized' || req.method === 'initialized') {
+      return;
+    }
+
     if (req.method === 'initialize') {
       sendJsonRpc({
         jsonrpc: '2.0',
@@ -343,8 +356,8 @@ function startMcpServer() {
           protocolVersion: '2024-11-05',
           capabilities: { tools: {} },
           serverInfo: {
-            name: 'promptshift-universal-bridge',
-            version: '1.1.0',
+            name: 'promptshift',
+            version: '1.2.0',
           },
         },
       });
@@ -549,6 +562,15 @@ function startMcpServer() {
           });
         }
       }
+    } else if (req.id !== undefined) {
+      sendJsonRpc({
+        jsonrpc: '2.0',
+        id: req.id,
+        error: {
+          code: -32601,
+          message: `Method '${req.method}' not implemented`,
+        },
+      });
     }
   });
 }
@@ -694,7 +716,10 @@ async function main() {
     return;
   }
 
-  if (opts.mcp) {
+  const isPipedOrNonInteractive = !process.stdin.isTTY;
+  const hasNoCliAction = !opts.target && !opts.check && !opts.initCi && !opts.badge;
+
+  if (opts.mcp || (isPipedOrNonInteractive && hasNoCliAction)) {
     startMcpServer();
     return;
   }
