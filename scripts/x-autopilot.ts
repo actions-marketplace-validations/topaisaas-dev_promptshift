@@ -39,10 +39,12 @@ function getCatalog(): XPost[] {
 interface PostHistoryEntry {
   id: string;
   category: string;
+  slot?: string;
   postedAt: string;
   mainTweetId: string;
   replyTweetId?: string;
   simulated?: boolean;
+  retweetedBy3K?: boolean;
 }
 
 interface PostsHistory {
@@ -379,18 +381,25 @@ export async function runAutopilot(): Promise<void> {
   try {
     const creds = { consumerKey, consumerSecret, accessToken, accessTokenSecret };
     
-    console.log('📡 Step 1: Broadcasting main tweet...');
+    console.log('📡 Step 1: Broadcasting main tweet from @promptshift_dev...');
     const mainResult = await postTweet(candidate.mainTweet, undefined, creds);
     console.log(`✅ Main tweet published! ID: ${mainResult.id}`);
 
-    // Wait 2 seconds before replying to avoid race conditions
-    await new Promise(r => setTimeout(r, 2000));
+    // Wait 2.5 seconds before replying to avoid replica propagation lag
+    await new Promise(r => setTimeout(r, 2500));
 
-    console.log('📡 Step 2: Broadcasting auto-reply thread...');
-    const replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+    console.log('📡 Step 2: Broadcasting conversion auto-reply thread...');
+    let replyResult: { id: string };
+    try {
+      replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+    } catch (replyErr: any) {
+      console.warn('⚠️ Reply attempt 1 delayed, retrying in 4s...', replyErr.message);
+      await new Promise(r => setTimeout(r, 4000));
+      replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+    }
     console.log(`✅ Auto-reply published! ID: ${replyResult.id}`);
 
-    // Step 3: Optional 3K Booster Retweet from personal account
+    // Step 3: 3K Booster Repost from @JeanYvesGarcin (with propagation retry)
     const boosterKey = process.env.X_3K_API_KEY || process.env.BOOSTER_API_KEY;
     const boosterSecret = process.env.X_3K_API_SECRET || process.env.BOOSTER_API_SECRET;
     const boosterToken = process.env.X_3K_ACCESS_TOKEN || process.env.BOOSTER_ACCESS_TOKEN;
@@ -398,20 +407,27 @@ export async function runAutopilot(): Promise<void> {
 
     let retweetedByBooster = false;
     if (boosterKey && boosterSecret && boosterToken && boosterTokenSecret) {
-      console.log('📡 Step 3: Triggering 3K Booster Retweet from personal account (@JeanYvesGarcin)...');
-      try {
-        await new Promise(r => setTimeout(r, 3000));
-        const boosterCreds = {
-          consumerKey: boosterKey,
-          consumerSecret: boosterSecret,
-          accessToken: boosterToken,
-          accessTokenSecret: boosterTokenSecret
-        };
-        const rtResult = await retweet(mainResult.id, boosterCreds);
-        retweetedByBooster = rtResult.retweeted;
-        console.log(`✅ 3K Booster Account retweeted successfully! (retweeted: ${retweetedByBooster})`);
-      } catch (err: any) {
-        console.warn('⚠️ 3K Booster Retweet warning (non-blocking):', err.message);
+      console.log('📡 Step 3: Triggering 3K Booster Repost from @JeanYvesGarcin...');
+      const boosterCreds = {
+        consumerKey: boosterKey,
+        consumerSecret: boosterSecret,
+        accessToken: boosterToken,
+        accessTokenSecret: boosterTokenSecret
+      };
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          await new Promise(r => setTimeout(r, attempt === 1 ? 4000 : 6000));
+          const rtResult = await retweet(mainResult.id, boosterCreds);
+          retweetedByBooster = rtResult.retweeted;
+          console.log(`✅ @JeanYvesGarcin reposted successfully on attempt ${attempt}! (retweeted: ${retweetedByBooster})`);
+          break;
+        } catch (err: any) {
+          if (attempt === 2) {
+            console.warn('⚠️ 3K Booster Repost warning (non-blocking):', err.message);
+          } else {
+            console.warn('⚠️ 3K Booster Repost propagation retry in 6s...');
+          }
+        }
       }
     }
 

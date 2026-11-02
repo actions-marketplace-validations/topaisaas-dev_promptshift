@@ -10,7 +10,16 @@
 
 export interface XPost {
   id: string;
-  category: 'ast-parity' | 'security' | 'ci-cd' | 'multi-agent' | 'terminal' | 'token-optimization';
+  category:
+    | 'ast-parity'
+    | 'security'
+    | 'ci-cd'
+    | 'multi-agent'
+    | 'terminal'
+    | 'token-optimization'
+    | 'mcp-ecosystem'
+    | 'syntax-traps';
+  slot?: 'morning' | 'afternoon';
   mainTweet: string;
   replyTweet: string;
 }

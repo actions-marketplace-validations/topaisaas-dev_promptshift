@@ -1,6 +1,6 @@
 {
-  "lastRun": "2026-10-31T22:39:57.912Z",
-  "totalBroadcasts": 3,
+  "lastRun": "2026-11-01T22:56:51.215Z",
+  "totalBroadcasts": 5,
   "history": [
     {
       "id": "post-d001-morning",
@@ -26,6 +26,24 @@
       "postedAt": "2026-10-31T22:39:57.912Z",
       "mainTweetId": "2116661459170001259",
       "replyTweetId": "2116661468670185897",
+      "simulated": false,
+      "retweetedBy3K": true
+    },
+    {
+      "id": "post-d002-afternoon",
+      "category": "security",
+      "postedAt": "2026-11-01T19:02:25.400Z",
+      "mainTweetId": "2116969094087897561",
+      "replyTweetId": "2116969105731285249",
+      "simulated": false,
+      "retweetedBy3K": true
+    },
+    {
+      "id": "post-d003-morning",
+      "category": "mcp-ecosystem",
+      "postedAt": "2026-11-01T22:56:51.215Z",
+      "mainTweetId": "2117028090966872362",
+      "replyTweetId": "2117028102551556443",
       "simulated": false,
       "retweetedBy3K": true
     }
