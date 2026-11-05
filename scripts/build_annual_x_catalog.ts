@@ -1,3 +1,18 @@
+/**
+ * PromptShift X (Twitter) Annual Catalog Builder — v3 "Marketing & CTA" edition
+ *
+ * Tone: simple, direct, commercial English. Every main tweet ends with a clear
+ * call-to-action strictly pointing to the reply ("👇 Link in the reply", "Link in the reply 👇").
+ * The main tweet never relies on bio links and never contains a URL (keeps full X reach,
+ * especially when reposted by @jeanyvesgarcin). The auto-reply carries the offer +
+ * https://promptshift.dev.
+ *
+ * Posts already broadcast (listed in data/x_posts_history.json) are preserved
+ * verbatim at the top of the catalog so the autopilot resumes at the next slot.
+ *
+ * Run: npx tsx scripts/build_annual_x_catalog.ts
+ */
+
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -17,574 +32,567 @@ export interface XPost {
   replyTweet: string;
 }
 
+type Category = XPost['category'];
+
+interface Draft {
+  family: string;
+  key: string; // used to space out similar posts
+  category: Category;
+  body: string; // main tweet WITHOUT CTA
+  leads: string[]; // candidate first lines for the reply
+}
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const CATALOG_FILE = path.join(DATA_DIR, 'x_annual_posts_catalog.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'x_posts_history.json');
+const TOTAL_DAYS = 365;
+const SIX_MONTH_POSTS = 368;
+
 /**
- * Computes X (Twitter) weighted character length:
- * - Standard ASCII / Latin-1 characters count as 1
- * - Emojis / Astral plane / CJK characters (> U+10FF) count as 2
- * - http(s):// URLs count as 23 chars per t.co wrapping
+ * X weighted length: chars > U+10FF (emojis, CJK, arrows) count as 2,
+ * every http(s) URL counts as 23 (t.co).
  */
 function getXWeightedLength(text: string): number {
   const urlRegex = /https?:\/\/[^\s]+/g;
-  const withoutUrls = text.replace(urlRegex, '');
   const urls = text.match(urlRegex) || [];
   let count = urls.length * 23;
-  for (const ch of withoutUrls) {
-    const code = ch.codePointAt(0) || 0;
-    count += code > 0x10ff ? 2 : 1;
+  for (const ch of text.replace(urlRegex, '')) {
+    count += (ch.codePointAt(0) || 0) > 0x10ff ? 2 : 1;
   }
   return count;
 }
 
-// Preserve the exact 3 historical posts already broadcast in data/x_posts_history.json
-const HISTORICAL_BROADCASTED_POSTS: XPost[] = [
-  {
-    id: 'post-d001-morning',
-    category: 'ast-parity',
-    slot: 'morning',
-    mainTweet:
-      'Windsurf Cascade vs Cursor Rules:\n\n.windsurfrules and .cursorrules use incompatible directive headers. Switching editors without AST transpilation breaks agent flow.\n\n$ npx promptshift --source windsurf --target cursor',
-    replyTweet:
-      'Stop wasting 3 hours manually reformatting AI instructions. The $1.99 Single Pass pays for itself on day 1.\n\n👉 1-Click interactive studio:\nhttps://promptshift.dev',
-  },
-  {
-    id: 'post-d001-afternoon',
-    category: 'security',
-    slot: 'afternoon',
-    mainTweet:
-      'Binary magic byte protection:\nAI coding rules should only contain markdown and text. PromptShift blocks Windows PE, ELF, and Mach-O executables in-RAM.\n\nClean configs only:\n$ npx promptshift',
-    replyTweet:
-      'PromptShift parses, deduplicates, and sanitizes API keys in-RAM with zero server retention.\n\n🔒 Sovereign universal bridge for developers ($1.99):\nhttps://promptshift.dev',
-  },
-  {
-    id: 'post-d002-morning',
-    category: 'token-optimization',
-    slot: 'morning',
-    mainTweet:
-      'Multi-agent token budget compounding:\nIn multi-agent swarms, passing bloated instructions across 4 subagents compounds token waste 4x. Clean directives are mandatory.\n\nOptimize swarm guidelines:\n$ npx promptshift --to=gemini',
-    replyTweet:
-      'One source of truth for all your AI coding assistants. Export to Cursor, Claude, Copilot & Gemini simultaneously.\n\n⚡ Universal 4-in-1 Pass ($1.99):\nhttps://promptshift.dev',
-  },
-];
-
-// ============================================================================
-// HANDCRAFTED HIGH-VIRALITY STANDALONE POST BANKS (CALIBRATED FOR REPOSTS BY @jeanyvesgarcin)
-// Strictly ZERO external URLs in mainTweet, <= 265 weighted chars
-// ============================================================================
-
-const MCP_ECOSYSTEM_POSTS: string[] = [
-  `PromptShift is officially Grade-A certified on the Glama MCP Registry.\n\nYour Claude Desktop & Cursor agents can now transpile rules, redact leaked API keys, and benchmark AST parity directly over STDIO.\n\nZero disk writes:\n$ npx promptshift --mcp`,
-  `Stop asking LLMs to rewrite their own system prompts.\n\nConnect a deterministic MCP tool instead:\n1. Agent reads .cursor/rules/*.mdc\n2. Calls promptshift_transpile in RAM\n3. Writes verified CLAUDE.md (98.5% AST parity)\n\n$ npx promptshift --mcp`,
-  `Why STDIO MCP beats cloud wrappers for AI config files:\n\n• 0ms network roundtrip\n• 0 third-party prompt logging\n• Sub-15ms JSON-RPC 2.0 execution\n• Automatic secret redaction before disk write\n\nAdd to Claude Desktop:\n$ npx promptshift --mcp`,
-  `3 MCP servers every multi-IDE repo needs in 2026:\n\n1. filesystem -> read/write local rule files\n2. github -> open sync PRs automatically\n3. promptshift -> deterministic AST transpilation + secret scrubbing\n\nRun locally:\n$ npx promptshift --mcp`,
-  `Inside our Glama Firecracker microVM audit:\n\n• Base: node:22-alpine (unprivileged user)\n• Cold boot to JSON-RPC ping: <40ms\n• External runtime dependencies: 0\n• TDQS Tool Schema Grade: 5-Star\n\nTest the MCP server:\n$ npx promptshift --mcp`,
-  `Ever wondered if converting .cursorrules to CLAUDE.md silently dropped a constraint?\n\nOur MCP server exposes promptshift_validate_ast:\nIt benchmarks semantic fidelity in RAM and flags prompt drift before you commit.\n\n$ npx promptshift --mcp`,
-  `Before your AI coding agent commits a new rule file, have it call promptshift_sanitize_secrets via MCP.\n\nScrubs sk-proj-*, sk-ant-*, AKIA*, ghp_*, and sk_live_* in memory with zero retention.\n\n1-line setup:\n$ npx promptshift --mcp`,
-  `Claude Desktop config tip:\n\nAdd "promptshift": { "command": "npx", "args": ["-y", "promptshift", "--mcp"] }\n\nNow ask Claude:\n"Convert this repo's Cursor .mdc rules into a clean CLAUDE.md and verify AST parity."`,
-  `Why Tool Definition Quality Score (TDQS) matters for MCP:\n\nVague 1-line tool descriptions make agents hallucinate arguments.\nExplicit "when to use / when NOT to use" schemas cut wrong tool calls by >80%.\n\nSee it live:\n$ npx promptshift --mcp`,
-  `Cursor MCP + Claude Code CLI workflow:\n\nEdit modular .cursor/rules/*.mdc in Cursor.\nLet the PromptShift MCP tool compile deterministic CLAUDE.md + Copilot instructions automatically in RAM.\n\nZero manual copy-paste:\n$ npx promptshift --mcp`,
-  `Most MCP servers pull 150+ npm packages just to parse JSON-RPC.\n\nPromptShift's STDIO MCP binary uses 0 external dependencies.\nPure Node core. Instant startup. Zero supply-chain bloat.\n\nVerify it yourself:\n$ npx promptshift --mcp`,
-  `Agentic self-healing for repo configs:\n\nWhen a PR updates .cursor/rules/api.mdc, an autonomous agent running PromptShift MCP detects drift, transpiles CLAUDE.md, and validates 98.5% AST fidelity.\n\nBootstrap now:\n$ npx promptshift --mcp`,
-  `Running Cline or Roo Code alongside Cursor?\n\nInstead of duplicating 500 lines of architecture rules, expose PromptShift over STDIO MCP and generate clean target rulebooks on demand.\n\nOne command:\n$ npx promptshift --mcp`,
-  `How MCP HTTP-402 / quota previews should work for devs:\n\n1. Never block small repos (<=2 rule files = 100% free)\n2. Unlock the master output file immediately to prove AST quality\n3. Zero-signup unlock for large repos\n\n$ npx promptshift --mcp`,
-  `Dockerized MCP for strict enterprise sandboxes:\n\ndocker build -t promptshift .\ndocker run -i --rm promptshift\n\nRuns as non-root user, 100% air-gapped in RAM, speaking pure JSON-RPC 2.0 over STDIO.`,
-  `Why AI agents love deterministic MCP tools:\n\nWhen Claude calls an LLM to convert YAML frontmatter, output varies every run.\nWhen Claude calls promptshift_transpile, the AST output is 100% idempotent.\n\n$ npx promptshift --mcp`,
-  `Windsurf Cascade + Claude Desktop harmony:\n\nKeep .windsurfrules synced with Claude Projects XML bundles without touching a browser.\nJust wire up the STDIO MCP bridge:\n\n$ npx promptshift --mcp`,
-  `Testing MCP liveness the right way:\n\nYour STDIO server must handle:\n• ping -> {}\n• notifications/initialized -> silent ack\n• initialize -> capabilities + serverInfo\n• tools/list -> full JSON schema\n\nTry ours:\n$ npx promptshift --mcp`,
-  `Stop pasting proprietary system prompts into web chatbots just to reformat them.\n\nRun PromptShift locally via STDIO MCP. Your repo's rules never leave your machine's RAM.\n\n$ npx promptshift --mcp`,
-  `Multi-repo founder hack:\n\nKeep one battle-tested architecture prompt.\nUse PromptShift MCP inside Claude Desktop to stamp out Cursor, Copilot, Windsurf & Gemini configs for every new repo in 2 seconds.\n\n$ npx promptshift --mcp`,
-];
-
-const SYNTAX_TRAPS_POSTS: string[] = [
-  `Infamous Cursor .mdc bug that wastes hours:\n\n---\ndescription: React rules\nglobs: *.tsx\n---\n\nIn YAML, an unquoted * starts an alias anchor!\nCursor's parser fails silently and ignores the ENTIRE rule file.\n\nFix & validate:\n$ npx promptshift --check`,
-  `Cursor .mdc silent trap #2:\n\nSetting alwaysApply: false WITHOUT a clear description string means Cursor's semantic router never attaches your rule—even when globs match.\n\nGenerate valid .mdc headers automatically:\n$ npx promptshift --to=cursor`,
-  `Why pasting .cursor/rules/*.mdc into CLAUDE.md backfires:\n\nLeftover "--- globs: src/**/*.ts ---" blocks confuse Claude Code into thinking rules are metadata comments rather than active imperatives.\n\nStrip & map AST cleanly:\n$ npx promptshift --to=claude`,
-  `Windows CRLF trap in .cursor/rules/:\n\nMixed \\r\\n inside YAML frontmatter delimiters (---) breaks frontmatter extraction in several AI IDE extensions. Zero errors shown—your agent just codes blind.\n\nAudit your repo:\n$ npx promptshift --check`,
-  `GitHub Copilot instruction trap:\n\nCopilot reads .github/copilot-instructions.md, NOT .cursorrules or CLAUDE.md.\nIf 3 devs on your team use Copilot and you only maintain .cursorrules, they ship unguarded code.\n\n$ npx promptshift --to=copilot`,
-  `OpenAI Custom GPT ceiling trap:\n\nCustom GPT instructions hard-cap at 8,000 chars.\nPasting a 14k-char CLAUDE.md truncates your bottom security constraints!\nPromptShift splits overflow into structured Knowledge bundles.\n\n$ npx promptshift --to=openai`,
-  `Why "Never use X" disappears during manual prompt edits:\n\nWhen devs summarize long .cursorrules for another editor, negative constraints ("NEVER expose service_role", "NO default exports") get cut first.\n\nPreserve 98.5% AST:\n$ npx promptshift --to=claude`,
-  `UTF-8 BOM (Byte Order Mark) bug:\n\nIf an editor saves .cursor/rules/auth.mdc with a leading UTF-8 BOM, the opening --- isn't at byte 0.\nFrontmatter parsing fails silently. Your auth rules vanish.\n\nCheck in 0.4s:\n$ npx promptshift --check`,
-  `Cursor legacy trap:\n\nMaintaining BOTH a root .cursorrules file AND .cursor/rules/*.mdc with conflicting instructions causes non-deterministic precedence in agent loops.\n\nConsolidate into clean scoped .mdc:\n$ npx promptshift --to=cursor`,
-  `Claude Projects XML vs raw Markdown:\n\nClaude's attention mechanism tracks <instructions> and <constraints> XML boundaries far better than flat walls of text in multi-file contexts.\n\nCompile XML + CLAUDE.md in 1 shot:\n$ npx promptshift --to=claude`,
-  `Comma-separated globs trap in .mdc:\n\nglobs: src/*.ts, lib/*.ts (unquoted or malformed bracket arrays) frequently breaks glob matching across IDE versions.\n\nStandardize every rule header deterministically:\n$ npx promptshift --to=cursor`,
-  `Windsurf .windsurfrules vs Cursor .mdc:\n\nWindsurf expects unified Cascade markdown directives, while Cursor thrives on file-scoped .mdc modules.\nCopy-pasting 1:1 degrades both editors.\n\nBridge them cleanly:\n$ npx promptshift --to=windsurf`,
-  ` Gemini CLI & Antigravity config layout:\n\nGemini looks for GEMINI.md + AGENTS.md + .agents/rules/*.md.\nManually syncing those with .cursor/rules/ across every sprint is pure toil.\n\nTranspile in 0.4s:\n$ npx promptshift --to=gemini`,
-  `Markdown heading depth trap:\n\nJumping from # H1 straight to #### H4 inside CLAUDE.md flattens semantic grouping when agents chunk long instruction trees.\n\nNormalize AST hierarchy automatically:\n$ npx promptshift --to=claude`,
-  `Code-fence leakage in AI rulebooks:\n\nUnclosed triple backticks (\`\`\`) inside an example rule turn the bottom 60% of your CLAUDE.md into a literal code block—disabling every rule below it!\n\nCatch it instantly:\n$ npx promptshift --check`,
-  `@file reference drift:\n\nCursor rules use @docs/schema.sql references.\nPaste that raw into Copilot or OpenAI Assistants and the agent hallucinates a missing path.\n\nTranspile cross-IDE references cleanly:\n$ npx promptshift --to=claude`,
-  `Duplicate rule priority collision:\n\nRule A: "Use vitest for all tests"\nRule B (copied 4 months ago): "Use jest mocks"\n\nResult: AI writes broken hybrid test files.\nAudit rule drift before coding:\n$ npx promptshift --check`,
-  `YAML colon trap in .cursor/rules/*.mdc:\n\ndescription: API: strict Zod validation\n\nThat unquoted second colon crashes strict YAML frontmatter parsers! Always quote descriptions—or let AST compilation handle it:\n$ npx promptshift --to=cursor`,
-  `Monorepo subfolder trap:\n\nRoot CLAUDE.md doesn't automatically become scoped .cursor/rules/ globs for packages/web and packages/api unless paths are mapped.\n\nPreview mapped output:\n$ npx promptshift --dry-run --to=cursor`,
-  `Why LLM-based "prompt converters" fail:\n\nAsk an LLM to convert 12 .mdc files to CLAUDE.md and it summarizes away 30% of your edge-case rules.\nCompilers shouldn't hallucinate. Use deterministic AST:\n$ npx promptshift --to=claude`,
-];
-
-const SECURITY_POSTS: string[] = [
-  `DevSecOps wake-up call:\n\nDevelopers paste "example" curl commands into .cursorrules to show AI how internal APIs work—accidentally committing live Bearer & sk-proj-* keys.\n\nScan & redact in RAM:\n$ npx promptshift --check`,
-  `1 in 8 public .cursorrules / CLAUDE.md files audited on GitHub contains hardcoded secrets, internal endpoints, or staging tokens.\n\nNever push raw AI configs without an OWASP secret scan:\n$ npx promptshift --check`,
-  `Stripe sk_live_* & rk_live_* leak vector:\n\nWhen tuning AI rules for billing webhooks, devs often paste real dashboard snippets into prompt files.\nPromptShift auto-redacts 15+ credential patterns in RAM.\n\n$ npx promptshift --check`,
-  `Anthropic sk-ant-api03-* & OpenAI sk-proj-* keys inside CLAUDE.md get indexed by git history forever—even if you delete the line 2 commits later.\n\nCatch secrets BEFORE git add:\n$ npx promptshift --check`,
-  `Supabase service_role JWT trap:\n\nPutting a real service_role key in an AI rule example bypasses Row Level Security across your entire Postgres DB if pushed.\n\nSanitize rulebooks locally in 0.4s:\n$ npx promptshift --check`,
-  `Why online "free prompt converters" are a compliance nightmare:\n\nYour CLAUDE.md reveals your architecture, auth flaws, and DB schema.\nPromptShift runs 100% in ephemeral RAM—0 DB writes, 0 prompt logs.\n\n$ npx promptshift --to=cursor`,
-  `Zip Slip vulnerability in shared AI rule packs:\n\nDownloading community .cursorrules ZIP bundles? Crafted "../../.ssh/authorized_keys" archive entries can escape extraction paths.\nPromptShift blocks path traversal in RAM.`,
-  `AWS AKIA* access keys in DevOps prompt files:\n\nAutomated bots scrape public GitHub commits for AKIA patterns in <90 seconds.\nRun an in-RAM secret check on your AI instructions on every PR:\n\n$ npx promptshift --init-ci`,
-  `GitHub ghp_* and github_pat_* tokens often sneak into MCP & CI prompt instructions.\n\nPromptShift's heuristic scanner replaces exposed tokens with [REDACTED_API_KEY] before writing target files.\n\n$ npx promptshift --to=claude`,
-  `SOC-2 & GDPR Art. 28 rule for engineering leaders:\n\nInternal system prompts are core IP.\nTools that log prompts to third-party databases fail security review.\nPromptShift = zero retention, local CLI & in-RAM API.`,
-  `Private RSA / OpenSSH headers inside AI agent instructions:\n\nNever let -----BEGIN PRIVATE KEY----- touch a prompt bundle.\nPromptShift strips cryptographic key blocks automatically during AST transpilation.\n\n$ npx promptshift --check`,
-  `Binary injection defense for AI configs:\n\nRule packs should NEVER contain disguised executables.\nPromptShift inspects magic bytes and rejects Windows PE, Linux ELF & macOS Mach-O binaries in RAM.\n\n$ npx promptshift --check`,
-  `Slack xoxb-* & Discord bot tokens inside multi-agent rules:\n\nCopy-pasting .env examples into CLAUDE.md is the #1 accidental leak in indie SaaS repos.\nAudit your workspace in 400ms:\n\n$ npx promptshift --check`,
-  `Google AIza* & HuggingFace hf_* keys in ML repos:\n\nNotebook devs turning prompts into Cursor rules routinely leave API keys in code blocks.\nScrub every rule file deterministically:\n\n$ npx promptshift --to=cursor`,
-  `GitLab glpat-* & Postgres connection strings (postgres://user:pass@host) in backend rules:\n\nOne leaked staging DB URL gives attackers your schema.\nEnforce automated PR secret guards:\n\n$ npx promptshift --init-ci`,
-  `Zip Bomb protection on config uploads:\n\nA 40KB malicious archive can decompress to 4GB and crash naive CI runners.\nPromptShift enforces strict compression-ratio & byte ceilings in memory.\n\nSafe by design:\n$ npx promptshift --check`,
-];
-
-const TOKEN_OPTIMIZATION_POSTS: string[] = [
-  `Do the token math on bloated AI rules:\n\n4,200 redundant tokens in CLAUDE.md\n× 60 agent turns/day\n× 22 workdays\n= 5.54M wasted input tokens/month PER dev.\n\nSplit into glob-scoped rules in 0.4s:\n$ npx promptshift --to=cursor`,
-  `"Lost in the Middle" hits AI coding rules hard:\n\nWhen .cursorrules exceeds ~600 lines, LLM recall on rules between lines 200-450 drops sharply.\nModularize into targeted .mdc files so only relevant rules load:\n$ npx promptshift --to=cursor`,
-  `Prompt caching trap in Claude Code:\n\nConstantly hand-editing random typos at the top of a giant CLAUDE.md invalidates your prefix cache—multiplying input token costs up to 10x.\nCompile clean, stable AST blocks:\n$ npx promptshift --to=claude`,
-  `Cursor alwaysApply: true mistake:\n\nMarking 15 .mdc files as alwaysApply: true injects database, CSS, and CI rules even when editing a README!\nScope rules by file globs instead:\n\n$ npx promptshift --to=cursor`,
-  `Benchmark on a real 14-rule SaaS repo:\n\n• Raw copy-pasted instructions: 6,120 tokens\n• After PromptShift AST deduplication: 2,790 tokens (-54%)\n• Constraint adherence: 98.5% parity\n\nLess noise = smarter codegen:\n$ npx promptshift`,
-  `Why reasoning models (o3, Claude Sonnet/Opus) stall on messy rulebooks:\n\nContradictory directives force extra thinking tokens on every turn—slowing responses by 4-8 seconds.\nAudit rule hygiene:\n$ npx promptshift --check`,
-  `Subagent context fan-out:\n\nSpawn 5 parallel subagents in Claude Code with an unpruned 5,000-token root prompt = 25,000 tokens burned before reading a single source file!\n\nKeep root directives lean:\n$ npx promptshift --to=claude`,
-  `Prose vs AST directives:\n\nBad (42 tokens): "Please remember that whenever you are creating a new React component..."\nGood (9 tokens): "React components: functional TSX, named exports only."\n\nClean your rule tree:\n$ npx promptshift`,
-  `Why splitting a 900-line prompt boosts code quality overnight:\n\nWhen editing SQL migrations, your AI agent needs Postgres & RLS rules—not 400 lines of Tailwind animation guidelines.\n\nModularize fast:\n$ npx promptshift --to=cursor`,
-  `Hidden cost of copy-pasting stacktrace examples into .cursorrules:\n\nA single 120-line error log example eats ~1,100 tokens on EVERY chat turn for months.\nAudit and trim bloated rule files:\n\n$ npx promptshift --check`,
-  `Context window != attention budget:\n\nJust because a model accepts 200k or 1M tokens doesn't mean 10k tokens of messy rules won't dilute instruction following.\nHigh-signal AST wins every time:\n$ npx promptshift --to=claude`,
-  `Agency token savings case study:\n\n8 engineers × 50 prompts/day.\nPruning redundant boilerplate across CLAUDE.md and .cursor/rules/ saved >$1,100/yr in API usage while cutting latency.\n\nTest locally:\n$ npx promptshift --dry-run`,
-];
-
-const MULTI_AGENT_FOUNDER_POSTS: string[] = [
-  `The 2026 engineering team reality:\n\n• Tech Lead lives in Claude Code CLI\n• Frontend ships in Cursor\n• Backend uses Copilot\n• Contractor uses Windsurf\n\nStop fighting over editors. Sync 1 rule AST across all 4:\n$ npx promptshift`,
-  `AI editor lock-in is a myth.\n\nIf you spent 4 months perfecting .cursor/rules/*.mdc, you aren't married to Cursor.\nTranspile your entire rulebook to Claude Code, Copilot, or Windsurf in 0.4s:\n\n$ npx promptshift --to=claude`,
-  `Indie hacker / SaaS founder workflow:\n\nBuild UI in Cursor (scoped .mdc rules).\nRun deep backend refactors in Claude Code (CLAUDE.md).\nKeep both brains 100% synchronized in 1 command:\n\n$ npx promptshift --to=claude`,
-  `Why forcing 20 developers onto one AI IDE fails:\n\nTop engineers have muscle memory.\nStandardize the ARCHITECTURE RULES, not the text editor.\nGenerate Cursor, Claude, Copilot & Gemini configs from 1 source:\n$ npx promptshift`,
-  `Software agency superpower:\n\nClient A mandates GitHub Copilot.\nClient B uses Cursor.\nClient C wants Claude Projects.\n\nReuse your battle-tested security & clean-code rules across every client in 2s:\n$ npx promptshift`,
-  `New engineer onboarding in 2026:\n\nOld way: 40-page Notion wiki nobody reads.\nNew way: Verified .cursor/rules/ + CLAUDE.md + copilot-instructions.md synced in git so their AI writes idiomatic code on Day 1.\n\n$ npx promptshift`,
-  `Open-source maintainer tip:\n\nContributors submit PRs using Cursor, Claude Code, Cline, and Copilot.\nShip synced rule files for all 4 so AI-assisted PRs actually respect your repo's style!\n\n$ npx promptshift --init-ci`,
-  `Switching AI models mid-quarter?\n\nModel upgrades happen monthly. Teams with portable, deterministic rule ASTs switch ecosystems in 30 seconds instead of 3 days.\n\nTest your repo's portability:\n$ npx promptshift --check`,
-  `Solo founder leverage:\n\nWhen you jump between 4 microservices and 2 frontends, rule drift makes your AI introduce bugs.\nStamp uniform, secret-scrubbed guidelines across every repo:\n\n$ npx promptshift --to=cursor`,
-  `Why CTOs standardize AI instructions in Git:\n\nPrompts living only inside one dev's local UI settings vanish when they leave.\nChecked-in, cross-IDE transpiled rules turn tribal knowledge into repo assets.\n\n$ npx promptshift`,
-  `Pair programming across different AI tools:\n\nDriver in Cursor + Navigator running Claude Code in terminal.\nWhen both tools read identical AST-verified constraints, architectural friction drops to zero.\n\n$ npx promptshift --to=claude`,
-  `Evaluating Windsurf vs Cursor vs Claude Code on a real sprint?\n\nBenchmark fairly: feed all three the exact same transpiled instruction hierarchy (98.5% AST parity) before judging code quality!\n\n$ npx promptshift --dry-run`,
-];
-
-const CICD_TERMINAL_POSTS: string[] = [
-  `How AI rule drift happens in every fast team:\n\nMon: Dev updates CLAUDE.md\nWed: Another dev edits .cursorrules\nFri: Prod bug because Cursor missed Monday's auth rule.\n\nBlock drift in GitHub Actions:\n$ npx promptshift --init-ci`,
-  `10-second CI/CD upgrade for any TypeScript or Python repo:\n\nRun:\n$ npx promptshift --init-ci\n\nGenerates .github/workflows/promptshift-parity.yml to audit rule parity + leaked API keys on every Pull Request.`,
-  `Machine-readable AI config audits for CI pipelines:\n\n$ npx promptshift --check --json\n\nOutputs structured JSON with AST parity score, detected source, and redacted secret count. Pipe straight into jq or PR comments!`,
-  `Zero-install terminal speedrun:\n\n1. cd your-saas-repo\n2. npx promptshift --dry-run --to=claude\n3. Inspect generated files & secret scan in 400ms—nothing written to disk until you're ready.`,
-  `Show contributors your repo is AI-agent ready:\n\n$ npx promptshift --badge\n\nGenerates a live certified 98.5% AST Parity badge for your GitHub README alongside your CI & MIT license shields.`,
-  `Pre-push sanity check before Friday deploys:\n\nDid anyone paste a staging token into .cursor/rules/ or leave CLAUDE.md out of sync?\nOne sub-second check catches both:\n\n$ npx promptshift --check`,
-  `Why deterministic compilers beat LLM scripts in GitHub Actions:\n\n• 0 OpenAI/Anthropic API keys needed in CI\n• 0 flaky network timeouts\n• 0.4s execution time\n• 100% reproducible exit codes\n\n$ npx promptshift --init-ci`,
-  `Migrating legacy .cursorrules to modern .cursor/rules/*.mdc + CLAUDE.md + .github/copilot-instructions.md:\n\nDon't burn your Saturday doing YAML plumbing by hand.\nRun once, commit, ship:\n$ npx promptshift --to=claude`,
-];
-
-// ============================================================================
-// 60 REAL-WORLD PRODUCTION STACKS × 9 DISTINCT ENGINEERING ANGLES = 540 UNIQUE BLUEPRINTS
-// ============================================================================
-
-interface StackSpec {
-  name: string;
-  glob: string;
-  rule: string;
-  antiPattern: string;
+function mulberry32(seed: number): () => number {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-const PRODUCTION_STACKS: StackSpec[] = [
-  { name: 'Next.js 15 App Router', glob: 'app/**/*.tsx', rule: 'Enforce Server Components by default; validate all Server Actions with Zod', antiPattern: 'leaking DB queries into "use client" files' },
-  { name: 'FastAPI + Pydantic v2', glob: 'app/routers/**/*.py', rule: 'Require async def endpoints, strict response_model, and Depends() injection', antiPattern: 'blocking sync I/O inside async event loops' },
-  { name: 'Rust + Axum', glob: 'src/**/*.rs', rule: 'Forbid .unwrap() in handlers; return typed AppError implementing IntoResponse', antiPattern: 'panicking worker threads with raw unwrap()' },
-  { name: 'Go gRPC Services', glob: 'internal/**/*.go', rule: 'Propagate context.Context first arg and wrap all errors via fmt.Errorf("%w")', antiPattern: 'swallowing cancellation signals in goroutines' },
-  { name: 'TypeScript 5.8 Strict', glob: 'src/**/*.ts', rule: 'Ban explicit any; enforce exhaustive switch checks with satisfies never', antiPattern: 'silencing type errors with as unknown as T' },
-  { name: 'Python uv + Ruff', glob: 'packages/**/*.py', rule: 'Never emit pip install; enforce uv add and strict ruff check + format', antiPattern: 'polluting globalenvs with legacy requirements.txt' },
-  { name: 'Tailwind CSS v4', glob: 'src/components/**/*.tsx', rule: 'Use CSS-first @theme tokens; ban arbitrary magic hex values in classNames', antiPattern: 'scattering hardcoded [#1a2b3c] across 40 components' },
-  { name: 'Supabase Postgres + RLS', glob: 'supabase/migrations/*.sql', rule: 'Enable Row Level Security on every CREATE TABLE with explicit auth.uid() policies', antiPattern: 'shipping public tables with RLS disabled' },
-  { name: 'Drizzle ORM', glob: 'src/db/**/*.ts', rule: 'Use prepared parameterized queries and explicit transaction rollbacks', antiPattern: 'interpolating raw user strings inside sql`` templates' },
-  { name: 'Prisma Monorepo', glob: 'packages/db/**/*.ts', rule: 'Instantiate a single global PrismaClient singleton; select explicit fields', antiPattern: 'spawning connection-pool exhaustion in serverless dev' },
-  { name: 'Cloudflare Workers + Hono', glob: 'src/index.ts', rule: 'Stick to Web Standard APIs; zero Node fs/net imports; bind secrets via c.env', antiPattern: 'importing Node-only crypto/fs polyfills that break edge deploys' },
-  { name: 'Svelte 5 Runes', glob: 'src/lib/**/*.svelte', rule: 'Use $state, $derived, and $props runes exclusively; ban legacy export let', antiPattern: 'mixing Svelte 4 reactive $: labels into Svelte 5 components' },
-  { name: 'Astro 5 Islands', glob: 'src/pages/**/*.astro', rule: 'Ship zero JS by default; add client:visible only on interactive islands', antiPattern: 'hydrating static marketing layouts with client:load everywhere' },
-  { name: 'Vue 3 Composition API', glob: 'src/**/*.vue', rule: 'Use <script setup lang="ts"> with typed defineProps<T>() only', antiPattern: 'falling back to legacy Options API mixins' },
-  { name: 'Nuxt 4 Fullstack', glob: 'server/api/**/*.ts', rule: 'Validate event payloads via readValidatedBody(event, zodSchema)', antiPattern: 'trusting unvalidated readBody() inputs in Nitro routes' },
-  { name: 'React Router v7 / Remix', glob: 'app/routes/**/*.tsx', rule: 'Keep mutations in action() and data reads in loader(); never fetch in useEffect', antiPattern: 'triggering client waterfall fetches inside useEffect' },
-  { name: 'Flutter + Dart 3', glob: 'lib/**/*.dart', rule: 'Use sealed classes with exhaustive switch expressions and const constructors', antiPattern: 'rebuilding entire widget trees without const keys' },
-  { name: 'SwiftUI + Swift 6', glob: 'Sources/**/*.swift', rule: 'Enforce @Observable macro and strict MainActor concurrency isolation', antiPattern: 'using deprecated ObservableObject with @Published races' },
-  { name: 'Kotlin Jetpack Compose', glob: 'app/src/**/*.kt', rule: 'Hoist UI state via unidirectional StateFlow; keep composables stateless', antiPattern: 'mutating side-effect state directly inside @Composable bodies' },
-  { name: 'React Native + Expo SDK', glob: 'app/**/*.tsx', rule: 'Use Expo Router typed routes and FlashList for virtualized feeds', antiPattern: 'rendering 500 items inside unvirtualized ScrollView' },
-  { name: 'Tauri v2 Desktop', glob: 'src-tauri/src/**/*.rs', rule: 'Scope IPC commands with minimum capability permissions in capabilities/*.json', antiPattern: 'exposing unrestricted shell execution to the webview' },
-  { name: 'Solidity + Foundry', glob: 'contracts/**/*.sol', rule: 'Enforce Checks-Effects-Interactions and ReentrancyGuard on external calls', antiPattern: 'updating balances after external ETH transfers' },
-  { name: 'Solana Anchor (Rust)', glob: 'programs/**/*.rs', rule: 'Verify signer + PDA seeds constraints on every Account8 struct', antiPattern: 'accepting unchecked AccountInfo without owner verification' },
-  { name: 'Terraform / OpenTofu', glob: 'infra/**/*.tf', rule: 'Pin provider versions, tag all resources, and never hardcode IAM secrets', antiPattern: 'committing wildcard Action: "*" IAM policies' },
-  { name: 'Kubernetes Helm Charts', glob: 'charts/**/*.yaml', rule: 'Set resources.limits, readOnlyRootFilesystem: true, and runAsNonRoot: true', antiPattern: 'deploying privileged pods with unbounded memory' },
-  { name: 'Turborepo Workspaces', glob: 'packages/*/src/**/*.ts', rule: 'Import exclusively via declared package exports; ban relative ../.. cross-package paths', antiPattern: 'reaching into sibling package internals and breaking cache' },
-  { name: 'Bun HTTP + SQLite', glob: 'src/**/*.ts', rule: 'Use native Bun.serve() and parameterized db.query() bindings', antiPattern: 'installing heavy Express middleware chains on Bun runtime' },
-  { name: 'Deno 2 TypeScript', glob: 'src/**/*.ts', rule: 'Use explicitjsr:/npm: specifiers and least-privilege --allow-net flags', antiPattern: 'running tasks with blanket --allow-all in production' },
-  { name: 'GraphQL Yoga + Pothos', glob: 'src/graphql/**/*.ts', rule: 'Enforce DataLoader batching on every nested relation and max query depth <= 6', antiPattern: 'shipping N+1 SQL queries on nested GraphQL resolvers' },
-  { name: 'tRPC v11 End-to-End', glob: 'src/server/routers/*.ts', rule: 'Protect authenticated procedures via protectedProcedure middleware + Zod input', antiPattern: 'exposing internal mutations on publicProcedure' },
-  { name: 'Playwright E2E Suite', glob: 'tests/e2e/**/*.spec.ts', rule: 'Locate elements by getByRole / getByTestId; zero hard waitForTimeout() sleeps', antiPattern: 'writing flaky CSS-selector tests with sleep(3000)' },
-  { name: 'Vitest Unit Testing', glob: 'src/**/*.test.ts', rule: 'Reset mocks in afterEach and test deterministic edge cases without real network calls', antiPattern: 'leaking global vi.mock state across test files' },
-  { name: 'Stripe Billing Webhooks', glob: 'app/api/webhooks/**/*.ts', rule: 'Verify stripe-signature against raw request body and enforce idempotency keys', antiPattern: 'parsing JSON before verifying webhook cryptographic signatures' },
-  { name: 'Polar MoR Checkouts', glob: 'lib/payments/**/*.ts', rule: 'Validate Standard Webhooks HMAC signatures and verify Order UUID formats', antiPattern: 'unlocking paid tiers on unverified client query params' },
-  { name: 'Auth.js / OAuth2 Flows', glob: 'src/auth/**/*.ts', rule: 'Enforce state + PKCE checks, HttpOnly SameSite=Lax cookies, and short JWT TTLs', antiPattern: 'storing raw access tokens in browser localStorage' },
-  { name: 'Upstash Redis Rate-Limit', glob: 'src/middleware/**/*.ts', rule: 'Apply sliding-window rate limits per IP + API key before expensive compute', antiPattern: 'leaving LLM or auth endpoints open to unbounded bursts' },
-  { name: 'Postgres pgvector RAG', glob: 'src/retrieval/**/*.ts', rule: 'Use HNSW cosine indexes with pre-filtered tenant_id metadata WHERE clauses', antiPattern: 'leaking cross-tenant embeddings in vector similarity scans' },
-  { name: 'ClickHouse Analytics', glob: 'sql/ch/**/*.sql', rule: 'Filter on primary ORDER BY time-bucket keys first; avoid SELECT * on wide tables', antiPattern: 'triggering full-column scans across billion-row partitions' },
-  { name: 'DuckDB + Polars Data', glob: 'pipelines/**/*.py', rule: 'Use lazy scan_parquet() predicate pushdown; ban row-by-row .iterrows() loops', antiPattern: 'materializing 20GB DataFrames eagerly into RAM' },
-  { name: 'Vercel AI SDK Streams', glob: 'app/api/chat/**/*.ts', rule: 'Use streamText with strict Zod tool parameters and maxSteps: 5 guardrails', antiPattern: 'allowing runaway infinite tool-calling loops' },
-  { name: 'LangGraph Stateful Agents', glob: 'agents/**/*.py', rule: 'Type TypedDict state reducers explicitly and persist checkpoints per thread_id', antiPattern: 'mutating shared global dicts across concurrent runs' },
-  { name: 'Anthropic MCP TypeScript', glob: 'src/mcp/**/*.ts', rule: 'Write pure JSON-RPC to stdout only; route all debug logs strictly to stderr', antiPattern: 'corrupting STDIO JSON-RPC frames with console.log()' },
-  { name: 'OpenAI Agents SDK', glob: 'src/agents/**/*.py', rule: 'Attach input/output tripwire guardrails before handoffs to tool-executing agents', antiPattern: 'passing raw untrusted prompt injections into shell tools' },
-  { name: 'Temporal Durable Workflows', glob: 'workflows/**/*.ts', rule: 'Keep workflow code 100% deterministic; isolate all network/clock calls in Activities', antiPattern: 'calling Math.random() or fetch() directly inside workflow replay' },
-  { name: 'Elixir Phoenix LiveView', glob: 'lib/*_web/live/**/*.ex', rule: 'Use LiveView streams for collections and pattern-match authorized socket assigns', antiPattern: 'holding 10,000 DOM rows in socket memory per user' },
-  { name: 'Rails 8 + Hotwire', glob: 'app/controllers/**/*.rb', rule: 'Enforce strong parameters with expect() and scope queries to Current.user', antiPattern: 'querying Model.find(params[:id]) without tenant scoping' },
-  { name: 'Laravel 12 Actions', glob: 'app/Actions/**/*.php', rule: 'Validate via FormRequest classes, declare strict_types=1, and queue heavy jobs', antiPattern: 'stuffing 300 lines of SQL + mailers inside controller methods' },
-  { name: 'ASP.NET Core 9 Minimal API', glob: 'Endpoints/**/*.cs', rule: 'Use TypedResults, CancellationToken propagation, and AsNoTracking() on read queries', antiPattern: 'tracking read-only EF Core entities on hot paths' },
-  { name: 'Spring Boot 3 Virtual Threads', glob: 'src/main/java/**/*.java', rule: 'Use constructor injection, @Valid DTO records, and avoid synchronized pin blocks', antiPattern: 'pinning carrier threads with legacy synchronized I/O' },
-  { name: 'Zig Systems Code', glob: 'src/**/*.zig', rule: 'Pass explicit std.mem.Allocator and pair allocations with errdefer/defer free', antiPattern: 'hiding global heap allocations without cleanup paths' },
-  { name: 'C++23 Modern CMake', glob: 'src/**/*.cpp', rule: 'Use RAII smart pointers, std::span/std::expected, and zero raw new/delete', antiPattern: 'shipping manual pointer arithmetic and buffer overruns' },
-  { name: 'WebAssembly + Rust', glob: 'crates/wasm/**/*.rs', rule: 'Minimize JS<->Wasm boundary copies; pass typed byte slices across linear memory', antiPattern: 'serializing giant JSON strings across wasm-bindgen on every frame' },
-  { name: 'Playwright + Axe A11y', glob: 'tests/a11y/**/*.ts', rule: 'Assert WCAG 2.1 AA contrast, ARIA labels, and keyboard focus traps on every view', antiPattern: 'shipping clickable <div onClick> elements invisible to keyboards' },
-  { name: 'GraphQL Federation v2', glob: 'subgraphs/**/*.graphql', rule: 'Declare explicit @key entities and ban breaking field removals without @deprecated', antiPattern: 'breaking downstream mobile clients with silent schema edits' },
-  { name: 'Kafka / Redpanda Consumers', glob: 'consumers/**/*.ts', rule: 'Make event handlers idempotent by event_id and route poison pills to DLQ', antiPattern: 'crashing consumer groups in infinite retry loops on bad payloads' },
-  { name: 'GitHub Actions Security', glob: '.github/workflows/*.yml', rule: 'Pin third-party actions to full 40-char commit SHAs and set permissions: read-all', antiPattern: 'interpolating untrusted PR titles directly inside run: bash blocks' },
-  { name: 'Docker Multi-Stage Prod', glob: 'Dockerfile*', rule: 'Copy minimal build artifacts into alpine/distroless and run as non-root USER', antiPattern: 'shipping 1.4GB dev images running as root with .env baked in' },
-  { name: 'OpenTelemetry Tracing', glob: 'src/telemetry/**/*.ts', rule: 'Propagate W3C traceparent headers and scrub PII/tokens from span attributes', antiPattern: 'logging raw Authorization headers into distributed traces' },
-  { name: 'Monorepo Design System', glob: 'packages/ui/src/**/*.tsx', rule: 'Support ref forwarding, semantic Radix/ARIA primitives, and dark-mode tokens', antiPattern: 'hardcoding z-index: 99999 and non-accessible custom dropdowns' },
-  { name: 'Chrome Extension MV3', glob: 'src/background/**/*.ts', rule: 'Design ephemeral service workers using chrome.storage.session—zero global vars', antiPattern: 'relying on in-memory globals that vanish when MV3 suspends' },
-];
-
-function buildStackPost(stack: StackSpec, angle: number): { category: XPost['category']; text: string } {
-  switch (angle % 11) {
-    case 0:
-      return {
-        category: 'ast-parity',
-        text: `${stack.name} drift:\n\nCursor: "${stack.rule}"\n\nSkip CLAUDE.md sync -> Claude Code starts ${stack.antiPattern}.\n\n$ npx promptshift --to=claude`,
-      };
-    case 1:
-      return {
-        category: 'token-optimization',
-        text: `${stack.name} context tip:\n\nDon't load ${stack.name} rules when editing docs.\nScope \`${stack.glob}\` in .cursor/rules/*.mdc to stop ${stack.antiPattern}.\n\n$ npx promptshift --to=cursor`,
-      };
-    case 2:
-      return {
-        category: 'multi-agent',
-        text: `Shipping ${stack.name} across mixed IDEs?\n\nRule: "${stack.rule}"\n\nCompile 1 prompt into Cursor (.mdc), CLAUDE.md & Copilot simultaneously:\n$ npx promptshift --to=copilot`,
-      };
-    case 3:
-      return {
-        category: 'syntax-traps',
-        text: `Why ${stack.name} agents break rules after switching editors:\n\nPasting \`${stack.glob}\` YAML frontmatter raw into CLAUDE.md leads to ${stack.antiPattern}.\n\n$ npx promptshift --to=claude`,
-      };
-    case 4:
-      return {
-        category: 'ci-cd',
-        text: `PR guardrail for ${stack.name}:\n\nStop AI PRs from ${stack.antiPattern}.\nKeep \`${stack.glob}\` rules synced across Cursor, Copilot & Claude on every commit:\n$ npx promptshift --init-ci`,
-      };
-    case 5:
-      return {
-        category: 'mcp-ecosystem',
-        text: `${stack.name} + MCP:\n\nLet Claude Desktop or Cursor call PromptShift MCP to sync "${stack.rule}" on \`${stack.glob}\` in RAM.\n\n$ npx promptshift --mcp`,
-      };
-    case 6:
-      return {
-        category: 'security',
-        text: `Auditing ${stack.name} AI rules:\n\nPrevent ${stack.antiPattern}—and ensure \`${stack.glob}\` rule snippets never leak live API keys.\n\nScan in RAM:\n$ npx promptshift --check`,
-      };
-    case 7:
-      return {
-        category: 'terminal',
-        text: `2s setup for ${stack.name}:\n\nEnforce "${stack.rule}" across Windsurf, Cursor & Claude Code—zero manual markdown edits.\n\n$ npx promptshift --dry-run --to=windsurf`,
-      };
-    case 8:
-      return {
-        category: 'multi-agent',
-        text: `Gemini CLI + Cursor on ${stack.name}:\n\nSync AGENTS.md with \`${stack.glob}\` .mdc rules so neither agent starts ${stack.antiPattern}.\n\n$ npx promptshift --to=gemini`,
-      };
-    case 9:
-      return {
-        category: 'token-optimization',
-        text: `Trim ${stack.name} prompt bloat:\n\nScope "${stack.rule}" strictly to \`${stack.glob}\` instead of 1 giant monolithic root prompt.\n\n$ npx promptshift --check`,
-      };
-    default:
-      return {
-        category: 'ast-parity',
-        text: `Before vs After (${stack.name}):\n\nUnsynced rules: AI keeps ${stack.antiPattern}.\nAST-synced \`${stack.glob}\`: 98.5% parity across every IDE.\n\n$ npx promptshift --to=cursor`,
-      };
+function shuffle<T>(items: T[], seed: number): T[] {
+  const rand = mulberry32(seed);
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+  return arr;
 }
 
+/** Reorders so the same key never appears within `window` consecutive items (best effort). */
+function spreadByKey(items: Draft[], window = 3): Draft[] {
+  const arr = [...items];
+  for (let i = 1; i < arr.length; i++) {
+    const recent = new Set(arr.slice(Math.max(0, i - window), i).map((d) => d.key));
+    if (!recent.has(arr[i].key)) continue;
+    for (let j = i + 1; j < arr.length; j++) {
+      if (!recent.has(arr[j].key)) {
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        break;
+      }
+    }
+  }
+  return arr;
+}
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 // ============================================================================
-// CONTEXT-MATCHED CONVERSION REPLIES (40+ VARIATIONS ACROSS CATEGORIES & OFFERS)
-// Includes Glama Grade-A social proof, Free Starter hook, $1.99 Single Pass, $5.99 Pro, $19.99 Team
+// CALLS-TO-ACTION (11 = prime, rotates independently of the family pattern)
 // ============================================================================
 
-const CATEGORY_REPLIES: Record<XPost['category'], string[]> = {
-  'mcp-ecosystem': [
-    `PromptShift is Grade-A certified on Glama MCP Registry (zero disk retention, 98.5% AST parity).\n\n⚡ Install MCP or try the Web Studio (Free ≤2 files / $1.99 Pass):\nhttps://promptshift.dev`,
-    `Verify our Grade-A MCP server on Glama:\nhttps://glama.ai/mcp/servers/topaisaas-dev/promptshift\n\n🚀 Or transpile Cursor, Claude & Copilot rules in 1 click:\nhttps://promptshift.dev`,
-    `Run PromptShift inside Claude Desktop & Cursor via STDIO MCP—100% in RAM, zero telemetry.\n\n⚡ Live Diff Studio & $1.99 Repo Pass:\nhttps://promptshift.dev`,
-    `Grade-A verified on Glama • 3 deterministic MCP tools (transpile, secret scrub, AST audit).\n\n👉 Try free on small repos or unlock unlimited ($5.99/mo):\nhttps://promptshift.dev`,
-    `Connect your AI coding agents to our official Glama Grade-A MCP server:\nhttps://glama.ai/mcp/servers/topaisaas-dev/promptshift\n\n⚡ Web converter:\nhttps://promptshift.dev`,
-  ],
-  'syntax-traps': [
-    `Stop losing hours to silent YAML & frontmatter parser bugs. PromptShift compiles valid Cursor, Claude, Windsurf & Copilot configs in 0.4s.\n\n⚡ Try free or $1.99 Pass:\nhttps://promptshift.dev`,
-    `Deterministic AST transpilation—zero LLM hallucinations, zero dropped negative constraints (98.5% certified parity).\n\n🧪 Live Diff Inspector:\nhttps://promptshift.dev`,
-    `Test your repo free (≤2 rule files, no signup). Multi-rule repositories unlock instantly for $1.99—cheaper than a coffee.\n\n👉 Check your rules:\nhttps://promptshift.dev`,
-    `Don't let broken .mdc globs silently disable your architecture rules.\n\n⚡ Validate & export 4-in-1 IDE bundles in 2 seconds ($1.99):\nhttps://promptshift.dev`,
-    `One canonical rule AST -> clean .cursor/rules/*.mdc, CLAUDE.md, .windsurfrules & Copilot instructions.\n\n🚀 Try live in browser:\nhttps://promptshift.dev`,
-  ],
-  security: [
-    `PromptShift redacts 15+ API key formats (OpenAI, Anthropic, AWS, GitHub, Stripe) 100% in ephemeral RAM. Zero DB writes.\n\n🔒 Scan free or unlock repo ($1.99):\nhttps://promptshift.dev`,
-    `SOC-2 & GDPR friendly: your proprietary prompts never touch disk or third-party logs.\n\n🛡️ Audit & transpile your AI rules safely:\nhttps://promptshift.dev`,
-    `Catch leaked sk-*, AKIA* & ghp_* keys before they hit git history, while syncing Cursor + Claude rules.\n\n⚡ Free starter / $1.99 Single Pass:\nhttps://promptshift.dev`,
-    `OWASP in-RAM secret sanitizer + Zip Slip shield + 98.5% AST transpiler in one zero-retention tool.\n\n🔒 Try live now:\nhttps://promptshift.dev`,
-    `Protect your team's repos from accidental credential leaks in AI rulebooks ($5.99/mo Pro or $19.99/mo Team CI/CD):\nhttps://promptshift.dev`,
-  ],
-  'token-optimization': [
-    `Cut context bloat by ~50% while keeping 98.5% semantic AST parity across Cursor, Claude Code & Copilot.\n\n⚡ Test free or $1.99 Single Pass:\nhttps://promptshift.dev`,
-    `Stop paying the daily token tax on monolithic rule files. Split into clean glob-scoped modules in 0.4s.\n\n👉 Live AST Studio:\nhttps://promptshift.dev`,
-    `Smarter context = faster agent responses + lower API bills. Pay $1.99 once and save hundreds in wasted input tokens:\nhttps://promptshift.dev`,
-    `Deduplicate redundant directives and preserve 100% of negative guardrails in RAM.\n\n🧪 Benchmark your prompt files live:\nhttps://promptshift.dev`,
-    `Modular .mdc + lean CLAUDE.md generated from a single source of truth.\n\n🚀 Free for ≤2 files • $5.99/mo Pro Unlimited:\nhttps://promptshift.dev`,
-  ],
-  'multi-agent': [
-    `Let every developer use their favorite AI editor without rule drift. Export Cursor, Claude, Copilot & Windsurf in 1 click.\n\n⚡ $1.99 Single Pass / $5.99 Pro:\nhttps://promptshift.dev`,
-    `Built for multi-IDE teams & agencies: sync every repo across Claude Code, Cursor & Copilot ($5.99/mo Pro or $19.99/mo Team):\nhttps://promptshift.dev`,
-    `Zero vendor lock-in for your AI engineering rules. Write once, compile everywhere with 98.5% AST parity.\n\n👉 Try free (no account needed):\nhttps://promptshift.dev`,
-    `Ship faster across Cursor + Claude Code CLI without maintaining duplicate instruction files.\n\n🚀 1-Click 4-in-1 bundle ($1.99):\nhttps://promptshift.dev`,
-    `Also available as a Grade-A certified MCP server on Glama for autonomous agent sync:\nhttps://glama.ai/mcp/servers/topaisaas-dev/promptshift\n\nWeb Studio: https://promptshift.dev`,
-  ],
-  'ci-cd': [
-    `Enforce continuous AI rule parity & secret redaction in GitHub Actions PRs.\n\n⚡ Free starter, $5.99/mo Pro, or $19.99/mo Team CI/CD:\nhttps://promptshift.dev`,
-    `Stop PRs where CLAUDE.md and .cursor/rules/ drift apart. Setup takes 10 seconds.\n\n🛡️ Docs, CLI & Web Studio:\nhttps://promptshift.dev`,
-    `Deterministic 0.4s AST checks in CI—zero flaky LLM calls, zero prompt logging.\n\n🚀 Unlock multi-rule repos from $1.99:\nhttps://promptshift.dev`,
-    `Keep Cursor, Claude Code, Windsurf & Copilot locked in 98.5% AST sync on every merge:\nhttps://promptshift.dev`,
-  ],
-  terminal: [
-    `0.4s in terminal or drag-and-drop in browser—100% in-RAM with automatic API key sanitization.\n\n⚡ Free ≤2 files or $1.99 Single Pass:\nhttps://promptshift.dev`,
-    `Why spend 2 hours reformatting YAML globs by hand? Convert your whole repo for $1.99 (or $5.99/mo Pro Unlimited):\nhttps://promptshift.dev`,
-    `Test live in our zero-retention Diff Studio before touching your local files:\nhttps://promptshift.dev`,
-    `Works via CLI (npx promptshift), Glama Grade-A MCP (--mcp), or Web Studio:\nhttps://promptshift.dev`,
-  ],
-  'ast-parity': [
-    `Compile Cursor (.mdc), Claude Code (CLAUDE.md), Copilot & Windsurf rules with 98.5% certified AST parity.\n\n⚡ Free ≤2 files or $1.99 Pass:\nhttps://promptshift.dev`,
-    `Zero prompt drift across AI editors—100% deterministic in-RAM transpilation + secret scrubbing.\n\n👉 Live interactive studio:\nhttps://promptshift.dev`,
-    `Unlock multi-rule repositories in 10 seconds ($1.99 Single Pass or $5.99/mo Pro Unlimited, zero signup):\nhttps://promptshift.dev`,
-    `Test your rules in our live side-by-side AST Diff Inspector:\nhttps://promptshift.dev`,
-    `Grade-A MCP certified + Web Studio. Export all 4 AI IDE ecosystems in 1 click:\nhttps://promptshift.dev`,
-  ],
+const CTAS = [
+  '👇 Link in the reply.',
+  'Try it free. Link in the reply 👇',
+  'See the link in the reply 👇',
+  'Free for small repos. Link in the reply 👇',
+  '👇 Link in the first reply.',
+  'Takes 10 seconds. Link in the reply 👇',
+  'Free to start. 👇 Link in the reply.',
+  'No signup needed. Link in the reply 👇',
+  'Try it now. 👇 Link in the reply.',
+  'Start free. Link in the reply 👇',
+  '👇 Link in the reply to this post.',
+];
+
+// ============================================================================
+// REPLY OFFERS (7 = prime) — every reply ends with the site link
+// ============================================================================
+
+const OFFERS = [
+  'Free for up to 2 files. No signup.',
+  'Bigger repo? One-time $1.99 pass.',
+  'Free to try • $1.99 one-time • $5.99/mo unlimited.',
+  'Teams: $19.99/mo with checks on every PR.',
+  'Try it free in your browser. Nothing stored.',
+  'Grade A on the Glama MCP registry. Free to start.',
+  'Pro: unlimited conversions for $5.99/mo.',
+];
+
+const GENERIC_LEADS = [
+  'Your AI rules, in every editor.',
+  'Write once. Sync everywhere.',
+  'Free to try. No signup.',
+  'Cursor, Claude Code, Copilot & Windsurf in 1 click.',
+  'Stop copy-pasting AI rules.',
+  'Built for devs who use more than one AI editor.',
+  'Try it on your repo now.',
+  'One rulebook for every AI editor.',
+];
+
+// ============================================================================
+// 1. HANDCRAFTED POSTS (simple, punchy, commercial)
+// ============================================================================
+
+const HANDCRAFTED: Record<string, { category: Category; leads: string[]; posts: string[] }> = {
+  pain: {
+    category: 'ast-parity',
+    leads: [
+      'Write your AI rules once. Use them in every editor.',
+      'Stop rewriting AI rules by hand.',
+      'Your AI rules, in every editor, in 1 click.',
+    ],
+    posts: [
+      `You spent hours writing the perfect AI rules for Cursor.\n\nThen you tried Claude Code and had to start from zero.\n\nWe fixed that. PromptShift converts your rules to any AI editor in 1 click.`,
+      `Your AI keeps ignoring your coding rules?\n\nMost of the time the rules are fine. They're just in the wrong format for that editor.\n\nPromptShift fixes the format for you.`,
+      `Copy-pasting AI rules between Cursor, Claude Code and Copilot is not a workflow.\n\nIt's a bug factory.\n\nWrite them once. Let PromptShift sync the rest.`,
+      `Every AI editor wants its rules in a different file:\n\n• Cursor: .cursor/rules\n• Claude Code: CLAUDE.md\n• Copilot: copilot-instructions.md\n• Windsurf: .windsurfrules\n\nPromptShift writes all 4 for you.`,
+      `Monday: you update your Cursor rules.\nFriday: Claude Code still uses the old ones.\n\nSound familiar?\n\nPromptShift keeps every AI editor on the same page.`,
+      `The most expensive bug in AI coding isn't in your code.\n\nIt's the rule you updated in one editor and forgot in the other three.`,
+      `You don't need a new AI editor.\n\nYou need your current rules to work in every AI editor.\n\nThat's exactly what PromptShift does.`,
+      `Switching AI editors shouldn't feel like moving house.\n\nPack your rules once. Unpack them anywhere. In seconds.`,
+      `Stop maintaining 4 copies of the same AI instructions.\n\nOne source of truth. Every editor in sync. Zero copy-paste.`,
+      `"Why did the AI write it like that?"\n\nUsually because it never saw your rules.\n\nPromptShift makes sure every AI editor gets them.`,
+      `AI coding tools change every month.\n\nYour coding standards shouldn't.\n\nKeep them portable with PromptShift.`,
+      `A new AI editor drops. Everyone wants to try it.\n\nThe hard part isn't installing it. It's moving your rules.\n\nWe made that part take 10 seconds.`,
+      `Your AI rules are your team's brain.\n\nDon't lock them inside one editor.`,
+      `Rewriting AI rules by hand is the new copying code from Stack Overflow.\n\nIt works. Until it doesn't.\n\nAutomate it.`,
+      `If your AI rules live in only one tool, your team has a single point of failure.\n\nExport them to every editor in 1 click.`,
+    ],
+  },
+  offer: {
+    category: 'terminal',
+    leads: [
+      'See all plans and try it free here:',
+      'Start free. Upgrade only if it saves you time.',
+      'Pricing, plans and free trial:',
+    ],
+    posts: [
+      `Our pricing is simple:\n\n• Free: up to 2 rule files\n• $1.99: one-time pass for any repo\n• $5.99/mo: unlimited\n• $19.99/mo: teams + CI\n\nNo sales call. No contract.`,
+      `$1.99.\n\nThat's what it costs to convert your whole repo's AI rules to Cursor, Claude Code, Copilot & Windsurf.\n\nCheaper than the coffee you'd drink doing it by hand.`,
+      `Try before you pay.\n\nPromptShift is free for up to 2 rule files. No account. No credit card.\n\nIf it saves you time, upgrade. If not, it cost you nothing.`,
+      `What 2 hours of your time is worth: a lot.\nWhat PromptShift costs: $1.99.\n\nEasy math.`,
+      `No subscription required.\n\nNeed it once? Pay $1.99 once.\nNeed it every week? $5.99/mo unlimited.\n\nYou choose.`,
+      `For teams: $19.99/mo.\n\nEvery pull request gets checked, so your AI rules never drift apart between editors.\n\nSetup takes 10 seconds.`,
+      `We don't ask for your email to test the product.\n\nOpen it, drop your rule files, see the result. Free.`,
+      `Free plan, for real:\n\n✅ Up to 2 rule files\n✅ All major AI editors\n✅ No signup\n✅ Nothing stored on our servers`,
+      `Small repo? Free.\nBig repo? $1.99 one time.\nWhole team? $19.99/mo.\n\nThat's the whole pricing page.`,
+      `The cheapest productivity upgrade you'll buy this year costs $1.99.\n\nYour AI rules, in every editor, in 1 click.`,
+      `Pro plan: $5.99/mo.\n\nUnlimited repos. Unlimited conversions. Every AI editor.\n\nLess than one lunch a month.`,
+      `Agencies: one Team plan, every client repo.\n\nClient on Copilot? Client on Cursor? Same rules, right format, every time.\n\n$19.99/mo.`,
+      `Most dev tools want a demo call.\n\nWe want you to try it in 10 seconds. For free.\n\nThen decide.`,
+    ],
+  },
+  before: {
+    category: 'ast-parity',
+    leads: [
+      'Try the "after" yourself:',
+      'Go from hours to seconds.',
+      'See the difference on your own repo.',
+    ],
+    posts: [
+      `Before PromptShift:\n• Write rules for Cursor\n• Rewrite them for Claude Code\n• Rewrite again for Copilot\n• Forget to update one\n\nAfter:\n• Write once\n• Click once\n• Done`,
+      `Before: 2 hours copy-pasting AI rules between editors.\nAfter: 10 seconds.\n\nSame rules. Every editor. No mistakes.`,
+      `Old way: every dev on your team has their own AI rules.\nNew way: one shared rulebook, synced to every editor, in git.\n\nCleaner PRs. Fewer debates.`,
+      `Without synced rules: Cursor writes one style, Copilot another, and Claude invents its own folder structure.\n\nWith PromptShift: one style. Every editor.`,
+      `Before: "Wait, which file does Copilot read again?"\n\nAfter: you don't care. PromptShift writes it for you.`,
+      `Day 1 without PromptShift: copy rules to the new editor.\nDay 30: rules are out of sync.\nDay 60: nobody trusts the AI.\n\nWith PromptShift: one click on day 1. Still in sync on day 60.`,
+      `Onboarding a new dev, before:\n"Here's our 40-page wiki."\n\nAfter:\nTheir AI editor already knows your rules on day 1. Whatever editor they use.`,
+      `Manual conversion: you summarize, you skip things, you lose rules.\n\nPromptShift: every rule kept, formatted correctly for each editor.`,
+      `Before: "Works great in Cursor, terrible in Claude Code."\n\nAfter: works great in both. Same rules underneath.`,
+      `Switching AI editors used to cost a weekend.\n\nNow it costs a click.`,
+    ],
+  },
+  security: {
+    category: 'security',
+    leads: [
+      'Scan and clean your AI rules for free:',
+      'Convert + remove secrets in one click.',
+      'Your files are never stored. Ever.',
+    ],
+    posts: [
+      `Quick check before you push:\n\nIs there an API key in your AI rules file?\n\nPeople paste example code with real keys all the time. PromptShift finds and hides them automatically.`,
+      `Your CLAUDE.md is public the moment you push it to a public repo.\n\nMake sure it doesn't contain your OpenAI or Stripe keys.`,
+      `We never store your files.\n\nPromptShift processes everything in memory and forgets it right after.\n\nYour rules stay yours.`,
+      `Pasting your company's AI rules into a random online tool?\n\nThose rules describe your architecture. Use a tool that doesn't keep them.`,
+      `The feature nobody asks for until they need it:\n\nPromptShift removes API keys, tokens and passwords from your AI rules before writing the new files.`,
+      `AI rule files are the new .env files.\n\nPeople forget they contain secrets. Bots don't.`,
+      `Convert your AI rules + scan them for leaked keys.\n\nOne tool. One click. Zero data stored.`,
+      `Deleted an API key from your rules file?\n\nIt's still in your git history.\n\nCatch it before the commit, not after.`,
+      `Security team asks: "Where do our prompts go?"\n\nWith PromptShift: nowhere. Processed in memory, never saved.`,
+      `15+ types of API keys detected and hidden automatically: OpenAI, Anthropic, AWS, GitHub, Stripe and more.\n\nBuilt into every conversion.`,
+      `Sharing your AI rules with a contractor?\n\nClean out the secrets first. PromptShift does it automatically.`,
+    ],
+  },
+  question: {
+    category: 'multi-agent',
+    leads: [
+      'Whatever you answered, this keeps your rules in sync:',
+      'Tell us below. And try this:',
+      'One rulebook. Every AI editor.',
+    ],
+    posts: [
+      `Quick poll for devs:\n\nWhich AI editor are you using right now?\n\n1. Cursor\n2. Claude Code\n3. Copilot\n4. Windsurf\n\nWhatever you pick, PromptShift keeps your rules working in all of them.`,
+      `Honest question:\n\nHow many AI editors has your team tried this year?\n\nAnd how many times did you rewrite your rules?`,
+      `What's harder?\n\nA) Picking the best AI editor\nB) Moving your rules to it\n\nWe solved B.`,
+      `How long are your AI rules?\n\n10 lines? 500 lines?\n\nEither way, you shouldn't have to write them twice.`,
+      `Do your AI rules live in git, or in someone's local settings?\n\nIf it's the second one, that's a problem waiting to happen.`,
+      `If you could only keep one AI editor, which one would it be?\n\nGood news: with PromptShift, you don't have to choose.`,
+      `Does your team agree on one AI editor?\n\nIf not, you don't need a meeting. You need synced rules.`,
+      `Ever noticed your AI writes better code in one editor than another?\n\nCheck the rules. They're probably not the same.`,
+      `What's the one rule you always have to remind your AI about?\n\nPut it in your rulebook once. Sync it everywhere.`,
+      `Cursor or Claude Code?\n\nWrong question. Use both. Keep the rules in sync.`,
+    ],
+  },
+  proof: {
+    category: 'mcp-ecosystem',
+    leads: [
+      'MCP, terminal or web app. Your choice:',
+      'Verified Grade A on Glama:\nhttps://glama.ai/mcp/servers/topaisaas-dev/promptshift',
+      'Get started in 10 seconds:',
+    ],
+    posts: [
+      `PromptShift is rated Grade A on Glama, the MCP server registry.\n\nYour AI agents can use it directly from Claude Desktop or Cursor.`,
+      `Use PromptShift without leaving your AI chat.\n\nAdd it as an MCP server, then just ask: "convert my Cursor rules for Claude Code."\n\nDone.`,
+      `Did you know Claude can convert your rules for you?\n\nPromptShift works as an MCP tool. One line of config.`,
+      `Grade A on Glama ✅\nWorks in Claude Desktop ✅\nWorks in Cursor ✅\nNo data stored ✅\n\nThe PromptShift MCP server.`,
+      `3 ways to use PromptShift:\n\n1. Web app (drag & drop)\n2. Terminal: npx promptshift\n3. MCP inside Claude or Cursor\n\nSame result. Pick your style.`,
+      `Your AI agent can now keep its own rules in sync.\n\nPromptShift MCP: convert, check and clean AI rules from inside any MCP client.`,
+      `One command in your terminal:\n\nnpx promptshift\n\nIt finds your AI rules and converts them for the editor you want.`,
+      `Prefer the browser?\n\nDrag your rule files into PromptShift and download every format in 1 click.\n\nNothing to install.`,
+      `Add one line to your CI and every PR gets checked for out-of-sync AI rules and leaked keys:\n\nnpx promptshift --init-ci`,
+      `Built by devs who use Cursor and Claude Code every day and got tired of copy-pasting rules between them.`,
+    ],
+  },
+  math: {
+    category: 'token-optimization',
+    leads: [
+      'Get your time back:',
+      'Leaner rules, better AI, lower bills.',
+      'Do the math on your own repo:',
+    ],
+    posts: [
+      `Quick math:\n\n4 AI editors × 30 min to rewrite your rules × every time you update them\n\n= hours lost every month.\n\nOr 10 seconds with PromptShift.`,
+      `Bloated AI rules cost you twice:\n\n1. More tokens on every request\n2. Worse answers, because the AI gets lost\n\nPromptShift cleans and splits them for you.`,
+      `Long rule files = slower, more expensive AI.\n\nSplit them so each file only loads when it's needed. PromptShift does it automatically.`,
+      `Your AI reads your rules on every single message.\n\nRemove the duplicates and you save tokens all day, every day.`,
+      `Shorter, cleaner rules = faster AI answers.\n\nPromptShift removes duplicates and keeps every rule that matters.`,
+      `If your team updates its AI rules once a week and has 3 editors to sync, that's 150+ manual updates a year.\n\nOr zero.`,
+      `Time to set up AI rules for a new project:\n\nBy hand: 1-2 hours.\nWith PromptShift: under a minute.`,
+      `Every minute you spend formatting AI rules is a minute you're not shipping.\n\nAutomate the boring part.`,
+      `One giant rules file loads everything, every time.\nSmaller scoped rules load only what matters.\n\nLess noise. Better code.`,
+    ],
+  },
 };
 
-export function generateOptimizedCatalog(): XPost[] {
-  // 1. Collect all standalone handcrafted candidates
-  const morningCurated: Array<{ category: XPost['category']; text: string }> = [];
-  const afternoonCurated: Array<{ category: XPost['category']; text: string }> = [];
+function buildHandcrafted(): Draft[] {
+  // Round-robin across sub-families so the feed always alternates angles.
+  const order = ['pain', 'offer', 'before', 'security', 'question', 'proof', 'math'];
+  const out: Draft[] = [];
+  const max = Math.max(...order.map((k) => HANDCRAFTED[k].posts.length));
+  for (let i = 0; i < max; i++) {
+    for (const fam of order) {
+      const bank = HANDCRAFTED[fam];
+      if (i < bank.posts.length) {
+        out.push({ family: 'hand', key: `hand-${fam}`, category: bank.category, body: bank.posts[i], leads: bank.leads });
+      }
+    }
+  }
+  return out;
+}
 
-  // Interleave curated banks into Morning (deep tech / MCP / syntax / token) & Afternoon (security / multi-agent / CI-CD)
-  const maxCuratedLen = Math.max(
-    MCP_ECOSYSTEM_POSTS.length,
-    SYNTAX_TRAPS_POSTS.length,
-    TOKEN_OPTIMIZATION_POSTS.length,
-    SECURITY_POSTS.length,
-    MULTI_AGENT_FOUNDER_POSTS.length,
-    CICD_TERMINAL_POSTS.length
-  );
+// ============================================================================
+// 2. EDITOR-SWITCH POSTS (12 pairs × 6 templates = 72)
+// ============================================================================
 
-  for (let i = 0; i < maxCuratedLen; i++) {
-    if (i < MCP_ECOSYSTEM_POSTS.length) {
-      morningCurated.push({ category: 'mcp-ecosystem', text: MCP_ECOSYSTEM_POSTS[i] });
-    }
-    if (i < SYNTAX_TRAPS_POSTS.length) {
-      morningCurated.push({ category: 'syntax-traps', text: SYNTAX_TRAPS_POSTS[i] });
-    }
-    if (i < TOKEN_OPTIMIZATION_POSTS.length) {
-      morningCurated.push({ category: 'token-optimization', text: TOKEN_OPTIMIZATION_POSTS[i] });
-    }
-    if (i < SECURITY_POSTS.length) {
-      afternoonCurated.push({ category: 'security', text: SECURITY_POSTS[i] });
-    }
-    if (i < MULTI_AGENT_FOUNDER_POSTS.length) {
-      afternoonCurated.push({ category: 'multi-agent', text: MULTI_AGENT_FOUNDER_POSTS[i] });
-    }
-    if (i < CICD_TERMINAL_POSTS.length) {
-      afternoonCurated.push({
-        category: i % 2 === 0 ? 'ci-cd' : 'terminal',
-        text: CICD_TERMINAL_POSTS[i],
+const EDITOR_PAIRS: Array<[string, string]> = [
+  ['Cursor', 'Claude Code'],
+  ['Claude Code', 'Cursor'],
+  ['Cursor', 'GitHub Copilot'],
+  ['GitHub Copilot', 'Cursor'],
+  ['Windsurf', 'Cursor'],
+  ['Cursor', 'Windsurf'],
+  ['Claude Code', 'GitHub Copilot'],
+  ['Cursor', 'Gemini CLI'],
+  ['Claude Code', 'Windsurf'],
+  ['GitHub Copilot', 'Claude Code'],
+  ['Windsurf', 'Claude Code'],
+  ['Claude Code', 'Gemini CLI'],
+];
+
+const PAIR_TEMPLATES: Array<(a: string, b: string) => string> = [
+  (a, b) => `Moving from ${a} to ${b}?\n\nDon't rewrite your AI rules by hand.\nPromptShift converts them in 1 click, so ${b} follows the same rules ${a} did.`,
+  (a, b) => `${a} rules → ${b} rules.\n\nSame instructions. Right format. Zero copy-paste.\n\nThat's all PromptShift does, and it does it in seconds.`,
+  (a, b) => `Tried ${b} and it ignored all your coding rules?\n\nIt's not the AI. Your rules are still in ${a}'s format.\n\nConvert them once and ${b} gets it right from the first prompt.`,
+  (a, b) => `Your team uses ${a}. You prefer ${b}.\n\nNo need to argue.\n\nKeep one set of rules and export it to both with PromptShift.`,
+  (a, b) => `Want to test ${b} without losing your ${a} setup?\n\nConvert your rules, try ${b} for a week, switch back anytime.\n\nNo lock-in. Free for small projects.`,
+  (a, b) => `How long did it take you to write your ${a} rules?\n\nHours? Days?\n\nDon't do it again for ${b}. PromptShift moves everything over in seconds.`,
+];
+
+function buildPairs(): Draft[] {
+  const out: Draft[] = [];
+  EDITOR_PAIRS.forEach(([a, b]) => {
+    PAIR_TEMPLATES.forEach((tpl) => {
+      out.push({
+        family: 'pair',
+        key: `${a}>${b}`,
+        category: 'multi-agent',
+        body: tpl(a, b),
+        leads: [`${a} → ${b}: your rules, converted in 1 click.`, `Move your AI rules from ${a} to ${b} in seconds.`],
       });
+    });
+  });
+  return spreadByKey(shuffle(out, 20261105), 4);
+}
+
+// ============================================================================
+// 3. PERSONA POSTS (10 personas × 4 templates = 40)
+// ============================================================================
+
+const PERSONAS = [
+  { who: 'solo founders', one: 'a solo founder', pain: `You jump between Cursor and Claude Code all day. Your rules shouldn't get lost on the way.`, benefit: 'More shipping, less setup.' },
+  { who: 'agencies', one: 'an agency', pain: 'Every client wants a different AI editor.', benefit: 'One rulebook for every client repo.' },
+  { who: 'CTOs', one: 'a CTO', pain: `Your devs all use different AI editors. Your code standards can't depend on that.`, benefit: 'Consistent code, whatever the editor.' },
+  { who: 'freelancers', one: 'a freelancer', pain: 'New client, new repo, new AI setup. Every single time.', benefit: 'Set up any repo in under a minute.' },
+  { who: 'open-source maintainers', one: 'an open-source maintainer', pain: 'Contributors send PRs from Cursor, Copilot, Claude Code and Windsurf.', benefit: 'Every AI-assisted PR follows your style.' },
+  { who: 'startup teams', one: 'a startup team', pain: '5 devs. 4 AI editors. 1 codebase.', benefit: 'Everyone ships the same style of code.' },
+  { who: 'tech leads', one: 'a tech lead', pain: 'You write the rules. Half the team never sees them because they use another editor.', benefit: 'Your rules reach every editor automatically.' },
+  { who: 'indie hackers', one: 'an indie hacker', pain: 'You try every new AI tool the week it launches.', benefit: 'Try any new editor without losing your setup.' },
+  { who: 'junior devs', one: 'a junior dev', pain: `Your team's AI rules only exist for the editor you don't use.`, benefit: 'Get the same AI guidance as everyone else.' },
+  { who: 'vibe coders', one: 'a vibe coder', pain: 'Your AI forgets how you like things done every time you change tools.', benefit: 'Your AI remembers your style everywhere.' },
+];
+
+const PERSONA_TEMPLATES: Array<(p: (typeof PERSONAS)[number]) => string> = [
+  (p) => `For ${p.who}:\n\n${p.pain}\n\nPromptShift keeps your AI rules in sync across every editor.`,
+  (p) => `Built for ${p.who}.\n\n${p.pain}\n\nOne click: same rules in Cursor, Claude Code, Copilot & Windsurf.`,
+  (p) => `${cap(p.who)}, quick question:\n\nHow many copies of your AI rules do you maintain right now?\n\nIf it's more than 1, PromptShift will save you hours.`,
+  (p) => `If you're ${p.one}, here's an easy win:\n\nWrite your AI rules once. Export them to every AI editor.\n\n${p.benefit}`,
+];
+
+function buildPersonas(): Draft[] {
+  const out: Draft[] = [];
+  PERSONAS.forEach((p) => {
+    PERSONA_TEMPLATES.forEach((tpl) => {
+      out.push({
+        family: 'persona',
+        key: p.who,
+        category: 'multi-agent',
+        body: tpl(p),
+        leads: [`Made for ${p.who}.`, `PromptShift for ${p.who}:`],
+      });
+    });
+  });
+  return spreadByKey(shuffle(out, 1105), 4);
+}
+
+// ============================================================================
+// 4. STACK POSTS (60 stacks × 9 templates = 540)
+// ============================================================================
+
+const STACKS = [
+  'Next.js', 'React', 'Vue', 'Nuxt', 'Svelte', 'SvelteKit', 'Astro', 'Remix', 'Angular', 'SolidJS',
+  'Node.js', 'Express', 'NestJS', 'Fastify', 'Hono', 'Bun', 'Deno', 'TypeScript', 'Python', 'FastAPI',
+  'Django', 'Flask', 'Rust', 'Go', 'Java', 'Spring Boot', 'Kotlin', 'Swift', 'SwiftUI', 'Flutter',
+  'React Native', 'Expo', 'Laravel', 'PHP', 'Ruby on Rails', 'Elixir', '.NET', 'C#', 'C++', 'Zig',
+  'Supabase', 'Firebase', 'Prisma', 'Drizzle', 'PostgreSQL', 'MongoDB', 'Redis', 'Tailwind CSS', 'shadcn/ui', 'tRPC',
+  'GraphQL', 'Docker', 'Kubernetes', 'Terraform', 'AWS', 'Cloudflare Workers', 'Vercel', 'Electron', 'Tauri', 'Solidity',
+];
+
+const STACK_TEMPLATES: Array<{ category: Category; tpl: (s: string) => string }> = [
+  { category: 'ast-parity', tpl: (s) => `Building with ${s}?\n\nYour AI editor needs to know your ${s} rules.\nWrite them once, use them in Cursor, Claude Code, Copilot & Windsurf.\n\nPromptShift does the conversion for you.` },
+  { category: 'multi-agent', tpl: (s) => `${s} devs: stop pasting the same AI instructions into 3 different editors.\n\nOne source. Every editor. Always in sync.` },
+  { category: 'syntax-traps', tpl: (s) => `Your ${s} project has AI rules for Cursor but not for Claude Code?\n\nThat's why Claude keeps writing code your team rejects.\n\nFix it in 1 click.` },
+  { category: 'token-optimization', tpl: (s) => `${s} + AI coding tip:\n\nKeep your rules in one place and sync them to every editor your team uses.\n\nLess review time. Fewer "why did the AI do that?" moments.` },
+  { category: 'terminal', tpl: (s) => `Just started a new ${s} project?\n\nSet up AI rules for Cursor, Claude Code, Copilot & Windsurf in under a minute.\n\nFree for small projects.` },
+  { category: 'ast-parity', tpl: (s) => `The fastest way to make AI write better ${s} code:\n\nGive every AI editor the same clear rules.\n\nPromptShift handles the formats. You handle the shipping.` },
+  { category: 'multi-agent', tpl: (s) => `${s} team using different AI editors?\n\nOne dev on Cursor, one on Copilot, one on Claude Code = 3 different code styles.\n\nSync your rules. Get one.` },
+  { category: 'ci-cd', tpl: (s) => `Hot take for ${s} devs:\n\nYour AI rules matter as much as your linter config.\nThey belong in git, in sync, in every editor.\n\nPromptShift makes that automatic.` },
+  { category: 'ast-parity', tpl: (s) => `Shipping ${s} with AI?\n\nThe AI is only as good as the rules you give it.\n\nGive every editor the same ones. PromptShift syncs them in 1 click.` },
+];
+
+function buildStacks(): Draft[] {
+  const out: Draft[] = [];
+  STACKS.forEach((s) => {
+    STACK_TEMPLATES.forEach(({ category, tpl }) => {
+      out.push({
+        family: 'stack',
+        key: s,
+        category,
+        body: tpl(s),
+        leads: [`${s} rules for Cursor, Claude Code, Copilot & Windsurf, synced in 1 click.`, `Sync your ${s} AI rules across every editor.`],
+      });
+    });
+  });
+  return spreadByKey(shuffle(out, 365), 6);
+}
+
+// ============================================================================
+// ASSEMBLY
+// ============================================================================
+
+// Feed rhythm over 10 slots: 4 handcrafted, 3 stack, 2 editor-switch, 1 persona
+const PATTERN = ['hand', 'stack', 'pair', 'hand', 'persona', 'stack', 'hand', 'pair', 'stack', 'hand'];
+
+function loadPreserved(): XPost[] {
+  const history = fs.existsSync(HISTORY_FILE) ? JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')) : { history: [] };
+  const postedIds: string[] = history.history.map((h: { id: string }) => h.id);
+  if (postedIds.length === 0) return [];
+  const existing: XPost[] = fs.existsSync(CATALOG_FILE) ? JSON.parse(fs.readFileSync(CATALOG_FILE, 'utf-8')) : [];
+  const byId = new Map(existing.map((p) => [p.id, p]));
+  return postedIds.map((id) => {
+    const p = byId.get(id);
+    if (!p) throw new Error(`Broadcast post ${id} missing from existing catalog; cannot preserve it.`);
+    return p;
+  });
+}
+
+export function generateOptimizedCatalog(): XPost[] {
+  const preserved = loadPreserved();
+  const postedIds = new Set(preserved.map((p) => p.id));
+
+  const pools: Record<string, Draft[]> = {
+    hand: buildHandcrafted(),
+    stack: buildStacks(),
+    pair: buildPairs(),
+    persona: buildPersonas(),
+  };
+  const cursors: Record<string, number> = { hand: 0, stack: 0, pair: 0, persona: 0 };
+  const fallback = ['stack', 'pair', 'persona', 'hand'];
+
+  const next = (family: string): Draft | null => {
+    for (const fam of [family, ...fallback]) {
+      if (cursors[fam] < pools[fam].length) return pools[fam][cursors[fam]++];
     }
-  }
+    return null;
+  };
 
-  // 2. Build 660 distinct Stack Blueprints (60 stacks × 11 angles).
-  //    Since gcd(60, 11) = 1 and gcd(7, 60) = 1, stepping k = 0..659 with
-  //    stackIdx = (k * 7) % 60 and angle = k % 11 is a 100% mathematical bijection:
-  //    every consecutive post changes BOTH tech stack AND angle/category!
-  const stackBlueprints: Array<{ category: XPost['category']; text: string }> = [];
-  const totalCombinations = PRODUCTION_STACKS.length * 11; // 660
-  for (let k = 0; k < totalCombinations; k++) {
-    const stackIdx = (k * 7) % PRODUCTION_STACKS.length;
-    const angle = k % 11;
-    stackBlueprints.push(buildStackPost(PRODUCTION_STACKS[stackIdx], angle));
-  }
-
-  // 3. Assemble 730 total posts (365 days × 2/day), preserving indices 0..2 from history
-  //    Posts 3..370 = 368 brand-new hyper-optimized posts for the next 6 full months (184 days × 2/day)!
-  const catalog: XPost[] = [...HISTORICAL_BROADCASTED_POSTS];
-  const usedMainTweets = new Set<string>(HISTORICAL_BROADCASTED_POSTS.map((p) => p.mainTweet.trim()));
-
-  let mCuratedIdx = 0;
-  let aCuratedIdx = 0;
-  let stackPoolIdx = 0;
-  const replyCounters: Record<string, number> = {};
-
-  const TOTAL_DAYS = 365;
-  const SLOTS: Array<'morning' | 'afternoon'> = ['morning', 'afternoon'];
+  const catalog: XPost[] = [...preserved];
+  const usedMain = new Set(preserved.map((p) => p.mainTweet.trim()));
+  const usedReplies = new Set(preserved.map((p) => p.replyTweet.trim()));
+  let n = 0;
 
   for (let day = 1; day <= TOTAL_DAYS; day++) {
-    for (const slot of SLOTS) {
-      // Skip the 3 already-populated historical slots
-      if (day === 1 && (slot === 'morning' || slot === 'afternoon')) continue;
-      if (day === 2 && slot === 'morning') continue;
+    for (const slot of ['morning', 'afternoon'] as const) {
+      const id = `post-d${String(day).padStart(3, '0')}-${slot}`;
+      if (postedIds.has(id)) continue;
 
-      const dayPad = String(day).padStart(3, '0');
-      const id = `post-d${dayPad}-${slot}`;
+      const draft = next(PATTERN[n % PATTERN.length]);
+      if (!draft) throw new Error(`Ran out of drafts at ${id}`);
 
-      let chosen: { category: XPost['category']; text: string } | null = null;
+      const mainTweet = `${draft.body}\n\n${CTAS[n % CTAS.length]}`.trim();
+      if (usedMain.has(mainTweet)) throw new Error(`Duplicate main tweet at ${id}`);
+      usedMain.add(mainTweet);
 
-      // Prioritize rich interleaving during the next 6 months (Days 2..186 = 368 posts):
-      // Alternate Handcrafted Standalone Gems with Distinct Stack Blueprints so feed feels 100% human & varied!
-      const preferCurated = day % 2 === 0 ? slot === 'afternoon' : slot === 'morning';
-
-      if (preferCurated) {
-        const pool = slot === 'morning' ? morningCurated : afternoonCurated;
-        while (
-          (slot === 'morning' ? mCuratedIdx : aCuratedIdx) < pool.length &&
-          !chosen
-        ) {
-          const idx = slot === 'morning' ? mCuratedIdx++ : aCuratedIdx++;
-          const candidate = pool[idx];
-          if (!usedMainTweets.has(candidate.text.trim())) {
-            chosen = candidate;
+      // Pick the first unused (lead, offer) combination, rotating the offer by post index.
+      // Specific leads first (rotated so siblings differ), generic leads only as a fallback.
+      const shift = n % draft.leads.length;
+      const leads = [...draft.leads.slice(shift), ...draft.leads.slice(0, shift), ...GENERIC_LEADS];
+      let replyTweet = '';
+      search: for (let li = 0; li < leads.length; li++) {
+        for (let oi = 0; oi < OFFERS.length; oi++) {
+          const lead = leads[li];
+          const candidate = `${lead}\n\n${OFFERS[(n + oi) % OFFERS.length]}\n👉 https://promptshift.dev`;
+          if (!usedReplies.has(candidate)) {
+            replyTweet = candidate;
+            break search;
           }
         }
       }
+      if (!replyTweet) throw new Error(`No unique reply available for ${id}`);
+      usedReplies.add(replyTweet);
 
-      // Otherwise pull next unique item from Stack Blueprints (or remaining curated pools)
-      while (!chosen && stackPoolIdx < stackBlueprints.length) {
-        const candidate = stackBlueprints[stackPoolIdx++];
-        if (!usedMainTweets.has(candidate.text.trim())) {
-          chosen = candidate;
-        }
-      }
-
-      // Drain any remaining curated items if needed
-      while (!chosen && mCuratedIdx < morningCurated.length) {
-        const candidate = morningCurated[mCuratedIdx++];
-        if (!usedMainTweets.has(candidate.text.trim())) chosen = candidate;
-      }
-      while (!chosen && aCuratedIdx < afternoonCurated.length) {
-        const candidate = afternoonCurated[aCuratedIdx++];
-        if (!usedMainTweets.has(candidate.text.trim())) chosen = candidate;
-      }
-
-      if (!chosen) {
-        throw new Error(`Ran out of unique posts at ${id}`);
-      }
-
-      const cleanMain = chosen.text.trim();
-      usedMainTweets.add(cleanMain);
-
-      const replies = CATEGORY_REPLIES[chosen.category];
-      const rCount = replyCounters[chosen.category] || 0;
-      replyCounters[chosen.category] = rCount + 1;
-      const cleanReply = replies[rCount % replies.length].trim();
-
-      catalog.push({
-        id,
-        category: chosen.category,
-        slot,
-        mainTweet: cleanMain,
-        replyTweet: cleanReply,
-      });
+      catalog.push({ id, category: draft.category, slot, mainTweet, replyTweet });
+      n++;
     }
   }
-
   return catalog;
 }
 
 // ============================================================================
-// BUILD, AUDIT & WRITE CATALOG
+// BUILD, AUDIT & WRITE
 // ============================================================================
 
 const catalog = generateOptimizedCatalog();
-console.log(`Generated ${catalog.length} total posts (including 368 prime 6-month posts starting at post-d002-afternoon).`);
-
+const preservedCount = loadPreserved().length;
 let errors = 0;
 const ids = new Set<string>();
-const uniqueMainCheck = new Set<string>();
 
-catalog.forEach((p, idx) => {
+for (const p of catalog) {
   if (ids.has(p.id)) {
-    console.error(`❌ Duplicate ID: ${p.id} at index ${idx}`);
+    console.error(`❌ Duplicate ID: ${p.id}`);
     errors++;
   }
   ids.add(p.id);
 
-  if (uniqueMainCheck.has(p.mainTweet)) {
-    console.error(`❌ Duplicate mainTweet content in ${p.id}`);
+  const isNew = catalog.indexOf(p) >= preservedCount;
+  const mainW = getXWeightedLength(p.mainTweet);
+  if (mainW > 278) {
+    console.error(`❌ Main tweet too long in ${p.id} (weighted=${mainW}):\n${p.mainTweet}\n`);
     errors++;
   }
-  uniqueMainCheck.add(p.mainTweet);
-
-  const mainWeighted = getXWeightedLength(p.mainTweet);
-  if (p.mainTweet.length > 280 || mainWeighted > 278) {
-    console.error(
-      `❌ Main tweet exceeds X limit in ${p.id} (raw=${p.mainTweet.length}, weighted=${mainWeighted}):\n${p.mainTweet}`
-    );
+  if (/https?:\/\/|promptshift\.dev|glama\.ai|polar\.sh/i.test(p.mainTweet)) {
+    console.error(`❌ Main tweet contains a URL/domain in ${p.id}`);
     errors++;
   }
-
-  if (
-    p.mainTweet.includes('http://') ||
-    p.mainTweet.includes('https://') ||
-    p.mainTweet.includes('promptshift.dev') ||
-    p.mainTweet.includes('glama.ai') ||
-    p.mainTweet.includes('polar.sh')
-  ) {
-    console.error(`❌ Main tweet contains external domain/URL in ${p.id}`);
+  if (isNew && !/link in the (first )?reply/i.test(p.mainTweet.split('\n').pop() || '')) {
+    console.error(`❌ Main tweet missing "Link in the reply" CTA in ${p.id}`);
     errors++;
   }
-
-  const replyWeighted = getXWeightedLength(p.replyTweet);
-  if (p.replyTweet.length > 280 || replyWeighted > 278) {
-    console.error(
-      `❌ Reply tweet exceeds X limit in ${p.id} (raw=${p.replyTweet.length}, weighted=${replyWeighted}):\n${p.replyTweet}`
-    );
+  if (isNew && /\bbio\b/i.test(p.mainTweet)) {
+    console.error(`❌ Main tweet mentions bio in ${p.id}`);
     errors++;
   }
-
+  const replyW = getXWeightedLength(p.replyTweet);
+  if (replyW > 278) {
+    console.error(`❌ Reply too long in ${p.id} (weighted=${replyW})`);
+    errors++;
+  }
   if (!p.replyTweet.includes('https://promptshift.dev')) {
-    console.error(`❌ Reply tweet missing https://promptshift.dev in ${p.id}`);
+    console.error(`❌ Reply missing https://promptshift.dev in ${p.id}`);
     errors++;
   }
-});
+}
+
+if (new Set(catalog.map((p) => p.mainTweet)).size !== catalog.length) {
+  console.error('❌ Duplicate main tweets detected');
+  errors++;
+}
+if (new Set(catalog.map((p) => p.replyTweet)).size !== catalog.length) {
+  console.error('❌ Duplicate reply tweets detected');
+  errors++;
+}
 
 if (errors > 0) {
   console.error(`\n🚨 Validation failed with ${errors} error(s).`);
   process.exit(1);
 }
 
-// Category breakdown for the next 6 months (indices 3..370 = 368 posts = 184 days × 2/day)
-const sixMonthSlice = catalog.slice(3, 3 + 368);
+const upcoming = catalog.slice(preservedCount, preservedCount + SIX_MONTH_POSTS);
 const catCounts: Record<string, number> = {};
-for (const p of sixMonthSlice) {
-  catCounts[p.category] = (catCounts[p.category] || 0) + 1;
-}
+for (const p of upcoming) catCounts[p.category] = (catCounts[p.category] || 0) + 1;
 
-console.log('✅ 100% of posts passed X weighted-length, zero-duplicate, and zero-main-URL constraints!');
-console.log('📊 Next 6 Months (184 days / 368 posts) Category Distribution:', catCounts);
+console.log(`✅ ${catalog.length} posts (${preservedCount} already broadcast preserved, next = ${upcoming[0]?.id}).`);
+console.log('✅ 100% unique main tweets & replies, CTA on every new post, zero URL in main tweets, all <= 278 weighted chars.');
+console.log('📊 Next 6 months category mix:', catCounts);
 
-const dataDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.writeFileSync(CATALOG_FILE, JSON.stringify(catalog, null, 2), 'utf-8');
+console.log(`💾 Saved ${CATALOG_FILE}`);
+
+console.log('\n--- Preview of the next 6 posts ---');
+for (const p of upcoming.slice(0, 6)) {
+  console.log(`\n[${p.id}]\n${p.mainTweet}\n  ↳ ${p.replyTweet.replace(/\n/g, ' | ')}`);
 }
-const outJson = path.join(dataDir, 'x_annual_posts_catalog.json');
-fs.writeFileSync(outJson, JSON.stringify(catalog, null, 2), 'utf-8');
-console.log(`💾 Saved catalog to: ${outJson} (${(fs.statSync(outJson).size / 1024).toFixed(1)} KB)`);
