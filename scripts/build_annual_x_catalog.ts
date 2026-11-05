@@ -2,9 +2,10 @@
  * PromptShift X (Twitter) Annual Catalog Builder — v3 "Marketing & CTA" edition
  *
  * Tone: simple, direct, commercial English. Every main tweet ends with a clear
- * call-to-action ("Link in the reply 👇", "See link in bio", ...). The main tweet
- * itself never contains a URL (keeps full X reach, also when reposted by
- * @jeanyvesgarcin). The auto-reply carries the offer + https://promptshift.dev.
+ * call-to-action strictly pointing to the reply ("👇 Link in the reply", "Link in the reply 👇").
+ * The main tweet never relies on bio links and never contains a URL (keeps full X reach,
+ * especially when reposted by @jeanyvesgarcin). The auto-reply carries the offer +
+ * https://promptshift.dev.
  *
  * Posts already broadcast (listed in data/x_posts_history.json) are preserved
  * verbatim at the top of the catalog so the autopilot resumes at the next slot.
@@ -106,15 +107,15 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const CTAS = [
   '👇 Link in the reply.',
   'Try it free. Link in the reply 👇',
-  'See link in bio 🔗',
-  'Free for small repos. Link below 👇',
-  '👉 See the link in the first reply.',
+  'See the link in the reply 👇',
+  'Free for small repos. Link in the reply 👇',
+  '👇 Link in the first reply.',
   'Takes 10 seconds. Link in the reply 👇',
-  'Link in bio. Free to start.',
-  'No signup needed. Link below 👇',
-  'Try it now 👇 (link in reply)',
-  'Start free → link in the reply 👇',
-  'Check the link in our bio 👆',
+  'Free to start. 👇 Link in the reply.',
+  'No signup needed. Link in the reply 👇',
+  'Try it now. 👇 Link in the reply.',
+  'Start free. Link in the reply 👇',
+  '👇 Link in the reply to this post.',
 ];
 
 // ============================================================================
@@ -546,8 +547,12 @@ for (const p of catalog) {
     console.error(`❌ Main tweet contains a URL/domain in ${p.id}`);
     errors++;
   }
-  if (isNew && !/link|bio/i.test(p.mainTweet.split('\n').pop() || '')) {
-    console.error(`❌ Main tweet missing CTA in ${p.id}`);
+  if (isNew && !/link in the (first )?reply/i.test(p.mainTweet.split('\n').pop() || '')) {
+    console.error(`❌ Main tweet missing "Link in the reply" CTA in ${p.id}`);
+    errors++;
+  }
+  if (isNew && /\bbio\b/i.test(p.mainTweet)) {
+    console.error(`❌ Main tweet mentions bio in ${p.id}`);
     errors++;
   }
   const replyW = getXWeightedLength(p.replyTweet);
