@@ -404,6 +404,7 @@ export async function runAutopilot(): Promise<void> {
     const boosterSecret = process.env.X_3K_API_SECRET || process.env.BOOSTER_API_SECRET;
     const boosterToken = process.env.X_3K_ACCESS_TOKEN || process.env.BOOSTER_ACCESS_TOKEN;
     const boosterTokenSecret = process.env.X_3K_ACCESS_TOKEN_SECRET || process.env.BOOSTER_ACCESS_TOKEN_SECRET;
+    let boosterUserId = process.env.X_3K_USER_ID || process.env.BOOSTER_USER_ID;
 
     let retweetedByBooster = false;
     if (boosterKey && boosterSecret && boosterToken && boosterTokenSecret) {
@@ -417,7 +418,7 @@ export async function runAutopilot(): Promise<void> {
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           await new Promise(r => setTimeout(r, attempt === 1 ? 4000 : 6000));
-          const rtResult = await retweet(mainResult.id, boosterCreds);
+          const rtResult = await retweet(mainResult.id, boosterCreds, boosterUserId);
           retweetedByBooster = rtResult.retweeted;
           console.log(`✅ @JeanYvesGarcin reposted successfully on attempt ${attempt}! (retweeted: ${retweetedByBooster})`);
           break;
