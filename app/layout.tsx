@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
+import { GlobalPageTracker } from '@/components/PageTracker';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://promptshift.dev'),
@@ -286,6 +288,9 @@ export default function RootLayout({
         </a>
 
         <Navbar />
+        <Suspense fallback={null}>
+          <GlobalPageTracker />
+        </Suspense>
         <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 focus:outline-none">
           {children}
         </main>

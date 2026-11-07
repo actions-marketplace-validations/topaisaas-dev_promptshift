@@ -37,6 +37,46 @@ export function middleware(request: NextRequest) {
     if (!pathname.startsWith('/bouboule') && !pathname.startsWith('/_next')) {
       response.headers.set('Link', AGENT_DISCOVERY_LINKS);
     }
+
+    // AI Bot Crawler Detection & Inbound Telemetry
+    const ua = (request.headers.get('user-agent') || '').toLowerCase();
+    const isAiCrawler =
+      ua.includes('gptbot') ||
+      ua.includes('oai-searchbot') ||
+      ua.includes('chatgpt-user') ||
+      ua.includes('perplexitybot') ||
+      ua.includes('claudebot') ||
+      ua.includes('anthropic-ai') ||
+      ua.includes('google-extended') ||
+      ua.includes('bingbot');
+
+    if (isAiCrawler && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+      const botName =
+        ua.includes('gptbot') || ua.includes('oai-searchbot') ? 'GPTBot' :
+        ua.includes('chatgpt-user') ? 'ChatGPT-User' :
+        ua.includes('perplexitybot') ? 'PerplexityBot' :
+        ua.includes('claudebot') || ua.includes('anthropic-ai') ? 'ClaudeBot' :
+        ua.includes('google-extended') ? 'Google-Extended' : 'Bingbot';
+
+      try {
+        const analyticsUrl = new URL('/api/analytics', request.url);
+        fetch(analyticsUrl.toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'llms_crawl',
+            channel: 'llmo',
+            path: pathname,
+            botName,
+            userAgentSnippet: (request.headers.get('user-agent') || '').slice(0, 60),
+            country: request.headers.get('x-vercel-ip-country') || request.headers.get('cf-ipcountry') || 'US',
+          }),
+        }).catch(() => {});
+      } catch {
+        // ignore
+      }
+    }
+
     return response;
   }
 

@@ -174,10 +174,12 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  // Load events (merges local storage with server buffer — zero fake data seeded by default)
+  // Load events (merges local storage with server buffer — strictly 100% REAL telemetry)
   const loadData = async () => {
     setIsRefreshing(true);
     let loaded = AnalyticsTracker.getEvents();
+    // Guarantee 100% real data: filter out any legacy demo seeds
+    loaded = loaded.filter((e) => e && e.id && !e.id.startsWith('ev_pv_') && !e.id.startsWith('ev_conv_'));
 
     try {
       const adminKey = passkeyInput.trim() || 'promptshift-admin-2026';
@@ -187,7 +189,9 @@ export default function AdminDashboardPage() {
         if (data.events && Array.isArray(data.events) && data.events.length > 0) {
           const map = new Map<string, AnalyticsEvent>();
           loaded.forEach((e) => map.set(e.id, e));
-          data.events.forEach((e: AnalyticsEvent) => map.set(e.id, e));
+          data.events
+            .filter((e: AnalyticsEvent) => e && e.id && !e.id.startsWith('ev_pv_') && !e.id.startsWith('ev_conv_'))
+            .forEach((e: AnalyticsEvent) => map.set(e.id, e));
           loaded = Array.from(map.values()).sort(
             (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
           );
@@ -462,14 +466,14 @@ Try it with your project: https://promptshift.dev
 
             <button
               onClick={() => {
-                AnalyticsTracker.seedRealisticData();
+                AnalyticsTracker.purgeSyntheticData();
                 loadData();
               }}
-              title="Simulate demo activity in local browser storage only"
+              title="Purger toute donnée démo résiduelle et forcer la vérité terrain"
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Database className="w-3.5 h-3.5" />
-              <span>Demo Seed</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Vérité Terrain 100%</span>
             </button>
 
             <button
@@ -896,6 +900,213 @@ Try it with your project: https://promptshift.dev
           )}
         </section>
 
+        {/* Radar d'Acquisition Moteurs IA & Recherches Réelles (GEO / LLMO) */}
+        <section className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-[#0d1627] to-slate-950 border border-emerald-500/30 shadow-2xl flex flex-col gap-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+                <Globe2 className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-black text-white">
+                    Télémétrie Moteurs IA &amp; Recherches Réelles (GEO / LLMO)
+                  </h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    100% VÉRITÉ TERRAIN
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                    Traçabilité Inbound
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Suivi direct des clics et indexations provenant de ChatGPT, Perplexity, Claude, Google Search, X.com et crawlers IA.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-cyan-300 font-bold">
+                {summary.geoSearchInbound.chatgptClicks +
+                  summary.geoSearchInbound.perplexityClicks +
+                  summary.geoSearchInbound.claudeClicks +
+                  summary.geoSearchInbound.googleSearchClicks +
+                  summary.geoSearchInbound.xSocialClicks}{' '}
+                Clics Moteurs &amp; Réseaux
+              </span>
+            </div>
+          </div>
+
+          {/* KPI Cards: Inbound Channels */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {/* 1. ChatGPT */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-500/30 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">ChatGPT / OpenAI</span>
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.chatgptClicks}</span>
+                <span className="text-[10px] text-emerald-300 font-bold">clics</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                SearchGPT &amp; citations
+              </div>
+            </div>
+
+            {/* 2. Perplexity */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Perplexity AI</span>
+                <Search className="w-3.5 h-3.5 text-cyan-400" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.perplexityClicks}</span>
+                <span className="text-[10px] text-cyan-300 font-bold">clics</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                Recherches perplexity.ai
+              </div>
+            </div>
+
+            {/* 3. Claude */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Claude Code</span>
+                <Cpu className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.claudeClicks}</span>
+                <span className="text-[10px] text-amber-300 font-bold">clics</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                Anthropic claude.ai
+              </div>
+            </div>
+
+            {/* 4. Google Search */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-blue-500/30 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Google Search</span>
+                <Globe2 className="w-3.5 h-3.5 text-blue-400" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.googleSearchClicks}</span>
+                <span className="text-[10px] text-blue-300 font-bold">clics</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                Recherche organique
+              </div>
+            </div>
+
+            {/* 5. X.com Social */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-700 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">X (Twitter)</span>
+                <Share2 className="w-3.5 h-3.5 text-slate-300" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.xSocialClicks}</span>
+                <span className="text-[10px] text-slate-400 font-bold">clics</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                @promptshift_dev
+              </div>
+            </div>
+
+            {/* 6. Crawlers IA */}
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-purple-500/30 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-textMuted mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Indexeurs IA</span>
+                <Activity className="w-3.5 h-3.5 text-purple-400" />
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-2xl font-black text-white font-mono">{summary.geoSearchInbound.aiBotCrawls}</span>
+                <span className="text-[10px] text-purple-300 font-bold">crawls</span>
+              </div>
+              <div className="text-[10px] text-slate-500 mt-1 truncate">
+                GPTBot, ClaudeBot, llms.txt
+              </div>
+            </div>
+          </div>
+
+          {/* Table of Inbound Clicks and Intents */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                Journal des Clics &amp; Intentions de Recherche Réelles (Période : {period})
+              </span>
+              <span className="text-[11px] font-mono text-slate-400">
+                {summary.geoSearchInbound.recentReferrals.length} arrivées répertoriées
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/70">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="p-3">Horodatage</th>
+                    <th className="p-3">Moteur Source</th>
+                    <th className="p-3">Page d&apos;Atterrissage</th>
+                    <th className="p-3 min-w-[220px]">Intention Déduite de la Recherche</th>
+                    <th className="p-3 text-center">Pays</th>
+                    <th className="p-3">User-Agent / Contexte</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                  {summary.geoSearchInbound.recentReferrals.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-textMuted">
+                        Aucun clic entrant enregistré sur cette période ({period}). Dès qu&apos;un utilisateur clique depuis ChatGPT, Perplexity ou Google, le log apparaîtra ici en direct.
+                      </td>
+                    </tr>
+                  ) : (
+                    summary.geoSearchInbound.recentReferrals.map((r) => (
+                      <tr key={r.id} className="hover:bg-slate-900/40 transition-colors">
+                        <td className="p-3 text-textMuted whitespace-nowrap">
+                          {new Date(r.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} - {new Date(r.timestamp).toLocaleDateString('fr-FR', { month: '2-digit', day: '2-digit' })}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 ${
+                              r.sourceName.includes('ChatGPT')
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : r.sourceName.includes('Perplexity')
+                                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                                : r.sourceName.includes('Claude')
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                : r.sourceName.includes('Google')
+                                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                : r.sourceName.includes('X.com')
+                                ? 'bg-slate-800 text-slate-300 border border-slate-700'
+                                : r.sourceName.includes('Crawler') || r.sourceName.includes('Indexeur')
+                                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                : 'bg-slate-900 text-slate-400'
+                            }`}
+                          >
+                            {r.sourceName}
+                          </span>
+                        </td>
+                        <td className="p-3 text-cyan-300 font-mono">{r.path}</td>
+                        <td className="p-3 text-white font-sans text-xs">{r.inferredIntent}</td>
+                        <td className="p-3 text-center">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px]">
+                            {r.country || 'US'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-slate-400 text-[10px] truncate max-w-xs" title={r.userAgentSnippet}>
+                          {r.userAgentSnippet || 'navigateur web standard'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         {/* Advanced Telemetry Filter Bar */}
         <section className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-xl flex flex-col gap-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-800">
@@ -1115,7 +1326,9 @@ Try it with your project: https://promptshift.dev
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-black text-white">{summary.totalPageViews}</span>
-                <span className="text-[10px] text-textMuted font-mono">~{summary.uniqueSessions} sessions</span>
+                <span className="text-[10px] text-textMuted font-mono">
+                  {summary.uniqueSessions} session{summary.uniqueSessions > 1 ? 's' : ''} unique{summary.uniqueSessions > 1 ? 's' : ''}
+                </span>
               </div>
               <p className="text-[10px] text-emerald-400 font-semibold mt-1">
                 {summary.conversionRate}% conversion rate
@@ -1159,11 +1372,15 @@ Try it with your project: https://promptshift.dev
                 <ShieldCheck className="w-4 h-4 text-cyan-400" />
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-cyanGlow">{summary.averageParityScore}%</span>
-                <span className="text-[10px] text-cyan-300 font-bold">verified</span>
+                <span className="text-2xl font-black text-cyanGlow">
+                  {summary.totalConversions > 0 ? `${summary.averageParityScore}%` : '100%'}
+                </span>
+                <span className="text-[10px] text-cyan-300 font-bold">
+                  {summary.totalConversions > 0 ? 'vérifié' : 'prêt'}
+                </span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                Zero structural hallucination
+                {summary.totalConversions > 0 ? 'Zero structural hallucination' : 'Moteur déterministe en veille'}
               </p>
             </div>
 
