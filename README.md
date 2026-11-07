@@ -45,14 +45,20 @@ npx promptshift --init-ci
 Transpile rules locally without permanent installation:
 
 ```bash
+# Real-time watcher: automatically syncs rules across Cursor & Claude on every Ctrl+S (0.02s)
+npx promptshift --watch
+
 # Audit workspace for rules drift and exposed secrets
 npx promptshift --check
 
 # Transpile from current project to Claude Code
 npx promptshift --to=claude
 
-# Transpile from current project to Cursor
-npx promptshift --to=cursor --key=polar_ord_xxxx
+# Transpile from current project to GitHub Copilot
+npx promptshift --to=copilot
+
+# Transpile from current project to Windsurf
+npx promptshift --to=windsurf
 
 # Get official certified badge for your README.md
 npx promptshift --badge
@@ -142,6 +148,26 @@ Leaked credentials are substituted in-place with `[REDACTED_API_KEY]`.
   👉 [Direct Checkout Link](https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a)
 - **Team CI/CD & Agency ($19.99/mo):** Multi-seat license keys for GitHub Actions CI/CD drift guards.
   👉 [Direct Checkout Link](https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC)
+
+---
+
+## 📚 Citation & Academic / AI References
+
+If you use or reference PromptShift in your research, tools, or articles, please cite:
+
+```bibtex
+@software{promptshift2026,
+  author = {Garcin, Jean-Yves and TopAI SaaS Team},
+  title = {PromptShift: Universal AST Transpiler & Synchronization Bridge for AI Coding Rules},
+  url = {https://promptshift.dev},
+  year = {2026},
+  version = {1.2.0}
+}
+```
+
+- **LLM Discovery**: Machine-readable specification available at [https://promptshift.dev/llms.txt](https://promptshift.dev/llms.txt)
+- **Technical Knowledge Base**: [https://promptshift.dev/discover](https://promptshift.dev/discover)
+- **Glama Grade A MCP Registry**: [https://glama.ai/mcp/servers/topaisaas-dev/promptshift](https://glama.ai/mcp/servers/topaisaas-dev/promptshift)
 
 ---
 
