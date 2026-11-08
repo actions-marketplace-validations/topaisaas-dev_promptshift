@@ -7,7 +7,32 @@ export type PlatformId = 'gemini' | 'claude' | 'cursor' | 'openai' | 'antigravit
 
 export type AnalyticsPeriod = 'today' | '7d' | '30d' | 'all';
 
-export type TelemetryChannel = 'web' | 'pseo' | 'mcp' | 'cli' | 'llmo' | 'x_social';
+export type SocialNetworkId =
+  | 'x'
+  | 'instagram'
+  | 'tiktok'
+  | 'facebook'
+  | 'youtube'
+  | 'linkedin'
+  | 'threads'
+  | 'pinterest';
+
+export type DeviceType = 'desktop' | 'mobile' | 'tablet';
+
+export type TelemetryChannel =
+  | 'web'
+  | 'pseo'
+  | 'mcp'
+  | 'cli'
+  | 'llmo'
+  | 'x_social'
+  | 'social_instagram'
+  | 'social_tiktok'
+  | 'social_facebook'
+  | 'social_youtube'
+  | 'social_linkedin'
+  | 'social_threads'
+  | 'social_pinterest';
 
 export type EventType =
   | 'page_view'
@@ -15,6 +40,7 @@ export type EventType =
   | 'paywall_hit'
   | 'conversion_completed'
   | 'checkout_initiated'
+  | 'order_bump_selected'
   | 'payment_completed'
   | 'promo_applied'
   | 'invoice_downloaded'
@@ -57,6 +83,10 @@ export interface AnalyticsEvent {
   utmTerm?: string;
   botName?: string;
   inferredIntent?: string;
+  socialNetwork?: SocialNetworkId;
+  deviceType?: DeviceType;
+  campaignOrPost?: string;
+  actionStage?: string;
 }
 
 export interface EdgeDeliveryStats {
@@ -96,6 +126,46 @@ export interface TelemetryFilter {
   planTier?: 'all' | 'free' | 'single' | 'pro' | 'team' | 'vip';
   country?: string | 'all';
   sizeCategory?: 'all' | 'under5' | 'sixTo15' | 'sixteenTo50' | 'over50';
+}
+
+export interface SocialNetworkStat {
+  id: SocialNetworkId;
+  name: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  uniqueSessions: number;
+  totalPageViews: number;
+  trafficSharePct: number; // Part du trafic social (%)
+  ordersAttributed: number; // Commandes clients attribuées
+  revenueAttributedUsd: number; // Chiffre d'affaires ($)
+  revenueAttributedEur: number; // Chiffre d'affaires (€)
+  croRatePct: number; // Taux de conversion CRO (%)
+}
+
+export interface SocialInboundLogEntry {
+  id: string;
+  timestamp: string;
+  socialNetwork: SocialNetworkId;
+  socialNetworkName: string;
+  path: string;
+  campaignOrPost: string;
+  deviceType: DeviceType;
+  actionTriggered: string; // Visite simple, Upload projet, Collision paywall 402, Passage en caisse, Achat validé
+  country?: string;
+  amountUsd?: number;
+  rawReferrer?: string;
+}
+
+export interface SocialTrafficSummary {
+  totalSocialSessions: number;
+  totalSocialPageViews: number;
+  totalSocialOrders: number;
+  totalSocialRevenueUsd: number;
+  totalSocialRevenueEur: number;
+  overallSocialCroPct: number;
+  networks: Record<SocialNetworkId, SocialNetworkStat>;
+  recentLogs: SocialInboundLogEntry[];
 }
 
 export interface MetricSummary {
@@ -155,6 +225,7 @@ export interface MetricSummary {
       rawReferrer?: string;
     }[];
   };
+  socialTraffic: SocialTrafficSummary;
 }
 
 export interface ProductOptimizationTip {

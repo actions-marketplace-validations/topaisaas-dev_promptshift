@@ -1,53 +1,52 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { GoogleSearchConsoleService } from '@/lib/seo/googleSearchConsole';
+import { GscParserService } from '@/lib/seo/gscParser';
 
 export async function GET(request: NextRequest) {
   const credentials = GoogleSearchConsoleService.getCredentials();
 
-  if (!credentials) {
-    return NextResponse.json({
-      configured: false,
-      message: 'Google Search Console Service Account is not configured in environment variables.',
-      instructions: [
-        '1. Create a Google Cloud Service Account key (Owner or Search Console User role).',
-        '2. Add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY into .env.local',
-        '3. Add the service account email in Search Console > Settings > Users and permissions.',
-      ],
-    });
-  }
+  // If Service Account is configured in env, attempt live query
+  if (credentials) {
+    try {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  try {
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const rows = await GoogleSearchConsoleService.querySearchAnalytics('https://promptshift.dev', {
+        startDate: thirtyDaysAgo.toISOString().split('T')[0],
+        endDate: today.toISOString().split('T')[0],
+        dimensions: ['query'],
+        rowLimit: 15,
+      });
 
-    const rows = await GoogleSearchConsoleService.querySearchAnalytics('https://promptshift.dev', {
-      startDate: thirtyDaysAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      dimensions: ['query'],
-      rowLimit: 15,
-    });
-
-    return NextResponse.json({
-      configured: true,
-      serviceAccount: credentials.clientEmail,
-      queries: rows,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      {
+      return NextResponse.json({
         configured: true,
-        error: error.message || 'Failed to fetch Search Analytics',
-      },
-      { status: 500 }
-    );
+        mode: 'service_account_api',
+        serviceAccount: credentials.clientEmail,
+        queries: rows,
+        gscReport: GscParserService.getReport(),
+      });
+    } catch (error: any) {
+      // Fall through to CSV Export & ChatSEO Matrix mode
+    }
   }
+
+  // Solution 1 (Antigravity Playbook): Return official GSC CSV Export data & ChatSEO target matrix
+  const report = GscParserService.getReport();
+
+  return NextResponse.json({
+    configured: true,
+    mode: 'gsc_csv_export',
+    message: 'Données Google Search Console synchronisées via export officiel CSV & Matrice ChatSEO active.',
+    serviceAccount: null,
+    gscReport: report,
+  });
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, url } = body;
+    const { action, url, files } = body;
 
     if (action === 'submit-sitemap') {
       const result = await GoogleSearchConsoleService.submitSitemap();
@@ -60,8 +59,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(result);
     }
 
+    if (action === 'import-gsc-csv' && files) {
+      const updated = GscParserService.updateFromFiles(files);
+      return NextResponse.json({ ok: true, gscReport: updated });
+    }
+
     return NextResponse.json(
-      { error: `Unknown action: ${action}. Expected 'submit-sitemap' or 'index-url'.` },
+      { error: `Unknown action: ${action}. Expected 'submit-sitemap', 'index-url' or 'import-gsc-csv'.` },
       { status: 400 }
     );
   } catch (error: any) {

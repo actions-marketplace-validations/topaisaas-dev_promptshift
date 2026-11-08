@@ -18,6 +18,7 @@ export interface PolarCheckoutRequest {
   successUrl?: string;
   sourceChannel?: string;
   conversionPair?: string;
+  includeOrderBump?: boolean;
 }
 
 export interface PolarCheckoutResponse {
@@ -138,6 +139,8 @@ export class PolarService {
             project_name: (req.projectName || 'custom_workspace').slice(0, 60),
             channel: req.sourceChannel || 'web_studio',
             pair: req.conversionPair || 'direct',
+            order_bump: req.includeOrderBump ? 'true' : 'false',
+            order_bump_item: req.includeOrderBump ? 'rules_vault_50' : 'none',
           },
         }),
       });
