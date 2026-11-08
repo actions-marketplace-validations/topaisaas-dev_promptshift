@@ -30,6 +30,13 @@ export async function POST(req: NextRequest) {
       else if (lower.includes('claude.ai')) referrerDomain = 'claude.ai';
       else if (lower.includes('google.')) referrerDomain = 'google.com';
       else if (lower.includes('t.co') || lower.includes('x.com') || lower.includes('twitter.com')) referrerDomain = 'x.com';
+      else if (lower.includes('instagram.com')) referrerDomain = 'instagram.com';
+      else if (lower.includes('tiktok.com')) referrerDomain = 'tiktok.com';
+      else if (lower.includes('facebook.com') || lower.includes('fb.me')) referrerDomain = 'facebook.com';
+      else if (lower.includes('youtube.com') || lower.includes('youtu.be')) referrerDomain = 'youtube.com';
+      else if (lower.includes('linkedin.com') || lower.includes('lnkd.in')) referrerDomain = 'linkedin.com';
+      else if (lower.includes('threads.net')) referrerDomain = 'threads.net';
+      else if (lower.includes('pinterest.com') || lower.includes('pin.it')) referrerDomain = 'pinterest.com';
       else if (lower.includes('github.com')) referrerDomain = 'github.com';
       else {
         try {
@@ -40,11 +47,42 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    let deviceType = body.deviceType;
+    if (!deviceType) {
+      if (/(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(userAgent)) {
+        deviceType = 'tablet';
+      } else if (/mobi|android|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop/.test(userAgent)) {
+        deviceType = 'mobile';
+      } else {
+        deviceType = 'desktop';
+      }
+    }
+
+    let socialNetwork = body.socialNetwork;
+    if (!socialNetwork && (rawReferrer || body.utmSource)) {
+      const ref = (rawReferrer || '').toLowerCase();
+      const utm = (body.utmSource || '').toLowerCase();
+      if (ref.includes('t.co') || ref.includes('x.com') || ref.includes('twitter.com') || utm === 'x' || utm === 'twitter') socialNetwork = 'x';
+      else if (ref.includes('instagram.com') || utm === 'instagram' || utm === 'ig' || userAgent.includes('instagram')) socialNetwork = 'instagram';
+      else if (ref.includes('tiktok.com') || utm === 'tiktok' || userAgent.includes('tiktok') || userAgent.includes('musical_ly')) socialNetwork = 'tiktok';
+      else if (ref.includes('facebook.com') || ref.includes('fb.me') || utm === 'facebook' || utm === 'fb' || userAgent.includes('fbav') || userAgent.includes('fban')) socialNetwork = 'facebook';
+      else if (ref.includes('youtube.com') || ref.includes('youtu.be') || utm === 'youtube' || utm === 'yt') socialNetwork = 'youtube';
+      else if (ref.includes('linkedin.com') || ref.includes('lnkd.in') || utm === 'linkedin') socialNetwork = 'linkedin';
+      else if (ref.includes('threads.net') || utm === 'threads') socialNetwork = 'threads';
+      else if (ref.includes('pinterest.com') || ref.includes('pin.it') || utm === 'pinterest') socialNetwork = 'pinterest';
+    }
+
+    const campaignOrPost = body.campaignOrPost || (body.utmCampaign ? (body.utmTerm ? `${body.utmCampaign} (${body.utmTerm})` : body.utmCampaign) : (socialNetwork ? 'Lien direct bio/post' : undefined));
+
     const enriched = ServerTelemetryStore.record({
       ...body,
       referrer: rawReferrer,
       referrerDomain: referrerDomain || 'direct',
       botName,
+      deviceType,
+      socialNetwork,
+      campaignOrPost,
+      actionStage: body.actionStage || (body.type === 'page_view' ? 'Visite simple' : body.type === 'conversion_completed' ? 'Conversion terminée' : body.type),
       country:
         req.headers.get('x-vercel-ip-country') ||
         req.headers.get('cf-ipcountry') ||

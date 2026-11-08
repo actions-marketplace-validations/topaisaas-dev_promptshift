@@ -12,6 +12,10 @@ import {
   TelemetryFilter,
   ArbitrageDecisionItem,
   EdgeDeliveryStats,
+  SocialNetworkId,
+  SocialNetworkStat,
+  SocialInboundLogEntry,
+  SocialTrafficSummary,
 } from './analyticsTypes';
 
 export class AnalyticsAggregator {
@@ -76,7 +80,9 @@ export class AnalyticsAggregator {
         (e.id || '').toLowerCase().includes(q) ||
         (e.referrerDomain || '').toLowerCase().includes(q) ||
         (e.inferredIntent || '').toLowerCase().includes(q) ||
-        (e.path || '').toLowerCase().includes(q)
+        (e.path || '').toLowerCase().includes(q) ||
+        (e.socialNetwork || '').toLowerCase().includes(q) ||
+        (e.campaignOrPost || '').toLowerCase().includes(q)
       );
     }
 
@@ -190,6 +196,9 @@ export class AnalyticsAggregator {
     // Build GEO / LLMO Inbound Search Analytics
     const geoSearchInbound = this.buildGeoSearchInbound(filtered);
 
+    // Build Multi-Channel Social Media Traffic & CRO Analytics (X, Insta, TikTok, Facebook, YouTube, LinkedIn, Threads, Pinterest)
+    const socialTraffic = this.buildSocialTraffic(filtered);
+
     return {
       period,
       totalPageViews,
@@ -213,6 +222,7 @@ export class AnalyticsAggregator {
       edgeStats,
       arbitrageMatrix,
       geoSearchInbound,
+      socialTraffic,
     };
   }
 
@@ -249,7 +259,7 @@ export class AnalyticsAggregator {
         claudeClicks++;
       } else if (domain.includes('google') || utm.includes('google') || raw.includes('google.')) {
         googleSearchClicks++;
-      } else if (domain.includes('x.com') || domain.includes('t.co') || utm.includes('twitter') || utm.includes('x') || ev.channel === 'x_social') {
+      } else if (domain.includes('x.com') || domain.includes('t.co') || utm.includes('twitter') || utm.includes('x') || ev.channel === 'x_social' || ev.socialNetwork === 'x') {
         xSocialClicks++;
       } else if (domain.includes('github')) {
         githubClicks++;
@@ -278,7 +288,7 @@ export class AnalyticsAggregator {
           sourceName = 'Claude Code (Anthropic)';
         } else if (d.includes('google') || utm.includes('google')) {
           sourceName = 'Google Search';
-        } else if (d.includes('x.com') || d.includes('t.co') || utm.includes('twitter') || e.channel === 'x_social') {
+        } else if (d.includes('x.com') || d.includes('t.co') || utm.includes('twitter') || e.channel === 'x_social' || e.socialNetwork === 'x') {
           sourceName = 'X.com (Post @promptshift_dev)';
         } else if (d.includes('github')) {
           sourceName = 'GitHub Repository';
@@ -309,6 +319,209 @@ export class AnalyticsAggregator {
       directOrOtherClicks,
       aiBotCrawls,
       recentReferrals,
+    };
+  }
+
+  /**
+   * Computes 100% REAL multi-network social media metrics (X, Insta, TikTok, FB, YT, LinkedIn, Threads, Pinterest)
+   */
+  private static buildSocialTraffic(events: AnalyticsEvent[]): SocialTrafficSummary {
+    const EUR_USD_RATE = 1.08;
+    const networksConfig: Record<
+      SocialNetworkId,
+      { name: string; badgeBg: string; badgeText: string; badgeBorder: string }
+    > = {
+      x: {
+        name: 'X (Twitter)',
+        badgeBg: 'bg-black',
+        badgeText: 'text-white',
+        badgeBorder: 'border-slate-700',
+      },
+      instagram: {
+        name: 'Instagram',
+        badgeBg: 'bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500',
+        badgeText: 'text-white',
+        badgeBorder: 'border-pink-500/40',
+      },
+      tiktok: {
+        name: 'TikTok',
+        badgeBg: 'bg-black',
+        badgeText: 'text-cyan-400',
+        badgeBorder: 'border-cyan-500/40',
+      },
+      facebook: {
+        name: 'Facebook',
+        badgeBg: 'bg-blue-600',
+        badgeText: 'text-white',
+        badgeBorder: 'border-blue-400',
+      },
+      youtube: {
+        name: 'YouTube',
+        badgeBg: 'bg-red-600',
+        badgeText: 'text-white',
+        badgeBorder: 'border-red-500',
+      },
+      linkedin: {
+        name: 'LinkedIn',
+        badgeBg: 'bg-[#0077b5]',
+        badgeText: 'text-white',
+        badgeBorder: 'border-sky-400',
+      },
+      threads: {
+        name: 'Threads',
+        badgeBg: 'bg-slate-900',
+        badgeText: 'text-slate-100',
+        badgeBorder: 'border-slate-700',
+      },
+      pinterest: {
+        name: 'Pinterest',
+        badgeBg: 'bg-[#bd081c]',
+        badgeText: 'text-white',
+        badgeBorder: 'border-rose-500',
+      },
+    };
+
+    const sessionSets: Record<SocialNetworkId, Set<string>> = {
+      x: new Set(),
+      instagram: new Set(),
+      tiktok: new Set(),
+      facebook: new Set(),
+      youtube: new Set(),
+      linkedin: new Set(),
+      threads: new Set(),
+      pinterest: new Set(),
+    };
+
+    const counts: Record<
+      SocialNetworkId,
+      { pageViews: number; orders: number; revenueUsd: number }
+    > = {
+      x: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      instagram: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      tiktok: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      facebook: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      youtube: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      linkedin: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      threads: { pageViews: 0, orders: 0, revenueUsd: 0 },
+      pinterest: { pageViews: 0, orders: 0, revenueUsd: 0 },
+    };
+
+    const recentLogs: SocialInboundLogEntry[] = [];
+
+    // Helper to resolve network from event
+    const resolveNetwork = (ev: AnalyticsEvent): SocialNetworkId | undefined => {
+      if (ev.socialNetwork) return ev.socialNetwork;
+      const ref = (ev.referrer || '').toLowerCase();
+      const utm = (ev.utmSource || '').toLowerCase();
+      const domain = (ev.referrerDomain || '').toLowerCase();
+      if (domain === 'x.com' || ref.includes('t.co') || ref.includes('twitter.com') || utm === 'x' || utm === 'twitter') return 'x';
+      if (domain === 'instagram.com' || ref.includes('instagram') || utm === 'instagram' || utm === 'ig') return 'instagram';
+      if (domain === 'tiktok.com' || ref.includes('tiktok') || utm === 'tiktok') return 'tiktok';
+      if (domain === 'facebook.com' || ref.includes('facebook') || ref.includes('fb.me') || utm === 'facebook' || utm === 'fb') return 'facebook';
+      if (domain === 'youtube.com' || ref.includes('youtube') || ref.includes('youtu.be') || utm === 'youtube' || utm === 'yt') return 'youtube';
+      if (domain === 'linkedin.com' || ref.includes('linkedin') || ref.includes('lnkd.in') || utm === 'linkedin') return 'linkedin';
+      if (domain === 'threads.net' || ref.includes('threads') || utm === 'threads') return 'threads';
+      if (domain === 'pinterest.com' || ref.includes('pinterest') || ref.includes('pin.it') || utm === 'pinterest') return 'pinterest';
+      return undefined;
+    };
+
+    for (const ev of events) {
+      const net = resolveNetwork(ev);
+      if (!net) continue;
+
+      const sid = ev.sessionId || ev.id;
+      if (ev.type === 'page_view') {
+        counts[net].pageViews++;
+        sessionSets[net].add(sid);
+      }
+
+      if (ev.type === 'payment_completed' || (ev.type === 'conversion_completed' && !ev.isFreeTier && (ev.amountUsd || 0) > 0)) {
+        counts[net].orders++;
+        const amount = ev.amountUsd || (ev.planTier === 'team' ? 19.99 : ev.planTier === 'pro' ? 5.99 : 1.99);
+        counts[net].revenueUsd += amount;
+      }
+
+      // Add to log entries
+      let actionLabel = ev.actionStage || 'Visite simple';
+      if (!ev.actionStage) {
+        if (ev.type === 'page_view') actionLabel = 'Visite simple';
+        else if (ev.type === 'project_upload') actionLabel = 'Upload projet';
+        else if (ev.type === 'paywall_hit') actionLabel = 'Collision paywall 402';
+        else if (ev.type === 'checkout_initiated') actionLabel = 'Passage en caisse Polar';
+        else if (ev.type === 'conversion_completed') actionLabel = 'Conversion terminée';
+        else if (ev.type === 'payment_completed') actionLabel = `Achat validé ($${(ev.amountUsd || 1.99).toFixed(2)})`;
+      }
+
+      recentLogs.push({
+        id: ev.id,
+        timestamp: ev.timestamp,
+        socialNetwork: net,
+        socialNetworkName: networksConfig[net].name,
+        path: ev.path || '/',
+        campaignOrPost: ev.campaignOrPost || (ev.utmCampaign ? `${ev.utmCampaign}${ev.utmTerm ? ` (${ev.utmTerm})` : ''}` : 'Lien direct bio/post'),
+        deviceType: ev.deviceType || 'desktop',
+        actionTriggered: actionLabel,
+        country: ev.country || 'US',
+        amountUsd: ev.amountUsd,
+        rawReferrer: ev.referrer,
+      });
+    }
+
+    // Compute total social sessions
+    let totalSocialSessions = 0;
+    let totalSocialPageViews = 0;
+    let totalSocialOrders = 0;
+    let totalSocialRevenueUsd = 0;
+
+    const allSocialKeys = Object.keys(networksConfig) as SocialNetworkId[];
+    for (const k of allSocialKeys) {
+      totalSocialSessions += sessionSets[k].size;
+      totalSocialPageViews += counts[k].pageViews;
+      totalSocialOrders += counts[k].orders;
+      totalSocialRevenueUsd += counts[k].revenueUsd;
+    }
+
+    const totalSocialRevenueEur = Number((totalSocialRevenueUsd / EUR_USD_RATE).toFixed(2));
+    const overallSocialCroPct = totalSocialSessions > 0
+      ? Number(((totalSocialOrders / totalSocialSessions) * 100).toFixed(1))
+      : 0;
+
+    const networksRecord: Record<SocialNetworkId, SocialNetworkStat> = {} as any;
+
+    for (const k of allSocialKeys) {
+      const uSess = sessionSets[k].size;
+      const pViews = counts[k].pageViews;
+      const ords = counts[k].orders;
+      const revUsd = Number(counts[k].revenueUsd.toFixed(2));
+      const revEur = Number((revUsd / EUR_USD_RATE).toFixed(2));
+      const trafficShare = totalSocialSessions > 0 ? Math.round((uSess / totalSocialSessions) * 100) : 0;
+      const cro = uSess > 0 ? Number(((ords / uSess) * 100).toFixed(1)) : 0;
+
+      networksRecord[k] = {
+        id: k,
+        name: networksConfig[k].name,
+        badgeBg: networksConfig[k].badgeBg,
+        badgeText: networksConfig[k].badgeText,
+        badgeBorder: networksConfig[k].badgeBorder,
+        uniqueSessions: uSess,
+        totalPageViews: pViews,
+        trafficSharePct: trafficShare,
+        ordersAttributed: ords,
+        revenueAttributedUsd: revUsd,
+        revenueAttributedEur: revEur,
+        croRatePct: cro,
+      };
+    }
+
+    return {
+      totalSocialSessions,
+      totalSocialPageViews,
+      totalSocialOrders,
+      totalSocialRevenueUsd,
+      totalSocialRevenueEur,
+      overallSocialCroPct,
+      networks: networksRecord,
+      recentLogs: recentLogs.slice(0, 50),
     };
   }
 
@@ -464,14 +677,34 @@ export class AnalyticsAggregator {
         id: 'tip-zero-state',
         category: 'growth',
         title: 'Moteur Télémétrique Souverain Actif — Données 100% Réelles',
-        description: 'Le moteur d’analytics en RAM est vierge de toute donnée fictive. Dès qu’un visiteur atterrit depuis ChatGPT, Perplexity ou convertit un projet, ses métriques réelles s’afficheront ici en temps réel.',
+        description: 'Le moteur d’analytics en RAM est vierge de toute donnée fictive. Dès qu’un visiteur atterrit depuis ChatGPT, Perplexity, un réseau social ou convertit un projet, ses métriques réelles s’afficheront ici en temps réel.',
         impact: 'medium',
         metricGrounding: '0 conversion enregistrée. État de vérité terrain garanti.',
-        actionableStep: 'Testez une conversion sur le site ou surveillez les clics entrants depuis les moteurs IA.',
+        actionableStep: 'Testez une conversion sur le site ou surveillez les clics entrants depuis les réseaux sociaux et moteurs IA.',
       });
     }
 
-    // 1. GEO & AI Inbound signals
+    // 1. Social traffic signals
+    const soc = summary.socialTraffic;
+    if (soc.totalSocialSessions > 0) {
+      const topNet = (Object.entries(soc.networks) as [SocialNetworkId, SocialNetworkStat][])
+        .filter(([_, s]) => s.uniqueSessions > 0)
+        .sort((a, b) => b[1].uniqueSessions - a[1].uniqueSessions)[0];
+
+      if (topNet) {
+        tips.push({
+          id: 'tip-social-traction',
+          category: 'marketing',
+          title: `Trafic Réseaux Sociaux : ${soc.totalSocialSessions} sessions (${topNet[1].name} en tête)`,
+          description: `${topNet[1].name} génère ${topNet[1].trafficSharePct}% de votre trafic social. Son taux CRO s'élève à ${topNet[1].croRatePct}%.`,
+          impact: 'high',
+          metricGrounding: `${topNet[1].uniqueSessions} sessions uniques et ${topNet[1].ordersAttributed} commande(s) attribuée(s) à ${topNet[1].name}.`,
+          actionableStep: `Renforcez les publications avec liens directs ciblés vers les paires de migration sur ${topNet[1].name}.`,
+        });
+      }
+    }
+
+    // 2. GEO & AI Inbound signals
     const geo = summary.geoSearchInbound;
     const totalAiClicks = geo.chatgptClicks + geo.perplexityClicks + geo.claudeClicks;
     if (totalAiClicks > 0) {
@@ -479,14 +712,14 @@ export class AnalyticsAggregator {
         id: 'tip-geo-inbound',
         category: 'marketing',
         title: `Trafic Moteurs IA Détecté : ${totalAiClicks} clics entrants (ChatGPT / Perplexity / Claude)`,
-        description: `Les fiches d’autorité et llms.txt génèrent déjà des visites qualifiées depuis les moteurs génératifs.`,
+        description: `Les fiches d’autorité et llms.txt génèrent des visites qualifiées depuis les moteurs génératifs.`,
         impact: 'critical',
         metricGrounding: `ChatGPT: ${geo.chatgptClicks} · Perplexity: ${geo.perplexityClicks} · Claude: ${geo.claudeClicks}.`,
         actionableStep: `Renforcez les liens sur les pages de destination les plus visitées (ex: /convert/cursor-to-copilot).`,
       });
     }
 
-    // 2. Target platform dominance
+    // 3. Target platform dominance
     const targets = Object.entries(summary.targetPlatformShare).filter(([_, count]) => count > 0).sort((a, b) => b[1] - a[1]);
     if (targets.length > 0) {
       const topTgt = targets[0][0];
@@ -506,7 +739,7 @@ export class AnalyticsAggregator {
       });
     }
 
-    // 3. Secrets Redaction & Security B2B
+    // 4. Secrets Redaction & Security B2B
     if (summary.totalSecretsSanitized > 0) {
       tips.push({
         id: 'tip-security-shield',

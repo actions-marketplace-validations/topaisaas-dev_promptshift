@@ -4,10 +4,12 @@
  * Strictly 100% REAL telemetry with zero synthetic or mock event generation.
  */
 
-import { AnalyticsEvent, PlatformId, TelemetryChannel } from './analyticsTypes';
+import { AnalyticsEvent, DeviceType, PlatformId, SocialNetworkId, TelemetryChannel } from './analyticsTypes';
 
 const STORAGE_KEY = 'promptshift_analytics_events';
 const MAX_LOCAL_EVENTS = 500;
+const SOCIAL_STORAGE_KEY = 'promptshift_social_source';
+const CAMPAIGN_STORAGE_KEY = 'promptshift_social_campaign';
 
 export class AnalyticsTracker {
   /**
@@ -28,6 +30,161 @@ export class AnalyticsTracker {
   }
 
   /**
+   * Detects social network from referrer, UTM parameters, or in-app User Agent
+   */
+  public static detectSocialNetwork(
+    referrer?: string,
+    utmSource?: string,
+    userAgent?: string
+  ): SocialNetworkId | undefined {
+    const ref = (referrer || '').toLowerCase();
+    const utm = (utmSource || '').toLowerCase();
+    const ua = (userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : '') || '').toLowerCase();
+
+    // 1. X (Twitter)
+    if (
+      ref.includes('t.co') ||
+      ref.includes('x.com') ||
+      ref.includes('twitter.com') ||
+      utm === 'x' ||
+      utm === 'twitter' ||
+      utm === 'x.com'
+    ) {
+      return 'x';
+    }
+
+    // 2. Instagram
+    if (
+      ref.includes('instagram.com') ||
+      ref.includes('l.instagram.com') ||
+      utm === 'instagram' ||
+      utm === 'ig' ||
+      ua.includes('instagram')
+    ) {
+      return 'instagram';
+    }
+
+    // 3. TikTok
+    if (
+      ref.includes('tiktok.com') ||
+      ref.includes('link.tiktok.com') ||
+      ref.includes('vt.tiktok.com') ||
+      utm === 'tiktok' ||
+      ua.includes('tiktok') ||
+      ua.includes('musical_ly')
+    ) {
+      return 'tiktok';
+    }
+
+    // 4. Facebook
+    if (
+      ref.includes('facebook.com') ||
+      ref.includes('fb.me') ||
+      ref.includes('l.facebook.com') ||
+      ref.includes('lm.facebook.com') ||
+      utm === 'facebook' ||
+      utm === 'fb' ||
+      ua.includes('fbav') ||
+      ua.includes('fban')
+    ) {
+      return 'facebook';
+    }
+
+    // 5. YouTube
+    if (
+      ref.includes('youtube.com') ||
+      ref.includes('youtu.be') ||
+      utm === 'youtube' ||
+      utm === 'yt'
+    ) {
+      return 'youtube';
+    }
+
+    // 6. LinkedIn
+    if (
+      ref.includes('linkedin.com') ||
+      ref.includes('lnkd.in') ||
+      utm === 'linkedin'
+    ) {
+      return 'linkedin';
+    }
+
+    // 7. Threads
+    if (
+      ref.includes('threads.net') ||
+      ref.includes('l.threads.net') ||
+      utm === 'threads'
+    ) {
+      return 'threads';
+    }
+
+    // 8. Pinterest
+    if (
+      ref.includes('pinterest.com') ||
+      ref.includes('pin.it') ||
+      utm === 'pinterest'
+    ) {
+      return 'pinterest';
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Detects device type (mobile, tablet, desktop)
+   */
+  public static detectDeviceType(userAgent?: string): DeviceType {
+    const ua = (userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : '') || '').toLowerCase();
+    if (/(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(ua)) {
+      return 'tablet';
+    }
+    if (/mobi|android|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop/.test(ua)) {
+      return 'mobile';
+    }
+    return 'desktop';
+  }
+
+  /**
+   * Formats campaign or post string (e.g. from UTM campaign / content)
+   */
+  public static detectCampaignOrPost(utmCampaign?: string, utmContent?: string): string {
+    if (utmCampaign && utmCampaign.trim()) {
+      if (utmContent && utmContent.trim()) {
+        return `${utmCampaign} (${utmContent})`;
+      }
+      return utmCampaign;
+    }
+    if (utmContent && utmContent.trim()) {
+      return utmContent;
+    }
+    return 'Lien direct bio/post';
+  }
+
+  /**
+   * Attribution: persists social source across customer journey in sessionStorage
+   */
+  public static setAttributedSocialSource(socialNetwork: SocialNetworkId, campaignOrPost: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(SOCIAL_STORAGE_KEY, socialNetwork);
+      sessionStorage.setItem(CAMPAIGN_STORAGE_KEY, campaignOrPost);
+    } catch {
+      // ignore
+    }
+  }
+
+  public static getAttributedSocialSource(): { socialNetwork?: SocialNetworkId; campaignOrPost?: string } {
+    if (typeof window === 'undefined') return {};
+    try {
+      const socialNetwork = (sessionStorage.getItem(SOCIAL_STORAGE_KEY) as SocialNetworkId) || undefined;
+      const campaignOrPost = sessionStorage.getItem(CAMPAIGN_STORAGE_KEY) || undefined;
+      return { socialNetwork, campaignOrPost };
+    } catch {
+      return {};
+    }
+  }
+
+  /**
    * Extracts clean domain from raw HTTP referrer
    */
   public static resolveReferrerDomain(rawReferrer?: string): string {
@@ -38,6 +195,13 @@ export class AnalyticsTracker {
     if (lower.includes('claude.ai')) return 'claude.ai';
     if (lower.includes('google.')) return 'google.com';
     if (lower.includes('t.co') || lower.includes('x.com') || lower.includes('twitter.com')) return 'x.com';
+    if (lower.includes('instagram.com')) return 'instagram.com';
+    if (lower.includes('tiktok.com')) return 'tiktok.com';
+    if (lower.includes('facebook.com') || lower.includes('fb.me')) return 'facebook.com';
+    if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'youtube.com';
+    if (lower.includes('linkedin.com') || lower.includes('lnkd.in')) return 'linkedin.com';
+    if (lower.includes('threads.net')) return 'threads.net';
+    if (lower.includes('pinterest.com') || lower.includes('pin.it')) return 'pinterest.com';
     if (lower.includes('github.com')) return 'github.com';
     if (lower.includes('bing.com')) return 'bing.com';
     try {
@@ -68,17 +232,25 @@ export class AnalyticsTracker {
   }
 
   /**
-   * Tracks an arbitrary telemetry event
+   * Tracks an arbitrary telemetry event with automatic social attribution & device detection
    */
   public static track(event: Omit<AnalyticsEvent, 'id' | 'timestamp'>): void {
     if (typeof window === 'undefined') return;
+
+    const attributed = this.getAttributedSocialSource();
+    const deviceType = event.deviceType || this.detectDeviceType();
+    const socialNetwork = event.socialNetwork || attributed.socialNetwork;
+    const campaignOrPost = event.campaignOrPost || attributed.campaignOrPost;
 
     const fullEvent: AnalyticsEvent = {
       ...event,
       id: 'ev_' + Math.random().toString(36).substring(2, 11),
       timestamp: new Date().toISOString(),
-      userAgentSnippet: typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 50) : undefined,
+      userAgentSnippet: typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 60) : undefined,
       sessionId: event.sessionId || this.getSessionId(),
+      deviceType,
+      socialNetwork,
+      campaignOrPost,
     };
 
     // 1. Save locally in Sovereign Analytics store (real data only)
@@ -126,6 +298,7 @@ export class AnalyticsTracker {
     let utmMedium: string | undefined;
     let utmCampaign: string | undefined;
     let utmTerm: string | undefined;
+    let utmContent: string | undefined;
 
     if (typeof pathOrOptions === 'object' && pathOrOptions !== null) {
       path = pathOrOptions.path || '/';
@@ -139,11 +312,13 @@ export class AnalyticsTracker {
           utmSource = pathOrOptions.searchParams.get('utm_source') || undefined;
           utmMedium = pathOrOptions.searchParams.get('utm_medium') || undefined;
           utmCampaign = pathOrOptions.searchParams.get('utm_campaign') || undefined;
+          utmContent = pathOrOptions.searchParams.get('utm_content') || undefined;
           utmTerm = pathOrOptions.searchParams.get('utm_term') || pathOrOptions.searchParams.get('q') || undefined;
         } else {
           utmSource = pathOrOptions.searchParams.utm_source;
           utmMedium = pathOrOptions.searchParams.utm_medium;
           utmCampaign = pathOrOptions.searchParams.utm_campaign;
+          utmContent = (pathOrOptions.searchParams as any).utm_content;
           utmTerm = pathOrOptions.searchParams.utm_term || pathOrOptions.searchParams.q;
         }
       }
@@ -157,10 +332,18 @@ export class AnalyticsTracker {
         utmSource = sp.get('utm_source') || undefined;
         utmMedium = sp.get('utm_medium') || undefined;
         utmCampaign = sp.get('utm_campaign') || undefined;
+        utmContent = sp.get('utm_content') || undefined;
         utmTerm = sp.get('utm_term') || sp.get('q') || undefined;
       } catch {
         // ignore
       }
+    }
+
+    const detectedSocial = this.detectSocialNetwork(rawReferrer, utmSource);
+    const campaignOrPost = this.detectCampaignOrPost(utmCampaign, utmContent);
+
+    if (detectedSocial) {
+      this.setAttributedSocialSource(detectedSocial, campaignOrPost);
     }
 
     const referrerDomain = this.resolveReferrerDomain(rawReferrer);
@@ -168,10 +351,10 @@ export class AnalyticsTracker {
     const pairSlug = pairMatch ? pairMatch[1].toLowerCase() : undefined;
 
     let channel: TelemetryChannel = 'web';
-    if (referrerDomain.includes('chatgpt') || referrerDomain.includes('perplexity') || referrerDomain.includes('claude')) {
+    if (detectedSocial) {
+      channel = detectedSocial === 'x' ? 'x_social' : (`social_${detectedSocial}` as TelemetryChannel);
+    } else if (referrerDomain.includes('chatgpt') || referrerDomain.includes('perplexity') || referrerDomain.includes('claude')) {
       channel = 'llmo';
-    } else if (referrerDomain.includes('x.com')) {
-      channel = 'x_social';
     } else if (pairSlug) {
       channel = 'pseo';
     } else if (path.startsWith('/cli')) {
@@ -180,6 +363,7 @@ export class AnalyticsTracker {
 
     const inferredIntent = this.inferIntent(path, pairSlug);
     const sessionId = this.getSessionId();
+    const deviceType = this.detectDeviceType();
 
     this.track({
       type: 'page_view',
@@ -196,6 +380,10 @@ export class AnalyticsTracker {
       utmCampaign,
       utmTerm,
       inferredIntent,
+      socialNetwork: detectedSocial,
+      deviceType,
+      campaignOrPost,
+      actionStage: 'Visite simple',
     });
   }
 
@@ -214,6 +402,7 @@ export class AnalyticsTracker {
       fileCount: meta.fileCount,
       sizeBytes: meta.sizeBytes,
       sourcePlatform: meta.sourcePlatform,
+      actionStage: 'Upload projet',
     });
   }
 
@@ -233,6 +422,7 @@ export class AnalyticsTracker {
       sourcePlatform: meta.sourcePlatform,
       targetPlatform: meta.targetPlatform,
       planTier: 'single',
+      actionStage: 'Collision paywall 402',
     });
   }
 
@@ -267,6 +457,7 @@ export class AnalyticsTracker {
       currency: meta.currency || 'USD',
       durationMs: meta.durationMs,
       secretsCount: meta.secretsCount,
+      actionStage: 'Conversion terminée',
     });
   }
 
@@ -277,13 +468,33 @@ export class AnalyticsTracker {
     pairSlug?: string
   ): void {
     const numericAmount = amount ? Number.parseFloat(amount) : planTier === 'single' ? 1.99 : planTier === 'pro' ? 5.99 : 19.99;
+    const finalAmount = Number.isFinite(numericAmount) ? numericAmount : 1.99;
     this.track({
       type: 'checkout_initiated',
       channel: pairSlug ? 'pseo' : 'web',
       pairSlug,
       planTier,
-      amountUsd: Number.isFinite(numericAmount) ? numericAmount : 1.99,
+      amountUsd: finalAmount,
       currency: currency || 'USD',
+      actionStage: 'Passage en caisse Polar',
+    });
+  }
+
+  public static trackPaymentCompleted(meta: {
+    planTier: 'single' | 'pro' | 'team' | 'vip';
+    amountUsd: number;
+    currency?: string;
+    checkoutId?: string;
+    pairSlug?: string;
+  }): void {
+    this.track({
+      type: 'payment_completed',
+      channel: 'web',
+      pairSlug: meta.pairSlug,
+      planTier: meta.planTier,
+      amountUsd: meta.amountUsd,
+      currency: meta.currency || 'USD',
+      actionStage: `Achat validé ($${meta.amountUsd.toFixed(2)})`,
     });
   }
 
@@ -293,6 +504,7 @@ export class AnalyticsTracker {
       channel: 'web',
       promoCode,
       planTier: discountPercent === 100 ? 'vip' : 'pro',
+      actionStage: `Code Promo (${promoCode})`,
     });
   }
 
@@ -302,6 +514,7 @@ export class AnalyticsTracker {
       channel: 'web',
       projectTitleAnon: invoiceNumber,
       planTier,
+      actionStage: 'Facture téléchargée',
     });
   }
 
@@ -310,6 +523,7 @@ export class AnalyticsTracker {
       type: 'cli_token_copied',
       channel: 'cli',
       planTier,
+      actionStage: 'Clé CLI copiée',
     });
   }
 

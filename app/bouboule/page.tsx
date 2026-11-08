@@ -39,6 +39,11 @@ import {
   Activity,
   Scale,
   CheckCircle2,
+  Smartphone,
+  Monitor,
+  Tablet,
+  Radio,
+  ArrowUpRight,
 } from 'lucide-react';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
 import { AnalyticsAggregator } from '@/lib/analytics/analyticsAggregator';
@@ -1100,6 +1105,326 @@ Try it with your project: https://promptshift.dev
                         </td>
                       </tr>
                     ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* Radar d'Acquisition Réseaux Sociaux & Conversion CRO (8 Réseaux) */}
+        <section className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-[#0e1726] to-slate-950 border border-indigo-500/30 shadow-2xl flex flex-col gap-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-black text-white">
+                    Radar d&apos;Acquisition Réseaux Sociaux &amp; Conversion CRO (8 Réseaux)
+                  </h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    TEMPS RÉEL
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold">
+                    Attribution Sociale &amp; CRO
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Suivi unitaire des sessions, part de trafic, commandes et CA TTC (€ / $) attribués par réseau social.
+                </p>
+              </div>
+            </div>
+
+            {/* Global Social Summary Badges */}
+            <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
+              <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
+                <span className="text-slate-400 text-[11px]">Sessions :</span>
+                <span className="text-white font-bold">{summary.socialTraffic?.totalSocialSessions ?? 0}</span>
+              </div>
+              <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
+                <span className="text-slate-400 text-[11px]">Commandes :</span>
+                <span className="text-emerald-400 font-bold">{summary.socialTraffic?.totalSocialOrders ?? 0}</span>
+              </div>
+              <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
+                <span className="text-slate-400 text-[11px]">CA TTC :</span>
+                <span className="text-cyan-300 font-bold">
+                  {(summary.socialTraffic?.totalSocialRevenueEur ?? 0).toFixed(2)} €
+                </span>
+                <span className="text-slate-500 text-[10px]">
+                  (${(summary.socialTraffic?.totalSocialRevenueUsd ?? 0).toFixed(2)})
+                </span>
+              </div>
+              <div className="px-3 py-1 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center gap-2">
+                <span className="text-indigo-300 text-[11px]">CRO Global :</span>
+                <span className="text-indigo-200 font-bold">
+                  {(summary.socialTraffic?.overallSocialCroPct ?? 0).toFixed(1)}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 8 Social Network Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {[
+              {
+                id: 'x',
+                label: 'X (Twitter)',
+                desc: 'x.com / t.co',
+                color: 'border-slate-700 bg-black/70 hover:border-slate-500',
+                badgeClass: 'bg-black text-white border-slate-700',
+                progressColor: 'bg-slate-300',
+              },
+              {
+                id: 'instagram',
+                label: 'Instagram',
+                desc: 'l.instagram.com',
+                color: 'border-pink-500/30 bg-gradient-to-br from-pink-950/20 via-slate-950/80 to-purple-950/20 hover:border-pink-500/60',
+                badgeClass: 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-pink-400/50',
+                progressColor: 'bg-gradient-to-r from-pink-500 to-purple-500',
+              },
+              {
+                id: 'tiktok',
+                label: 'TikTok',
+                desc: 'link.tiktok.com',
+                color: 'border-cyan-500/30 bg-slate-950/80 hover:border-cyan-400/60',
+                badgeClass: 'bg-slate-950 text-cyan-300 border-cyan-400',
+                progressColor: 'bg-cyan-400',
+              },
+              {
+                id: 'facebook',
+                label: 'Facebook',
+                desc: 'l.facebook.com / fb.me',
+                color: 'border-blue-500/30 bg-slate-950/80 hover:border-blue-400/60',
+                badgeClass: 'bg-blue-600 text-white border-blue-400',
+                progressColor: 'bg-blue-500',
+              },
+              {
+                id: 'youtube',
+                label: 'YouTube',
+                desc: 'youtube.com / youtu.be',
+                color: 'border-red-500/30 bg-slate-950/80 hover:border-red-400/60',
+                badgeClass: 'bg-red-600 text-white border-red-400',
+                progressColor: 'bg-red-500',
+              },
+              {
+                id: 'linkedin',
+                label: 'LinkedIn',
+                desc: 'linkedin.com / lnkd.in',
+                color: 'border-sky-500/30 bg-slate-950/80 hover:border-sky-400/60',
+                badgeClass: 'bg-[#0077b5] text-white border-sky-400',
+                progressColor: 'bg-[#0077b5]',
+              },
+              {
+                id: 'threads',
+                label: 'Threads',
+                desc: 'threads.net / l.threads',
+                color: 'border-slate-700 bg-slate-950/80 hover:border-slate-500',
+                badgeClass: 'bg-slate-900 text-slate-100 border-slate-600',
+                progressColor: 'bg-slate-400',
+              },
+              {
+                id: 'pinterest',
+                label: 'Pinterest',
+                desc: 'pinterest.com / pin.it',
+                color: 'border-red-600/30 bg-slate-950/80 hover:border-red-500/60',
+                badgeClass: 'bg-[#bd081c] text-white border-red-500',
+                progressColor: 'bg-[#bd081c]',
+              },
+            ].map((net) => {
+              const stat = summary.socialTraffic?.networks[net.id as keyof typeof summary.socialTraffic.networks] ?? {
+                id: net.id,
+                name: net.label,
+                uniqueSessions: 0,
+                totalPageViews: 0,
+                trafficSharePct: 0,
+                ordersAttributed: 0,
+                revenueAttributedUsd: 0,
+                revenueAttributedEur: 0,
+                croRatePct: 0,
+              };
+
+              return (
+                <div
+                  key={net.id}
+                  className={`p-4 rounded-2xl border flex flex-col justify-between gap-3 transition-all ${net.color}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${net.badgeClass}`}>
+                      {net.label}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-500">{net.desc}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Sessions</div>
+                      <div className="text-xl font-black text-white font-mono">{stat.uniqueSessions}</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Part Trafic</div>
+                      <div className="text-xl font-black text-indigo-300 font-mono">
+                        {stat.trafficSharePct.toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Visual Progress Bar for Traffic Share */}
+                  <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${net.progressColor}`}
+                      style={{ width: `${Math.min(100, Math.max(stat.trafficSharePct, stat.uniqueSessions > 0 ? 5 : 0))}%` }}
+                    />
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
+                    <div>
+                      <span className="text-slate-500">Cmds : </span>
+                      <span className={`font-bold ${stat.ordersAttributed > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
+                        {stat.ordersAttributed}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">CA : </span>
+                      <span className={`font-bold ${stat.revenueAttributedEur > 0 ? 'text-cyan-300' : 'text-slate-400'}`}>
+                        {stat.revenueAttributedEur.toFixed(2)} €
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">CRO : </span>
+                      <span className={`font-bold ${stat.croRatePct > 0 ? 'text-emerald-300' : 'text-slate-400'}`}>
+                        {stat.croRatePct.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Timestamped Social Inbound Log Table */}
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <span className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+                <span>Journal Horodaté des Arrivées Réseaux Sociaux</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  (Période : {period})
+                </span>
+              </span>
+              <span className="text-[11px] font-mono text-slate-400">
+                {(summary.socialTraffic?.recentLogs ?? []).length} arrivées répertoriées
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/70">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="p-3">Date &amp; Heure</th>
+                    <th className="p-3">Réseau d&apos;Origine</th>
+                    <th className="p-3">Page Atterrissage Cible</th>
+                    <th className="p-3">Campagne / Post Spécifique</th>
+                    <th className="p-3 text-center">Type d&apos;Appareil</th>
+                    <th className="p-3">Action Client Déclenchée</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                  {(summary.socialTraffic?.recentLogs ?? []).length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-textMuted">
+                        Aucun visiteur en provenance des 8 réseaux sociaux sur cette période ({period}).
+                        <br />
+                        <span className="text-[10px] text-slate-500 mt-1 inline-block">
+                          Dès qu&apos;un internaute clique sur un lien de post ou de bio (X, Insta, TikTok, LinkedIn, YouTube, Facebook, Threads, Pinterest), la ligne s&apos;affiche ici en temps réel.
+                        </span>
+                      </td>
+                    </tr>
+                  ) : (
+                    (summary.socialTraffic?.recentLogs ?? []).map((entry) => {
+                      const badgeStyle =
+                        entry.socialNetwork === 'x'
+                          ? 'bg-black text-white border-slate-700'
+                          : entry.socialNetwork === 'instagram'
+                          ? 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-pink-400/50'
+                          : entry.socialNetwork === 'tiktok'
+                          ? 'bg-slate-950 text-cyan-300 border-cyan-400'
+                          : entry.socialNetwork === 'facebook'
+                          ? 'bg-blue-600 text-white border-blue-400'
+                          : entry.socialNetwork === 'youtube'
+                          ? 'bg-red-600 text-white border-red-400'
+                          : entry.socialNetwork === 'linkedin'
+                          ? 'bg-[#0077b5] text-white border-sky-400'
+                          : entry.socialNetwork === 'threads'
+                          ? 'bg-slate-900 text-slate-100 border-slate-600'
+                          : entry.socialNetwork === 'pinterest'
+                          ? 'bg-[#bd081c] text-white border-red-500'
+                          : 'bg-slate-800 text-slate-200 border-slate-700';
+
+                      return (
+                        <tr key={entry.id} className="hover:bg-slate-900/40 transition-colors">
+                          <td className="p-3 text-textMuted whitespace-nowrap">
+                            {new Date(entry.timestamp).toLocaleDateString('fr-FR', { month: '2-digit', day: '2-digit' })} -{' '}
+                            {new Date(entry.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="p-3">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border inline-flex items-center gap-1 ${badgeStyle}`}
+                            >
+                              {entry.socialNetworkName}
+                            </span>
+                          </td>
+                          <td className="p-3 text-cyan-300 font-mono font-medium">{entry.path}</td>
+                          <td className="p-3 text-slate-300 text-xs font-sans">
+                            {entry.campaignOrPost === 'Lien direct bio/post' ? (
+                              <span className="text-slate-400 italic">Lien direct bio/post</span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded bg-slate-900 border border-indigo-500/30 text-indigo-300 text-[10px] font-mono font-semibold">
+                                {entry.campaignOrPost}
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-[10px]">
+                              {entry.deviceType === 'mobile' ? (
+                                <>
+                                  <Smartphone className="w-3 h-3 text-emerald-400" />
+                                  <span>Mobile</span>
+                                </>
+                              ) : entry.deviceType === 'tablet' ? (
+                                <>
+                                  <Tablet className="w-3 h-3 text-amber-400" />
+                                  <span>Tablette</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Monitor className="w-3 h-3 text-blue-400" />
+                                  <span>Desktop</span>
+                                </>
+                              )}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 ${
+                                entry.actionTriggered === 'Achat validé'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : entry.actionTriggered === 'Passage en caisse'
+                                  ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
+                                  : entry.actionTriggered === 'Collision paywall 402'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : entry.actionTriggered === 'Upload projet'
+                                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                                  : 'bg-slate-900 text-slate-400 border border-slate-800'
+                              }`}
+                            >
+                              {entry.actionTriggered}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
