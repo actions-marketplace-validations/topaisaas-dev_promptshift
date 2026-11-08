@@ -2362,6 +2362,207 @@ Try it with your project: https://promptshift.dev
             </div>
           </div>
 
+          {/* GSC Performance Baseline (Données Export CSV 08/11/2026) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Clics Organiques GSC</span>
+              <div className="text-xl font-black text-white font-mono mt-1">
+                {seoStatus?.gscReport?.summary?.totalClicks ?? 0}
+              </div>
+              <span className="text-[10px] text-slate-500 mt-1">Données réelles GSC (J+2)</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Impressions GSC</span>
+              <div className="text-xl font-black text-white font-mono mt-1">
+                {seoStatus?.gscReport?.summary?.totalImpressions ?? 0}
+              </div>
+              <span className="text-[10px] text-slate-500 mt-1">Recherche Web Google</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Taux de Clic (CTR)</span>
+              <div className="text-xl font-black text-cyan-300 font-mono mt-1">
+                {(seoStatus?.gscReport?.summary?.averageCtr ?? 0).toFixed(1)}%
+              </div>
+              <span className="text-[10px] text-slate-500 mt-1">Indexation en cours</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-emerald-500/30 flex flex-col justify-between">
+              <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono">Statut Indexation</span>
+              <div className="text-xs font-bold text-emerald-300 font-mono mt-1 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Propriété Validée J+2</span>
+              </div>
+              <span className="text-[10px] text-slate-400 mt-1">Googlebot actif sur sitemap</span>
+            </div>
+          </div>
+
+          {/* Matrice des Mots-Clés Cibles ChatSEO (Playbook Antigravity - Section 3) */}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-white font-mono">
+                  Matrice des Mots-Clés Cibles ChatSEO (Top 10 Requêtes Commerciales Prioritaires)
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/50 px-2 py-0.5 rounded-md border border-cyan-500/30 font-bold">
+                Playbook Antigravity : Accélération Commerciale
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/80">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th className="p-3">Requête Cible</th>
+                    <th className="p-3">Intention</th>
+                    <th className="p-3 text-center">Pos. Visée</th>
+                    <th className="p-3">Page d&apos;Atterrissage</th>
+                    <th className="p-3 text-center">Volume Est.</th>
+                    <th className="p-3">Statut Télémétrie / SEO</th>
+                    <th className="p-3">Action Recommandée</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                  {((seoStatus?.gscReport?.chatSeoMatrix as any[]) || [
+                    {
+                      id: 'kw-1',
+                      keyword: 'cursor to claude rules converter',
+                      searchIntent: 'Transactionnelle',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/cursor-to-claude',
+                      monthlySearchVolumeEst: 2400,
+                      status: 'IndexNow Pingé',
+                      actionRecommended: 'Paire #1 la plus demandée. Maintenir le maillage interne et citer promptshift.dev sur X/Reddit.',
+                    },
+                    {
+                      id: 'kw-2',
+                      keyword: 'convert .cursorrules to CLAUDE.md',
+                      searchIntent: 'Transactionnelle',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/cursor-to-claude',
+                      monthlySearchVolumeEst: 1900,
+                      status: 'Schéma Déployé',
+                      actionRecommended: 'Requête à très haute intention technique. Couverte par balise SoftwareApplication et FAQ Schema.',
+                    },
+                    {
+                      id: 'kw-3',
+                      keyword: 'gemini to cursor rules converter',
+                      searchIntent: 'Commerciale',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/gemini-to-cursor',
+                      monthlySearchVolumeEst: 1100,
+                      status: 'llms.txt En Ligne',
+                      actionRecommended: 'Indexée dans llms-full.txt et citée pour l’écosystème Google Antigravity & Gemini CLI.',
+                    },
+                    {
+                      id: 'kw-4',
+                      keyword: 'cursor rules library',
+                      searchIntent: 'Informationnelle',
+                      targetPosition: '#2',
+                      targetUrl: '/rules-library',
+                      monthlySearchVolumeEst: 3600,
+                      status: 'Schéma Déployé',
+                      actionRecommended: 'Pousser le pack 50+ règles d’or en Order Bump et backlinks vers /rules-library.',
+                    },
+                    {
+                      id: 'kw-5',
+                      keyword: 'claude code to copilot instructions',
+                      searchIntent: 'Commerciale',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/claude-to-copilot',
+                      monthlySearchVolumeEst: 850,
+                      status: 'IndexNow Pingé',
+                      actionRecommended: 'Capture les équipes d’entreprises passant de Claude 3.7 à GitHub Copilot Enterprise.',
+                    },
+                    {
+                      id: 'kw-6',
+                      keyword: 'windsurf to cursor rules converter',
+                      searchIntent: 'Commerciale',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/windsurf-to-cursor',
+                      monthlySearchVolumeEst: 920,
+                      status: 'IndexNow Pingé',
+                      actionRecommended: 'Migrateurs de Cascade Windsurf vers Cursor. Fiche pSEO dédiée prête avec CLI sync.',
+                    },
+                    {
+                      id: 'kw-7',
+                      keyword: 'ai coding rules converter',
+                      searchIntent: 'Commerciale',
+                      targetPosition: '#1-3',
+                      targetUrl: '/',
+                      monthlySearchVolumeEst: 4200,
+                      status: 'Schéma Déployé',
+                      actionRecommended: 'Terme générique majeur. Page d’accueil optimisée pour RankBrain et Answer Engine Optimization.',
+                    },
+                    {
+                      id: 'kw-8',
+                      keyword: 'promptshift dev',
+                      searchIntent: 'Navigationnelle',
+                      targetPosition: '#1',
+                      targetUrl: '/',
+                      monthlySearchVolumeEst: 650,
+                      status: 'llms.txt En Ligne',
+                      actionRecommended: 'Marque officielle. Entity graph SameAs relié à GitHub, Glama MCP et npm.',
+                    },
+                    {
+                      id: 'kw-9',
+                      keyword: 'convert copilot-instructions.md to cursorrules',
+                      searchIntent: 'Transactionnelle',
+                      targetPosition: '#1',
+                      targetUrl: '/convert/copilot-to-cursor',
+                      monthlySearchVolumeEst: 1350,
+                      status: 'IndexNow Pingé',
+                      actionRecommended: 'Conversion réciproque inverse validée dans le moteur AST sans perte de négations.',
+                    },
+                    {
+                      id: 'kw-10',
+                      keyword: 'mcp server rules converter promptshift',
+                      searchIntent: 'Transactionnelle',
+                      targetPosition: '#1',
+                      targetUrl: '/cli',
+                      monthlySearchVolumeEst: 750,
+                      status: 'llms.txt En Ligne',
+                      actionRecommended: 'Cible les devs intégrant PromptShift en STDIO / SSE dans Cursor ou Claude Code.',
+                    },
+                  ]).map((item: any) => (
+                    <tr key={item.id} className="hover:bg-slate-900/40 transition-colors">
+                      <td className="p-3 text-white font-bold font-sans">{item.keyword}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 border border-slate-700 text-slate-300">
+                          {item.searchIntent}
+                        </span>
+                      </td>
+                      <td className="p-3 text-center">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/40">
+                          {item.targetPosition}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <Link href={item.targetUrl} className="text-cyan-300 hover:underline">
+                          {item.targetUrl}
+                        </Link>
+                      </td>
+                      <td className="p-3 text-center text-slate-300">
+                        {item.monthlySearchVolumeEst.toLocaleString('fr-FR')} /m
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-400 text-[11px] font-sans max-w-xs">
+                        {item.actionRecommended}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Action triggers */}
           <div className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">

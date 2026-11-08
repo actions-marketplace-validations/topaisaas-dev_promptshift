@@ -40,6 +40,7 @@ export type EventType =
   | 'paywall_hit'
   | 'conversion_completed'
   | 'checkout_initiated'
+  | 'order_bump_selected'
   | 'payment_completed'
   | 'promo_applied'
   | 'invoice_downloaded'

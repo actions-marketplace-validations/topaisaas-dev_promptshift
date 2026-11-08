@@ -58,6 +58,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [lastInvoice, setLastInvoice] = useState<VaultInvoice | null>(null);
   const [emailError, setEmailError] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
+  const [includeOrderBump, setIncludeOrderBump] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -113,7 +114,15 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const hasProject = Boolean(zipBase64 && zipBase64.trim().length > 0);
   const trimmedEmail = customerEmail.trim();
   const isEmailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(trimmedEmail);
-  const displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : tierPriceInfo.formattedTotal;
+  let displayPrice = isFreeBeta ? CurrencyManager.formatZero(currency) : tierPriceInfo.formattedTotal;
+  const bumpPriceFormatted = currency === 'EUR' ? '4.90 €' : '$4.99';
+  if (includeOrderBump && !isFreeBeta) {
+    if (selectedPlan === 'single') {
+      displayPrice = currency === 'EUR' ? '6.89 €' : '$6.98';
+    } else {
+      displayPrice = `${tierPriceInfo.formattedTotal} + Pack (${bumpPriceFormatted})`;
+    }
+  }
 
   const handlePolarCheckout = async () => {
     // Email is OPTIONAL for 1-Click Express Polar Checkout (Apple Pay / Google Pay / Link).
@@ -149,6 +158,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           projectName: projectName || 'Universal 4-in-1 Suite',
           sourceChannel,
           conversionPair,
+          includeOrderBump,
           successUrl,
           returnUrl,
         }),
@@ -314,6 +324,35 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               </div>
             </div>
 
+            {/* Playbook Section 5 Order Bump (+ $4.99): 50+ Master Rules & Prompts Vault */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/30 border border-amber-500/50 flex items-start gap-3 transition-all hover:border-amber-400">
+              <input
+                id="order-bump-checkbox"
+                type="checkbox"
+                checked={includeOrderBump}
+                onChange={(e) => {
+                  setIncludeOrderBump(e.target.checked);
+                  if (e.target.checked) {
+                    AnalyticsTracker.track({ type: 'order_bump_selected', planTier: selectedPlan, amountUsd: 4.99, currency });
+                  }
+                }}
+                className="mt-1 w-4 h-4 rounded text-amber-500 focus:ring-amber-400 bg-slate-950 border-slate-700 cursor-pointer accent-amber-500"
+              />
+              <label htmlFor="order-bump-checkbox" className="flex-1 cursor-pointer select-none">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
+                    <span>⚡ OPTION RECOMMANDÉE : Pack 50+ Master Rules &amp; Prompts</span>
+                  </span>
+                  <span className="text-xs font-mono font-black text-emerald-400 whitespace-nowrap bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    +{bumpPriceFormatted}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                  Débloquez l&apos;accès direct au coffre des 50+ règles d&apos;or de production (Next.js 15, Tailwind v4, Python FastAPI, Rust, Supabase RLS, Docker &amp; Guardrails Sécurité) testées et prêtes à l&apos;emploi pour Cursor, Claude Code, Copilot &amp; Windsurf.
+                </p>
+              </label>
+            </div>
+
             {/* Primary 1-Click Express Checkout CTA */}
             <div className="flex flex-col gap-2.5">
               <button
@@ -412,6 +451,16 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   </button>
                 </div>
               )}
+
+                            {/* Vault Download Card */}
+              <a
+                href="/downloads/promptshift-master-rules-vault.zip"
+                download="promptshift-master-rules-vault.zip"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all"
+              >
+                <Download className="w-4 h-4" />
+                <span>Télécharger le Pack 50+ Master Rules &amp; Prompts (.ZIP)</span>
+              </a>
 
               {lastInvoice && (
                 <button

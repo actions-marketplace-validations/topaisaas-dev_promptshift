@@ -13,13 +13,17 @@ export async function POST(req: NextRequest) {
       successUrl,
       sourceChannel,
       conversionPair,
+      includeOrderBump,
     } = body;
 
     if (!plan || !['single', 'pro', 'team'].includes(plan)) {
       return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
     }
 
-    const amountUsd = plan === 'single' ? 1.99 : plan === 'pro' ? 5.99 : 19.99;
+    let amountUsd = plan === 'single' ? 1.99 : plan === 'pro' ? 5.99 : 19.99;
+    if (includeOrderBump) {
+      amountUsd += 4.99;
+    }
 
     ServerTelemetryStore.record({
       type: 'checkout_initiated',
@@ -50,6 +54,7 @@ export async function POST(req: NextRequest) {
       successUrl,
       sourceChannel,
       conversionPair,
+      includeOrderBump: Boolean(includeOrderBump),
     });
 
     return NextResponse.json(checkout);
