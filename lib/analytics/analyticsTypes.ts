@@ -48,6 +48,15 @@ export interface AnalyticsEvent {
   secretsCount?: number;
   country?: string;
   userAgentSnippet?: string;
+  sessionId?: string;
+  referrer?: string;
+  referrerDomain?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  botName?: string;
+  inferredIntent?: string;
 }
 
 export interface EdgeDeliveryStats {
@@ -125,6 +134,27 @@ export interface MetricSummary {
   }[];
   edgeStats: EdgeDeliveryStats;
   arbitrageMatrix: ArbitrageDecisionItem[];
+  geoSearchInbound: {
+    chatgptClicks: number;
+    perplexityClicks: number;
+    claudeClicks: number;
+    googleSearchClicks: number;
+    xSocialClicks: number;
+    githubClicks: number;
+    directOrOtherClicks: number;
+    aiBotCrawls: number;
+    recentReferrals: {
+      id: string;
+      timestamp: string;
+      sourceName: string;
+      domain: string;
+      path: string;
+      inferredIntent: string;
+      country?: string;
+      userAgentSnippet?: string;
+      rawReferrer?: string;
+    }[];
+  };
 }
 
 export interface ProductOptimizationTip {

@@ -1,6 +1,7 @@
 /**
  * PromptShift Analytics Tracker — Sovereign Client & Server Telemetry
  * Captures user journey events, persists locally in client vault, and syncs to API.
+ * Strictly 100% REAL telemetry with zero synthetic or mock event generation.
  */
 
 import { AnalyticsEvent, PlatformId, TelemetryChannel } from './analyticsTypes';
@@ -9,6 +10,63 @@ const STORAGE_KEY = 'promptshift_analytics_events';
 const MAX_LOCAL_EVENTS = 500;
 
 export class AnalyticsTracker {
+  /**
+   * Retrieves or creates a real session ID for the active browser tab
+   */
+  public static getSessionId(): string {
+    if (typeof window === 'undefined') return 'sess_server';
+    try {
+      let sess = sessionStorage.getItem('promptshift_session_id');
+      if (!sess) {
+        sess = `ps_sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        sessionStorage.setItem('promptshift_session_id', sess);
+      }
+      return sess;
+    } catch {
+      return `ps_sess_ephemeral_${Date.now()}`;
+    }
+  }
+
+  /**
+   * Extracts clean domain from raw HTTP referrer
+   */
+  public static resolveReferrerDomain(rawReferrer?: string): string {
+    if (!rawReferrer || !rawReferrer.trim()) return 'direct';
+    const lower = rawReferrer.toLowerCase();
+    if (lower.includes('chatgpt.com') || lower.includes('chat.openai.com')) return 'chatgpt.com';
+    if (lower.includes('perplexity.ai')) return 'perplexity.ai';
+    if (lower.includes('claude.ai')) return 'claude.ai';
+    if (lower.includes('google.')) return 'google.com';
+    if (lower.includes('t.co') || lower.includes('x.com') || lower.includes('twitter.com')) return 'x.com';
+    if (lower.includes('github.com')) return 'github.com';
+    if (lower.includes('bing.com')) return 'bing.com';
+    try {
+      const u = new URL(rawReferrer);
+      return u.hostname.replace(/^www\./, '');
+    } catch {
+      return 'external';
+    }
+  }
+
+  /**
+   * Infers user intent based on landing URL and conversion slug
+   */
+  public static inferIntent(path: string, pairSlug?: string): string {
+    if (pairSlug) {
+      const parts = pairSlug.split('-to-');
+      if (parts.length === 2) {
+        return `Migration ${parts[0].toUpperCase()} ➔ ${parts[1].toUpperCase()}`;
+      }
+      return `Migration ${pairSlug}`;
+    }
+    if (path === '/discover') return 'Guide Autorité Formats IA (GEO)';
+    if (path === '/cli') return 'Installation CLI npx & MCP';
+    if (path === '/privacy' || path === '/security') return 'Audit Sécurité & Zero-Retention';
+    if (path === '/terms') return 'Conditions & Licence';
+    if (path === '/') return 'Atterrissage Studio Universal';
+    return `Navigation ${path}`;
+  }
+
   /**
    * Tracks an arbitrary telemetry event
    */
@@ -19,10 +77,11 @@ export class AnalyticsTracker {
       ...event,
       id: 'ev_' + Math.random().toString(36).substring(2, 11),
       timestamp: new Date().toISOString(),
-      userAgentSnippet: typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 40) : undefined,
+      userAgentSnippet: typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 50) : undefined,
+      sessionId: event.sessionId || this.getSessionId(),
     };
 
-    // 1. Save locally in Sovereign Analytics store
+    // 1. Save locally in Sovereign Analytics store (real data only)
     this.saveLocalEvent(fullEvent);
 
     // 2. Dispatch custom event for real-time reactivity in admin dashboard if open
@@ -46,10 +105,81 @@ export class AnalyticsTracker {
     }
   }
 
-  public static trackPageView(path: string = '/', country?: string, currency?: string): void {
+  public static trackPageView(
+    pathOrOptions:
+      | string
+      | {
+          path?: string;
+          country?: string;
+          currency?: string;
+          referrer?: string;
+          searchParams?: URLSearchParams | Record<string, string>;
+        } = '/',
+    countryArg?: string,
+    currencyArg?: string
+  ): void {
+    let path = '/';
+    let country = countryArg;
+    let currency = currencyArg;
+    let rawReferrer = typeof document !== 'undefined' ? document.referrer : undefined;
+    let utmSource: string | undefined;
+    let utmMedium: string | undefined;
+    let utmCampaign: string | undefined;
+    let utmTerm: string | undefined;
+
+    if (typeof pathOrOptions === 'object' && pathOrOptions !== null) {
+      path = pathOrOptions.path || '/';
+      country = pathOrOptions.country || country;
+      currency = pathOrOptions.currency || currency;
+      if (pathOrOptions.referrer !== undefined) {
+        rawReferrer = pathOrOptions.referrer;
+      }
+      if (pathOrOptions.searchParams) {
+        if (pathOrOptions.searchParams instanceof URLSearchParams) {
+          utmSource = pathOrOptions.searchParams.get('utm_source') || undefined;
+          utmMedium = pathOrOptions.searchParams.get('utm_medium') || undefined;
+          utmCampaign = pathOrOptions.searchParams.get('utm_campaign') || undefined;
+          utmTerm = pathOrOptions.searchParams.get('utm_term') || pathOrOptions.searchParams.get('q') || undefined;
+        } else {
+          utmSource = pathOrOptions.searchParams.utm_source;
+          utmMedium = pathOrOptions.searchParams.utm_medium;
+          utmCampaign = pathOrOptions.searchParams.utm_campaign;
+          utmTerm = pathOrOptions.searchParams.utm_term || pathOrOptions.searchParams.q;
+        }
+      }
+    } else if (typeof pathOrOptions === 'string') {
+      path = pathOrOptions;
+    }
+
+    if (typeof window !== 'undefined' && !utmSource) {
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        utmSource = sp.get('utm_source') || undefined;
+        utmMedium = sp.get('utm_medium') || undefined;
+        utmCampaign = sp.get('utm_campaign') || undefined;
+        utmTerm = sp.get('utm_term') || sp.get('q') || undefined;
+      } catch {
+        // ignore
+      }
+    }
+
+    const referrerDomain = this.resolveReferrerDomain(rawReferrer);
     const pairMatch = path.match(/^\/convert\/([a-z0-9-]+)$/i);
     const pairSlug = pairMatch ? pairMatch[1].toLowerCase() : undefined;
-    const channel: TelemetryChannel = pairSlug ? 'pseo' : path.startsWith('/cli') ? 'cli' : 'web';
+
+    let channel: TelemetryChannel = 'web';
+    if (referrerDomain.includes('chatgpt') || referrerDomain.includes('perplexity') || referrerDomain.includes('claude')) {
+      channel = 'llmo';
+    } else if (referrerDomain.includes('x.com')) {
+      channel = 'x_social';
+    } else if (pairSlug) {
+      channel = 'pseo';
+    } else if (path.startsWith('/cli')) {
+      channel = 'cli';
+    }
+
+    const inferredIntent = this.inferIntent(path, pairSlug);
+    const sessionId = this.getSessionId();
 
     this.track({
       type: 'page_view',
@@ -58,6 +188,14 @@ export class AnalyticsTracker {
       channel,
       country,
       currency: currency || 'USD',
+      sessionId,
+      referrer: rawReferrer || undefined,
+      referrerDomain,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmTerm,
+      inferredIntent,
     });
   }
 
@@ -176,7 +314,7 @@ export class AnalyticsTracker {
   }
 
   /**
-   * Retrieves all stored analytics events from local sovereign store
+   * Retrieves all stored analytics events from local sovereign store (real events only)
    */
   public static getEvents(): AnalyticsEvent[] {
     if (typeof window === 'undefined') return [];
@@ -186,7 +324,16 @@ export class AnalyticsTracker {
         return [];
       }
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+
+      // Purge any legacy synthetic demo seeds to guarantee 100% ground-truth
+      const realOnly = parsed.filter(
+        (e: AnalyticsEvent) => e && e.id && !e.id.startsWith('ev_pv_') && !e.id.startsWith('ev_conv_')
+      );
+      if (realOnly.length !== parsed.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(realOnly));
+      }
+      return realOnly;
     } catch {
       return [];
     }
@@ -203,10 +350,13 @@ export class AnalyticsTracker {
     }
   }
 
-  public static seedRealisticData(): void {
+  /**
+   * Purges any legacy synthetic demo events from local browser storage
+   */
+  public static purgeSyntheticData(): void {
     if (typeof window === 'undefined') return;
-    const seeded = this.generateRealisticSeedData();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+    const realOnly = this.getEvents();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(realOnly));
     window.dispatchEvent(new CustomEvent('promptshift_analytics_updated'));
   }
 
@@ -228,63 +378,5 @@ export class AnalyticsTracker {
     const clean = rawTitle.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
     if (clean.length <= 4) return clean;
     return clean.substring(0, 14);
-  }
-
-  /**
-   * Generates realistic telemetry distribution for optional sandbox simulation
-   */
-  private static generateRealisticSeedData(): AnalyticsEvent[] {
-    const events: AnalyticsEvent[] = [];
-    const now = Date.now();
-
-    const targets: PlatformId[] = ['claude', 'claude', 'claude', 'cursor', 'cursor', 'openai', 'gemini'];
-    const sources: PlatformId[] = ['antigravity', 'antigravity', 'gemini', 'gemini', 'claude', 'openai'];
-    const currencies = ['USD', 'USD', 'USD', 'EUR', 'GBP', 'CAD', 'JPY'];
-    const plans: ('free' | 'single' | 'pro' | 'team' | 'vip')[] = ['free', 'free', 'single', 'pro', 'vip', 'team'];
-
-    for (let i = 0; i < 140; i++) {
-      const offsetMs = Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000);
-      events.push({
-        id: 'ev_pv_' + i,
-        type: 'page_view',
-        path: '/',
-        channel: 'web',
-        timestamp: new Date(now - offsetMs).toISOString(),
-        currency: currencies[i % currencies.length],
-        country: ['US', 'FR', 'DE', 'GB', 'CA', 'JP'][i % 6],
-      });
-    }
-
-    for (let i = 0; i < 34; i++) {
-      const offsetMs = Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000);
-      const fileCount = Math.floor(Math.random() * 18) + 2;
-      const sizeBytes = fileCount * 7800 + Math.floor(Math.random() * 45000);
-      const isFree = fileCount <= 2;
-      const plan = isFree ? (i % 5 === 0 ? 'vip' : 'free') : plans[i % plans.length];
-      const target = targets[i % targets.length];
-      const source = sources[i % sources.length];
-      const secrets = i % 3 === 0 ? Math.floor(Math.random() * 3) + 1 : 0;
-
-      events.push({
-        id: 'ev_conv_' + i,
-        type: 'conversion_completed',
-        channel: 'web',
-        timestamp: new Date(now - offsetMs).toISOString(),
-        sourcePlatform: source,
-        targetPlatform: target,
-        projectTitleAnon: `agent-${target}-${i + 1}`,
-        fileCount,
-        sizeBytes,
-        parityScore: 98.2 + Math.round(Math.random() * 15) / 10,
-        isFreeTier: isFree,
-        planTier: plan,
-        promoCode: plan === 'vip' ? 'DEVVIP' : undefined,
-        currency: currencies[i % currencies.length],
-        secretsCount: secrets,
-        durationMs: 450 + Math.floor(Math.random() * 800),
-      });
-    }
-
-    return events.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 }

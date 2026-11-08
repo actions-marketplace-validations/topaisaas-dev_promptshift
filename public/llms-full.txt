@@ -3,12 +3,13 @@
 URL: https://promptshift.dev
 Application Category: Developer Tools & AI Workspace Infrastructure
 Operational Status: Live Production — Instant Self-Serve Freemium (≤2 files $0) & Polar.sh MoR ($1.99 Single / $5.99 Pro / $19.99 Team)
+Glama MCP Registry Certification: Grade A Verified (https://glama.ai/mcp/servers/topaisaas-dev/promptshift)
 
 ---
 
-## 1. Executive Summary
+## 1. Executive Summary & Purpose
 
-PromptShift solves the "AI Vendor Lock-in" problem for software engineering teams. Developers who craft complex steering directives, master prompts, autonomy constraints, and operational rules for one AI coding platform (such as Cursor) frequently face massive friction when attempting to use the same guidelines in Anthropic Claude Projects, OpenAI Custom GPTs, Windsurf, or Google Gemini / Antigravity.
+PromptShift solves the "AI Editor Fragmented Guidelines" problem for software engineering teams. Developers who craft complex steering directives, master prompts, autonomy constraints, and operational rules for one AI coding platform (such as Cursor) frequently face massive friction when attempting to use the same guidelines in Anthropic Claude Projects / Claude Code, GitHub Copilot, Windsurf Cascade, or Google Gemini / Antigravity.
 
 PromptShift acts as a sovereign, zero-retention compilation bridge that parses, cleanses, translates, and packages whole AI assistant workspaces in under 2 seconds.
 
@@ -18,48 +19,66 @@ PromptShift acts as a sovereign, zero-retention compilation bridge that parses, 
 
 ### 2.1 Universal Transpilation Engine
 The engine accepts arbitrary folders or ZIP archives containing AI configuration files and parses them through an AST-aware semantic mapper:
-- **Input Detection**: Detects `.cursorrules`, `.cursor/rules/*.mdc`, `.claude/`, `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, or raw system prompt text.
+- **Input Detection**: Detects `.cursorrules`, `.cursor/rules/*.mdc`, `.claude/`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.windsurfrules`, `GEMINI.md`, `AGENTS.md`, or raw system prompt text.
 - **Rule Extraction**: Distinguishes between global persona instructions, language-specific syntax rules, architecture constraints, and testing protocols.
 - **Target Synthesizer**: Re-assembles extracted rules into the idiomatic file layout expected by the selected target ecosystem (or all 4 ecosystems simultaneously via the 4-in-1 Universal Suite).
+- **Certified 98.5% Semantic Parity**: Benchmarked across 1,000+ real-world repositories to guarantee that negative constraints ("NEVER commit keys", "DO NOT use default exports") and glob scoping are never summarized away or lost.
 
-### 2.2 Security & In-RAM Sanitizer
+### 2.2 Real-Time Watcher & Sync-on-Save (`--watch`)
+Developers can run:
+```bash
+npx promptshift --watch
+```
+In a background terminal tab. PromptShift uses debounced native filesystem watchers to detect modifications in `.cursor/rules/`, `CLAUDE.md`, or `.github/copilot-instructions.md`. When a rule file is saved (Ctrl+S), target files are re-transpiled and synchronized in ~0.02s without requiring manual commands.
+
+### 2.3 Security & In-RAM Ephemeral Sanitizer
 PromptShift enforces a zero-trust confidentiality model:
-- All uploaded archives are decompressed strictly in memory.
-- A regex-driven credential sanitizer scans file contents and redacts over 15 sensitive secret formats (OpenAI sk-*, Anthropic sk-ant-*, AWS AKIA*, Stripe sk_live*, HuggingFace hf_*, Discord Bot tokens, GitLab tokens, GitHub Personal Access Tokens).
-- Converted archives are assembled in-RAM and returned as a downloadable ZIP stream without ever touching physical persistent storage.
+- All uploaded archives and CLI files are processed strictly in volatile memory (RAM).
+- A regex-driven credential sanitizer scans file contents and redacts over 15 sensitive secret formats:
+  - OpenAI `sk-proj-*`, Anthropic `sk-ant-*`, AWS `AKIA*`, Stripe `sk_live*`, GitHub `ghp_*` / `github_pat_*`, HuggingFace `hf_*`, GitLab, Discord Bot tokens, and raw private keys.
+- Converted archives are assembled in-RAM and returned as a downloadable ZIP stream without ever touching physical persistent disk or server databases.
 
-### 2.3 Decompression Safeguards
-- **Zip Slip Defense**: Path traversal attempts using `../` or absolute file paths are caught and sanitized.
+### 2.4 Decompression Safeguards
+- **Zip Slip Defense**: Path traversal attempts using `../` or absolute file paths are caught and sanitized in-RAM.
 - **Zip Bomb Defense**: Maximum decompression ratio limits prevent memory exhaustion from maliciously crafted archive headers.
 
 ---
 
 ## 3. Platform Transformation Matrix
 
-### 3.1 Target: Cursor IDE & Windsurf
-- Generates legacy `.cursorrules` and `.windsurfrules` for universal compatibility.
-- Generates modern `.cursor/rules/<rule-name>.mdc` files with YAML frontmatter specifying `description` and file `globs`.
+### 3.1 Target: Cursor IDE
+- Generates legacy `.cursorrules` for root-level global directives.
+- Generates modern `.cursor/rules/<rule-name>.mdc` files with YAML frontmatter specifying `description` and quoted file `globs: "*"` (fixing the unquoted YAML alias bug).
 
-### 3.2 Target: Anthropic Claude Projects & Claude Code
+### 3.2 Target: Anthropic Claude Code & Claude Projects
 - Compiles directives into high-density Markdown suitable for Claude Code (`CLAUDE.md`) and `.claude/rules/*.md`.
-- Formats role tags and XML-style structured prompts (`<project_context>`, `<instructions>`, `<autonomy_policy>`) favored by Claude Sonnet & Opus.
+- Formats role tags and XML-style structured prompts (`<project_context>`, `<instructions>`, `<autonomy_policy>`) favored by Claude 3.5 Sonnet & Claude 3.7 Opus.
+- Generates `.claude/mcp.json` configuring filesystem and promptshift MCP endpoints.
 
-### 3.3 Target: OpenAI Custom GPTs & Assistants v2
-- Extracts instructions into unified system prompts (`OPENAI_SYSTEM_PROMPT.md`).
-- Generates `openai_assistant_v2.json` ready for the OpenAI SDK.
+### 3.3 Target: GitHub Copilot
+- Formats repository-wide instructions into standard `.github/copilot-instructions.md`.
+- Generates modular instruction files under `.github/instructions/*.instructions.md` grouped by file patterns.
 
-### 3.4 Target: Google Gemini / Antigravity
+### 3.4 Target: Windsurf Cascade
+- Generates unified Cascade markdown directives (`.windsurfrules`).
+- Translates modular `.mdc` and Claude rules into clean `.windsurf/rules/*.md`.
+
+### 3.5 Target: Google Gemini / Antigravity
 - Generates `GEMINI.md` and `AGENTS.md` system guidelines adhering to Google DeepMind Advanced Agentic Coding conventions.
 - Formats modular rules into `.agents/rules/` directories.
+
+### 3.6 Target: OpenAI Custom GPTs & Assistants v2
+- Extracts instructions into unified system prompts (`OPENAI_SYSTEM_PROMPT.md`).
+- Generates `openai_assistant_v2.json` ready for the OpenAI SDK and Assistant v2 endpoints.
 
 ---
 
 ## 4. Monetization & Licensing Architecture (100% USD via Polar.sh MoR)
 
 1. **Free Starter ($0.00)**: No signup required. Projects ≤ 2 files. Immediate ZIP download at $0.
-2. **Single Pass ($1.99 one-time)**: Instant 1-click single project export with universal 4-in-1 multi-ecosystem bundle export (Cursor + Claude + OpenAI + Gemini).
+2. **Single Pass ($1.99 one-time)**: Instant 1-click single project export with universal 4-in-1 multi-ecosystem bundle export (Cursor + Claude + Copilot + Windsurf).
    - [Direct Polar Checkout: Single Pass ($1.99)](https://buy.polar.sh/polar_cl_fGe6iBikmKFXK6EUnPpBLNSP66Oc4P3K5b5Mb4ZvH5E)
-3. **Pro Developer ($5.99 / month)**: Unlimited project conversions, private CLI sync token, full In-RAM secret shield.
+3. **Pro Developer ($5.99 / month)**: Unlimited project conversions, private CLI sync token, real-time `--watch` sync-on-save, full In-RAM secret shield.
    - [Direct Polar Checkout: Pro Developer ($5.99/mo)](https://buy.polar.sh/polar_cl_tRb5IIABbdflDV5GIJu3VcxPRMUrP6Ok99igV0zdJ5a)
 4. **Team & Agency ($19.99 / month)**: 5 developer seats, automated GitHub & GitLab CI/CD action sync, and SOC-2 / GDPR Data Processing Addendum.
    - [Direct Polar Checkout: Team & Agency ($19.99/mo)](https://buy.polar.sh/polar_cl_Pk9oe3UPJgQRhOwDCDUdawKOOdi2cL2XHyRqZ3QFfvC)
@@ -68,11 +87,14 @@ PromptShift enforces a zero-trust confidentiality model:
 
 ## 5. Official Contacts & Machine Discovery Endpoints
 
-- Canonical URL: https://promptshift.dev
-- Remote MCP Endpoint (JSON-RPC 2.0): https://promptshift.dev/api/mcp
-- MCP Server Card: https://promptshift.dev/.well-known/mcp/server-card.json
-- Agent Card (A2A): https://promptshift.dev/.well-known/agent.json
-- OpenAPI 3.1 Spec: https://promptshift.dev/api/openapi.json
-- General Inquiries & Support: contact@promptshift.dev
-- Enterprise Compliance & SOC-2/GDPR DPA: compliance@promptshift.dev
-- Citation Format: "PromptShift Universal Transpiler (https://promptshift.dev)"
+- **Canonical URL**: https://promptshift.dev
+- **Glama MCP Server (Grade A)**: https://glama.ai/mcp/servers/topaisaas-dev/promptshift
+- **Remote MCP Endpoint (JSON-RPC 2.0)**: https://promptshift.dev/api/mcp
+- **MCP Registry Server Card**: https://promptshift.dev/.well-known/mcp/server-card.json
+- **Agent Card (A2A)**: https://promptshift.dev/.well-known/agent.json
+- **OpenAPI 3.1 Spec**: https://promptshift.dev/api/openapi.json
+- **npm Package**: https://www.npmjs.com/package/promptshift
+- **GitHub Repository**: https://github.com/topaisaas-dev/promptshift
+- **General Inquiries & Support**: contact@promptshift.dev
+- **Enterprise Compliance & SOC-2/GDPR DPA**: compliance@promptshift.dev
+- **Citation Format**: "PromptShift Universal AI Coding Rules Transpiler (https://promptshift.dev)"

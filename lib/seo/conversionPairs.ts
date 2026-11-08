@@ -1,7 +1,7 @@
 export interface ConversionPairData {
   slug: string;
-  sourceKey: 'cursor' | 'claude' | 'openai' | 'gemini' | 'antigravity';
-  targetKey: 'cursor' | 'claude' | 'openai' | 'gemini';
+  sourceKey: 'cursor' | 'claude' | 'openai' | 'gemini' | 'antigravity' | 'copilot' | 'windsurf';
+  targetKey: 'cursor' | 'claude' | 'openai' | 'gemini' | 'copilot' | 'windsurf';
   sourceName: string;
   targetName: string;
   title: string;
@@ -554,6 +554,273 @@ export const CONVERSION_PAIRS: Record<string, ConversionPairData> = {
       {
         question: 'What are the subscription plans?',
         answer: 'Free Starter for up to 2 files. $1.99 Single Migration Pass, or $5.99/mo Pro Developer with unlimited conversions.',
+      },
+    ],
+  },
+
+  'cursor-to-copilot': {
+    slug: 'cursor-to-copilot',
+    sourceKey: 'cursor',
+    targetKey: 'copilot',
+    sourceName: 'Cursor',
+    targetName: 'GitHub Copilot',
+    title: 'Convert Cursor Rules to GitHub Copilot (.cursorrules to copilot-instructions.md) | PromptShift',
+    metaDescription: 'Port your Cursor .cursorrules and .cursor/rules/*.mdc directly into GitHub Copilot instructions (.github/copilot-instructions.md) with 98.5% AST parity.',
+    h1: 'Convert Cursor Rules to GitHub Copilot Instructions',
+    tagline: 'Translate .cursorrules and modular .cursor/rules/*.mdc into native .github/copilot-instructions.md and path-scoped rules in seconds.',
+    sourceFiles: ['.cursorrules', '.cursor/rules/*.mdc', '.cursor/settings.json'],
+    targetFiles: ['.github/copilot-instructions.md', '.github/instructions/*.instructions.md'],
+    astParity: '98.5%',
+    heroHighlight: 'Seamless Copilot Workspace Guidance from Cursor Rules',
+    keyBenefits: [
+      'Translates .cursorrules into standard .github/copilot-instructions.md',
+      'Transforms scoped .mdc globs into dedicated Copilot instructions modules',
+      'In-RAM secret sanitizer scrubs exposed API keys and environment tokens',
+      'Instant 0.4s compilation via web studio or terminal (npx promptshift --to=copilot)',
+    ],
+    mappingHighlights: [
+      { sourceFeature: 'Root .cursorrules', targetFeature: '.github/copilot-instructions.md', description: 'Transpiles master guidelines into Copilot-recognized repository instructions' },
+      { sourceFeature: '.cursor/rules/*.mdc frontmatter', targetFeature: 'Copilot markdown sections', description: 'Removes YAML delimiters and groups rules under semantic headings' },
+      { sourceFeature: 'Cursor Agent Mode directives', targetFeature: 'Copilot steering rules', description: 'Enforces negative constraints and coding conventions in Copilot chat & autocomplete' },
+    ],
+    faqs: [
+      {
+        question: 'How do I use my Cursor rules in GitHub Copilot?',
+        answer: 'Copilot looks for instructions in .github/copilot-instructions.md. PromptShift converts your existing .cursorrules and .cursor/rules/*.mdc files into Copilot instructions automatically.',
+      },
+      {
+        question: 'Does Copilot support modular file rules like Cursor .mdc?',
+        answer: 'Copilot reads .github/copilot-instructions.md as the primary source. PromptShift compiles your modular .mdc files into structured, hierarchical sections so Copilot respects all your scoped rules.',
+      },
+      {
+        question: 'Can I automate this in CI?',
+        answer: 'Yes! Run npx promptshift --init-ci to generate a GitHub Actions workflow that keeps Copilot instructions and Cursor rules 100% in sync on every commit.',
+      },
+      {
+        question: 'Is it free to try?',
+        answer: 'Yes, projects with up to 2 rule files are 100% free with no account needed. Repositories with multi-rule architecture unlock for $1.99.',
+      },
+    ],
+  },
+
+  'copilot-to-cursor': {
+    slug: 'copilot-to-cursor',
+    sourceKey: 'copilot',
+    targetKey: 'cursor',
+    sourceName: 'GitHub Copilot',
+    targetName: 'Cursor',
+    title: 'Convert GitHub Copilot Instructions to Cursor Rules (.cursorrules & .mdc) | PromptShift',
+    metaDescription: 'Transform .github/copilot-instructions.md into modular Cursor rules (.cursorrules & .cursor/rules/*.mdc) with automated glob detection and 98.5% AST parity.',
+    h1: 'Convert GitHub Copilot Instructions to Cursor Rules',
+    tagline: 'Split monolithic .github/copilot-instructions.md into modular, high-performance Cursor rules (.cursorrules and .cursor/rules/*.mdc).',
+    sourceFiles: ['.github/copilot-instructions.md', '.github/instructions/*.instructions.md'],
+    targetFiles: ['.cursorrules', '.cursor/rules/*.mdc', '.cursor/settings.json'],
+    astParity: '98.5%',
+    heroHighlight: 'Automatic Scoped .mdc Generation from Copilot Rules',
+    keyBenefits: [
+      'Parses monolithic Copilot instructions into scoped .cursor/rules/*.mdc modules',
+      'Automatically generates valid YAML frontmatter with quoted globs',
+      'Optimizes context window by preventing unnecessary rule injection',
+      'In-RAM secret scrubber eliminates accidentally committed tokens',
+    ],
+    mappingHighlights: [
+      { sourceFeature: '.github/copilot-instructions.md', targetFeature: '.cursorrules', description: 'Extracts core global architectural directives for Cursor' },
+      { sourceFeature: 'Copilot section headings', targetFeature: '.cursor/rules/*.mdc', description: 'Splits frontend, backend, test, and database rules into glob-scoped .mdc files' },
+    ],
+    faqs: [
+      {
+        question: 'Why convert Copilot instructions to Cursor .mdc rules?',
+        answer: 'Monolithic copilot-instructions.md files load into every prompt turn. PromptShift splits them into targeted .mdc rules that only load when relevant files are edited, cutting token waste by ~50%.',
+      },
+      {
+        question: 'How does glob mapping work?',
+        answer: 'PromptShift inspects your project layout and headings to automatically map rules to glob patterns like src/**/*.tsx or tests/**/*.ts.',
+      },
+    ],
+  },
+
+  'cursor-to-windsurf': {
+    slug: 'cursor-to-windsurf',
+    sourceKey: 'cursor',
+    targetKey: 'windsurf',
+    sourceName: 'Cursor',
+    targetName: 'Windsurf Cascade',
+    title: 'Convert Cursor Rules to Windsurf (.cursorrules to .windsurfrules) | PromptShift',
+    metaDescription: 'Migrate Cursor .cursorrules and .cursor/rules/*.mdc to Codeium Windsurf (.windsurfrules) in 1 click. Zero server retention, 98.5% certified AST parity.',
+    h1: 'Convert Cursor Rules to Windsurf Cascade Rules',
+    tagline: 'Port your .cursorrules and .mdc multi-rule architecture to Windsurf Cascade format (.windsurfrules) in under 1 second.',
+    sourceFiles: ['.cursorrules', '.cursor/rules/*.mdc', '.cursor/settings.json'],
+    targetFiles: ['.windsurfrules', '.windsurf/rules/*.md'],
+    astParity: '98.5%',
+    heroHighlight: 'Instant Windsurf Cascade Portability from Cursor',
+    keyBenefits: [
+      'Compiles Cursor rules into native Windsurf Cascade directives (.windsurfrules)',
+      'Preserves negative constraints and coding guidelines with zero prompt degradation',
+      'Run in terminal with npx promptshift --to=windsurf or use the live browser studio',
+      '100% in-RAM execution with automatic secret redaction',
+    ],
+    mappingHighlights: [
+      { sourceFeature: 'Root .cursorrules', targetFeature: '.windsurfrules', description: 'Transpiles root guidelines for Windsurf Cascade agent loops' },
+      { sourceFeature: '.cursor/rules/*.mdc', targetFeature: '.windsurf/rules/*.md', description: 'Maps modular rules into Windsurf-compatible markdown directives' },
+    ],
+    faqs: [
+      {
+        question: 'Can I use my Cursor rules in Windsurf?',
+        answer: 'Yes! Windsurf reads .windsurfrules. PromptShift converts your entire Cursor rulebook into a clean .windsurfrules file in 0.4s.',
+      },
+      {
+        question: 'Does Windsurf support YAML frontmatter from .mdc files?',
+        answer: 'PromptShift strips Cursor-specific YAML delimiters and formats the instructions into clean markdown sections that Windsurf Cascade parses flawlessly.',
+      },
+    ],
+  },
+
+  'windsurf-to-cursor': {
+    slug: 'windsurf-to-cursor',
+    sourceKey: 'windsurf',
+    targetKey: 'cursor',
+    sourceName: 'Windsurf Cascade',
+    targetName: 'Cursor',
+    title: 'Convert Windsurf Rules to Cursor (.windsurfrules to .cursorrules) | PromptShift',
+    metaDescription: 'Convert Codeium Windsurf (.windsurfrules) into modern Cursor rules (.cursorrules & .cursor/rules/*.mdc) with 98.5% semantic AST parity.',
+    h1: 'Convert Windsurf Rules to Cursor Rules',
+    tagline: 'Transform .windsurfrules into modular Cursor rules (.cursorrules and .cursor/rules/*.mdc) with automatic glob scoping.',
+    sourceFiles: ['.windsurfrules', '.windsurf/rules/*.md'],
+    targetFiles: ['.cursorrules', '.cursor/rules/*.mdc', '.cursor/settings.json'],
+    astParity: '98.5%',
+    heroHighlight: 'From Flat Windsurf Rules to Modular Cursor .mdc Architecture',
+    keyBenefits: [
+      'Converts flat .windsurfrules into modern Cursor multi-rule .mdc structure',
+      'Generates proper YAML frontmatter with quoted globs to prevent Cursor silent parse errors',
+      'Scans and scrubs exposed API keys in RAM before writing files',
+    ],
+    mappingHighlights: [
+      { sourceFeature: '.windsurfrules', targetFeature: '.cursorrules', description: 'Converts Cascade directives into Cursor project guidelines' },
+    ],
+    faqs: [
+      {
+        question: 'How do I migrate my rules from Windsurf to Cursor?',
+        answer: 'Upload your .windsurfrules to PromptShift or run npx promptshift --source=windsurf --target=cursor in your project folder to generate .cursorrules and .cursor/rules/*.mdc instantly.',
+      },
+    ],
+  },
+
+  'claude-to-copilot': {
+    slug: 'claude-to-copilot',
+    sourceKey: 'claude',
+    targetKey: 'copilot',
+    sourceName: 'Anthropic Claude Code',
+    targetName: 'GitHub Copilot',
+    title: 'Convert Claude Code CLAUDE.md to GitHub Copilot Instructions | PromptShift',
+    metaDescription: 'Transpile CLAUDE.md and Claude Project XML instructions to .github/copilot-instructions.md with 98.5% AST parity. Zero retention.',
+    h1: 'Convert Claude Code CLAUDE.md to GitHub Copilot',
+    tagline: 'Translate CLAUDE.md and Claude Project instructions into standardized .github/copilot-instructions.md.',
+    sourceFiles: ['CLAUDE.md', 'claude_project_instructions.xml', '.claude/rules/*.md'],
+    targetFiles: ['.github/copilot-instructions.md', '.github/instructions/*.instructions.md'],
+    astParity: '98.5%',
+    heroHighlight: 'Unified GitHub Copilot Repository Instructions from Claude Code',
+    keyBenefits: [
+      'Converts CLAUDE.md directly into .github/copilot-instructions.md',
+      'Strips Claude-specific XML formatting while preserving all directives and constraints',
+      'In-RAM secret scrubber eliminates sensitive tokens before write',
+    ],
+    mappingHighlights: [
+      { sourceFeature: 'CLAUDE.md', targetFeature: '.github/copilot-instructions.md', description: 'Re-encodes Claude Code conventions for GitHub Copilot' },
+    ],
+    faqs: [
+      {
+        question: 'Can GitHub Copilot read CLAUDE.md?',
+        answer: 'No, Copilot exclusively reads .github/copilot-instructions.md. PromptShift converts your CLAUDE.md into valid Copilot instructions in one click.',
+      },
+    ],
+  },
+
+  'copilot-to-claude': {
+    slug: 'copilot-to-claude',
+    sourceKey: 'copilot',
+    targetKey: 'claude',
+    sourceName: 'GitHub Copilot',
+    targetName: 'Anthropic Claude Code',
+    title: 'Convert GitHub Copilot Instructions to Claude Code (CLAUDE.md) | PromptShift',
+    metaDescription: 'Convert .github/copilot-instructions.md to Anthropic Claude Code CLAUDE.md and Claude Projects XML with 98.5% AST parity.',
+    h1: 'Convert GitHub Copilot Instructions to Claude Code',
+    tagline: 'Transform .github/copilot-instructions.md into CLAUDE.md and Claude Project instructions in under a second.',
+    sourceFiles: ['.github/copilot-instructions.md'],
+    targetFiles: ['CLAUDE.md', 'claude_project_instructions.xml', '.claude/mcp.json'],
+    astParity: '98.5%',
+    heroHighlight: 'Direct Claude Code CLAUDE.md Generation from Copilot Instructions',
+    keyBenefits: [
+      'Converts Copilot instructions into CLAUDE.md tailored for the Claude Code CLI',
+      'Generates pre-configured .claude/mcp.json for local filesystem and promptshift MCP',
+      '100% ephemeral in-RAM execution',
+    ],
+    mappingHighlights: [
+      { sourceFeature: '.github/copilot-instructions.md', targetFeature: 'CLAUDE.md', description: 'Formats instructions into high-priority markdown for Claude Code' },
+    ],
+    faqs: [
+      {
+        question: 'Does Claude Code use copilot-instructions.md?',
+        answer: 'No, Claude Code looks for CLAUDE.md in your repository root. PromptShift converts your Copilot instructions into CLAUDE.md in 0.4s.',
+      },
+    ],
+  },
+
+  'claude-to-windsurf': {
+    slug: 'claude-to-windsurf',
+    sourceKey: 'claude',
+    targetKey: 'windsurf',
+    sourceName: 'Anthropic Claude Code',
+    targetName: 'Windsurf Cascade',
+    title: 'Convert Claude Code CLAUDE.md to Windsurf (.windsurfrules) | PromptShift',
+    metaDescription: 'Transpile CLAUDE.md to Codeium Windsurf (.windsurfrules) with 98.5% semantic parity and in-RAM secret redaction.',
+    h1: 'Convert Claude Code CLAUDE.md to Windsurf Cascade',
+    tagline: 'Port CLAUDE.md and Claude Project XML to Windsurf Cascade (.windsurfrules) in seconds.',
+    sourceFiles: ['CLAUDE.md', 'claude_project_instructions.xml'],
+    targetFiles: ['.windsurfrules', '.windsurf/rules/*.md'],
+    astParity: '98.5%',
+    heroHighlight: 'Seamless Windsurf Rules from Claude Code',
+    keyBenefits: [
+      'Converts CLAUDE.md into native .windsurfrules format',
+      'Strips XML tags and structures rules for Cascade autonomous workflows',
+      'Zero server storage with secret redaction in RAM',
+    ],
+    mappingHighlights: [
+      { sourceFeature: 'CLAUDE.md', targetFeature: '.windsurfrules', description: 'Transpiles Claude directives into Windsurf Cascade format' },
+    ],
+    faqs: [
+      {
+        question: 'How do I run my Claude Code rules in Windsurf?',
+        answer: 'Upload your CLAUDE.md to PromptShift or run npx promptshift --source=claude --target=windsurf to generate your .windsurfrules instantly.',
+      },
+    ],
+  },
+
+  'windsurf-to-claude': {
+    slug: 'windsurf-to-claude',
+    sourceKey: 'windsurf',
+    targetKey: 'claude',
+    sourceName: 'Windsurf Cascade',
+    targetName: 'Anthropic Claude Code',
+    title: 'Convert Windsurf (.windsurfrules) to Claude Code (CLAUDE.md) | PromptShift',
+    metaDescription: 'Convert Windsurf Cascade (.windsurfrules) into Anthropic Claude Code (CLAUDE.md) with 98.5% AST parity. In-RAM secret sanitizer.',
+    h1: 'Convert Windsurf Rules to Claude Code',
+    tagline: 'Translate .windsurfrules into CLAUDE.md and Claude Project XML instructions in under a second.',
+    sourceFiles: ['.windsurfrules'],
+    targetFiles: ['CLAUDE.md', 'claude_project_instructions.xml', '.claude/mcp.json'],
+    astParity: '98.5%',
+    heroHighlight: 'Instant CLAUDE.md Generation from Windsurf Rules',
+    keyBenefits: [
+      'Translates .windsurfrules into CLAUDE.md for Claude Code CLI and web projects',
+      'Adds structured XML autonomy blocks for Claude Sonnet & Opus',
+      'Configures .claude/mcp.json automatically',
+    ],
+    mappingHighlights: [
+      { sourceFeature: '.windsurfrules', targetFeature: 'CLAUDE.md', description: 'Structures Windsurf directives into Claude standard markdown' },
+    ],
+    faqs: [
+      {
+        question: 'How do I use my Windsurf rules in Claude Code?',
+        answer: 'PromptShift converts your .windsurfrules into a clean CLAUDE.md and .claude/mcp.json file with 98.5% certified AST parity.',
       },
     ],
   },

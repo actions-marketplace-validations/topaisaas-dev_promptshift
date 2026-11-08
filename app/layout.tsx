@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
+import { GlobalPageTracker } from '@/components/PageTracker';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://promptshift.dev'),
@@ -105,9 +107,22 @@ const jsonLdSchemas = [
       },
     ],
     sameAs: [
-      'https://github.com',
-      'https://x.com',
-      'https://linkedin.com',
+      'https://github.com/topaisaas-dev/promptshift',
+      'https://glama.ai/mcp/servers/topaisaas-dev/promptshift',
+      'https://www.npmjs.com/package/promptshift',
+      'https://x.com/promptshift_dev',
+      'https://x.com/jeanyvesgarcin',
+    ],
+    knowsAbout: [
+      'Cursor Rules (.cursorrules, .cursor/rules/*.mdc)',
+      'Anthropic Claude Code (CLAUDE.md)',
+      'GitHub Copilot Instructions (.github/copilot-instructions.md)',
+      'Windsurf Cascade (.windsurfrules)',
+      'Google Gemini & Antigravity (GEMINI.md, AGENTS.md)',
+      'OpenAI Custom GPTs & Assistants v2',
+      'Model Context Protocol (MCP)',
+      'Abstract Syntax Tree (AST) Rule Transpilation',
+      'In-RAM Ephemeral Secret Redaction',
     ],
     description: 'Sovereign 1-click universal transpiler and migration bridge for AI developer workspaces, instructions, and rules.',
   },
@@ -130,7 +145,17 @@ const jsonLdSchemas = [
     image: 'https://promptshift.dev/assets/official_logo.jpg',
     screenshot: 'https://promptshift.dev/assets/official_logo.jpg',
     applicationCategory: 'DeveloperApplication',
-    operatingSystem: 'Web, Modern Browsers',
+    applicationSubCategory: 'AI Developer Tool, Prompt Transpiler, Code Assistant Configuration Bridge',
+    operatingSystem: 'Cross-platform (Web, macOS, Linux, Windows, Node.js CLI)',
+    isAccessibleForFree: true,
+    license: 'https://opensource.org/licenses/MIT',
+    citation: 'https://promptshift.dev',
+    sameAs: [
+      'https://github.com/topaisaas-dev/promptshift',
+      'https://glama.ai/mcp/servers/topaisaas-dev/promptshift',
+      'https://www.npmjs.com/package/promptshift',
+      'https://x.com/promptshift_dev',
+    ],
     offers: {
       '@type': 'AggregateOffer',
       lowPrice: '0',
@@ -263,6 +288,9 @@ export default function RootLayout({
         </a>
 
         <Navbar />
+        <Suspense fallback={null}>
+          <GlobalPageTracker />
+        </Suspense>
         <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-7xl mx-auto px-6 py-8 focus:outline-none">
           {children}
         </main>

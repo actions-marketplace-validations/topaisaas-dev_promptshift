@@ -23,6 +23,7 @@ for (const cliPath of CLI_PATHS) {
   const helpOutput = execSync(`node "${cliPath}" --help`).toString();
   assert.ok(helpOutput.includes('npx promptshift [options]'), `CLI help check failed for ${label}`);
   assert.ok(helpOutput.includes('--mcp'), `CLI --mcp option missing in help for ${label}`);
+  assert.ok(helpOutput.includes('--watch'), `CLI --watch option missing in help for ${label}`);
 
   // 3. Test --dry-run --to=cursor and flag aliases (--source / --target / --verify / --sanitize-secrets)
   const dryRunOutput = execSync(`node "${cliPath}" --dry-run --to=cursor`).toString();

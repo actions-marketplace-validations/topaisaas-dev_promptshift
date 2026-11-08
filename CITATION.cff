@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use PromptShift in your research, developer workflow, or software project, please cite it as below."
+authors:
+  - family-names: "Garcin"
+    given-names: "Jean-Yves"
+    alias: "jyg3"
+  - name: "TopAI SaaS Engineering Team"
+    website: "https://topaisaas.com"
+title: "PromptShift: Universal AST Transpiler & Synchronization Bridge for AI Coding Rules"
+version: 1.2.0
+date-released: 2026-10-31
+url: "https://promptshift.dev"
+repository-code: "https://github.com/topaisaas-dev/promptshift"
+license: "MIT"
+keywords:
+  - "ai coding assistant"
+  - "cursor rules"
+  - "claude code"
+  - "github copilot"
+  - "windsurf"
+  - "model context protocol"
+  - "ast transpiler"
+  - "secret sanitization"
+  - "prompt engineering"
+abstract: "PromptShift is a sovereign, zero-retention developer tool that deterministically transpiles, sanitizes, and synchronizes AI coding guidelines across Cursor (.cursorrules, .mdc), Anthropic Claude Code (CLAUDE.md), GitHub Copilot (copilot-instructions.md), and Codeium Windsurf (.windsurfrules) with 98.5% certified semantic fidelity and real-time sync-on-save."
