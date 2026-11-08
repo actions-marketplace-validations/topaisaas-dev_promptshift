@@ -345,15 +345,21 @@ export async function runAutopilot(): Promise<void> {
 
   console.log(`Loaded Post Catalog: ${catalog.length} annual posts available (${postedIds.size} already broadcast)`);
 
-  console.log(`Selected Post ID: [${candidate.id}] (Category: ${candidate.category})`);
+  // Format Reply Tweet with Full Omnichannel UTM Tracking (utm_campaign=devrel_daily)
+  const utmUrl = `https://promptshift.dev?utm_source=twitter&utm_medium=social&utm_campaign=devrel_daily&utm_content=${candidate.id}`;
+  const formattedReplyTweet = candidate.replyTweet.includes('utm_campaign=')
+    ? candidate.replyTweet
+    : candidate.replyTweet.replace(/https:\/\/promptshift\.dev(?!\?)/g, utmUrl);
+
+  console.log('Selected Post ID: [' + candidate.id + '] (Category: ' + candidate.category + ')');
   console.log('----------------------------------------------------');
   console.log('📝 MAIN TWEET (Reach Maximized, Zero URLs):');
   console.log(candidate.mainTweet);
   console.log(`Length: ${candidate.mainTweet.length} / 280 chars`);
   console.log('----------------------------------------------------');
-  console.log('💬 AUTO-REPLY TWEET (Conversion Link & Polar Pass):');
-  console.log(candidate.replyTweet);
-  console.log(`Length: ${candidate.replyTweet.length} / 280 chars`);
+  console.log('💬 AUTO-REPLY TWEET (Omnichannel DevRel & Polar Pass):');
+  console.log(formattedReplyTweet);
+  console.log(`Length: ${formattedReplyTweet.length} / 280 chars`);
   console.log('----------------------------------------------------\n');
 
   if (isDryRun) {
@@ -388,14 +394,14 @@ export async function runAutopilot(): Promise<void> {
     // Wait 2.5 seconds before replying to avoid replica propagation lag
     await new Promise(r => setTimeout(r, 2500));
 
-    console.log('📡 Step 2: Broadcasting conversion auto-reply thread...');
+    console.log('📡 Step 2: Broadcasting conversion auto-reply thread with UTM tracking...');
     let replyResult: { id: string };
     try {
-      replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+      replyResult = await postTweet(formattedReplyTweet, mainResult.id, creds);
     } catch (replyErr: any) {
       console.warn('⚠️ Reply attempt 1 delayed, retrying in 4s...', replyErr.message);
       await new Promise(r => setTimeout(r, 4000));
-      replyResult = await postTweet(candidate.replyTweet, mainResult.id, creds);
+      replyResult = await postTweet(formattedReplyTweet, mainResult.id, creds);
     }
     console.log(`✅ Auto-reply published! ID: ${replyResult.id}`);
 
