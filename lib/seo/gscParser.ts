@@ -20,11 +20,11 @@ export interface GscMetricRow {
 export interface ChatSeoTargetKeyword {
   id: string;
   keyword: string;
-  searchIntent: 'Commerciale' | 'Transactionnelle' | 'Navigationnelle' | 'Informationnelle';
+  searchIntent: 'Commercial' | 'Transactional' | 'Navigational' | 'Informational' | 'Commerciale' | 'Transactionnelle' | 'Navigationnelle' | 'Informationnelle';
   targetPosition: string; // ex: '#1', '#1-3'
   targetUrl: string;
   monthlySearchVolumeEst: number;
-  status: 'IndexNow Pingé' | 'Schéma Déployé' | 'llms.txt En Ligne' | 'Indexation Demandée';
+  status: 'IndexNow Pinged' | 'Schema Deployed' | 'llms.txt Live' | 'Indexing Requested' | 'IndexNow Pingé' | 'Schéma Déployé' | 'llms.txt En Ligne' | 'Indexation Demandée';
   actionRecommended: string;
 }
 
@@ -53,102 +53,102 @@ export const CHAT_SEO_TARGET_MATRIX: ChatSeoTargetKeyword[] = [
   {
     id: 'kw-1',
     keyword: 'cursor to claude rules converter',
-    searchIntent: 'Transactionnelle',
+    searchIntent: 'Transactional',
     targetPosition: '#1',
     targetUrl: '/convert/cursor-to-claude',
     monthlySearchVolumeEst: 2400,
-    status: 'IndexNow Pingé',
-    actionRecommended: 'Paire #1 la plus demandée. Maintenir le maillage interne et citer promptshift.dev sur X/Reddit.',
+    status: 'IndexNow Pinged',
+    actionRecommended: '#1 highest demand pair. Maintain internal linking and cite promptshift.dev on X/Reddit.',
   },
   {
     id: 'kw-2',
     keyword: 'convert .cursorrules to CLAUDE.md',
-    searchIntent: 'Transactionnelle',
+    searchIntent: 'Transactional',
     targetPosition: '#1',
     targetUrl: '/convert/cursor-to-claude',
     monthlySearchVolumeEst: 1900,
-    status: 'Schéma Déployé',
-    actionRecommended: 'Requête à très haute intention technique. Couverte par balise SoftwareApplication et FAQ Schema.',
+    status: 'Schema Deployed',
+    actionRecommended: 'High technical intent query. Covered by SoftwareApplication and FAQ Schema tags.',
   },
   {
     id: 'kw-3',
     keyword: 'gemini to cursor rules converter',
-    searchIntent: 'Commerciale',
+    searchIntent: 'Commercial',
     targetPosition: '#1',
     targetUrl: '/convert/gemini-to-cursor',
     monthlySearchVolumeEst: 1100,
-    status: 'llms.txt En Ligne',
-    actionRecommended: 'Indexée dans llms-full.txt et citée pour l’écosystème Google Antigravity & Gemini CLI.',
+    status: 'llms.txt Live',
+    actionRecommended: 'Indexed in llms-full.txt and referenced for Google Antigravity & Gemini CLI ecosystem.',
   },
   {
     id: 'kw-4',
     keyword: 'cursor rules library',
-    searchIntent: 'Informationnelle',
+    searchIntent: 'Informational',
     targetPosition: '#2',
     targetUrl: '/rules-library',
     monthlySearchVolumeEst: 3600,
-    status: 'Schéma Déployé',
-    actionRecommended: 'Pousser le pack 50+ règles d’or en Order Bump et backlinks vers /rules-library.',
+    status: 'Schema Deployed',
+    actionRecommended: 'Promote the 50+ master rules vault in Order Bump and backlinks toward /rules-library.',
   },
   {
     id: 'kw-5',
     keyword: 'claude code to copilot instructions',
-    searchIntent: 'Commerciale',
+    searchIntent: 'Commercial',
     targetPosition: '#1',
     targetUrl: '/convert/claude-to-copilot',
     monthlySearchVolumeEst: 850,
-    status: 'IndexNow Pingé',
-    actionRecommended: 'Capture les équipes d’entreprises passant de Claude 3.7 à GitHub Copilot Enterprise.',
+    status: 'IndexNow Pinged',
+    actionRecommended: 'Captures enterprise engineering teams moving from Claude 3.7 to GitHub Copilot Enterprise.',
   },
   {
     id: 'kw-6',
     keyword: 'windsurf to cursor rules converter',
-    searchIntent: 'Commerciale',
+    searchIntent: 'Commercial',
     targetPosition: '#1',
     targetUrl: '/convert/windsurf-to-cursor',
     monthlySearchVolumeEst: 920,
-    status: 'IndexNow Pingé',
-    actionRecommended: 'Migrateurs de Cascade Windsurf vers Cursor. Fiche pSEO dédiée prête avec CLI sync.',
+    status: 'IndexNow Pinged',
+    actionRecommended: 'Captures engineers migrating from Cascade Windsurf to Cursor. pSEO landing page with CLI sync.',
   },
   {
     id: 'kw-7',
     keyword: 'ai coding rules converter',
-    searchIntent: 'Commerciale',
+    searchIntent: 'Commercial',
     targetPosition: '#1-3',
     targetUrl: '/',
     monthlySearchVolumeEst: 4200,
-    status: 'Schéma Déployé',
-    actionRecommended: 'Terme générique majeur. Page d’accueil optimisée pour RankBrain et Answer Engine Optimization.',
+    status: 'Schema Deployed',
+    actionRecommended: 'Major generic query. Homepage optimized for RankBrain and Answer Engine Optimization (AEO).',
   },
   {
     id: 'kw-8',
     keyword: 'promptshift dev',
-    searchIntent: 'Navigationnelle',
+    searchIntent: 'Navigational',
     targetPosition: '#1',
     targetUrl: '/',
     monthlySearchVolumeEst: 650,
-    status: 'llms.txt En Ligne',
-    actionRecommended: 'Marque officielle. Entity graph SameAs relié à GitHub, Glama MCP et npm.',
+    status: 'llms.txt Live',
+    actionRecommended: 'Official brand keyword. Entity graph SameAs linked to GitHub, Glama MCP, and npm.',
   },
   {
     id: 'kw-9',
     keyword: 'convert copilot-instructions.md to cursorrules',
-    searchIntent: 'Transactionnelle',
+    searchIntent: 'Transactional',
     targetPosition: '#1',
     targetUrl: '/convert/copilot-to-cursor',
     monthlySearchVolumeEst: 1350,
-    status: 'IndexNow Pingé',
-    actionRecommended: 'Conversion réciproque inverse validée dans le moteur AST sans perte de négations.',
+    status: 'IndexNow Pinged',
+    actionRecommended: 'Inverse reciprocal conversion validated in AST engine with zero negation drift.',
   },
   {
     id: 'kw-10',
     keyword: 'mcp server rules converter promptshift',
-    searchIntent: 'Transactionnelle',
+    searchIntent: 'Transactional',
     targetPosition: '#1',
     targetUrl: '/cli',
     monthlySearchVolumeEst: 750,
-    status: 'llms.txt En Ligne',
-    actionRecommended: 'Cible les devs intégrant PromptShift en STDIO / SSE dans Cursor ou Claude Code.',
+    status: 'llms.txt Live',
+    actionRecommended: 'Targets developers integrating PromptShift in STDIO / SSE inside Cursor or Claude Code.',
   },
 ];
 
@@ -156,15 +156,15 @@ export const CHAT_SEO_TARGET_MATRIX: ChatSeoTargetKeyword[] = [
 let currentGscReport: GscExportReport = {
   source: 'gsc_csv_export',
   exportDate: '2026-11-08',
-  searchType: 'Web (textuel)',
-  dateRange: 'Les 3 derniers mois (depuis le 06/11/2026)',
+  searchType: 'Web (Text)',
+  dateRange: 'Last 3 months (since 2026-11-06)',
   summary: {
     totalClicks: 0,
     totalImpressions: 0,
     averageCtr: 0,
     averagePosition: null,
     statusSummary:
-      'Propriété Google Search Console validée (J+2). Indexation en cours de propagation par Googlebot. Matrice ChatSEO active.',
+      'Google Search Console property validated (D+2). Googlebot indexation propagating. ChatSEO matrix active.',
   },
   dailyMetrics: [{ date: '2026-11-06', clicks: 0, impressions: 0 }],
   topQueries: [],
@@ -314,8 +314,8 @@ export class GscParserService {
         averagePosition: topQueries.length > 0 ? topQueries[0].position : null,
         statusSummary:
           totalClicks === 0 && totalImpressions === 0
-            ? 'Propriété GSC active (J+2). Phase de découverte Googlebot. Matrice ChatSEO chargée.'
-            : `${totalClicks} clics et ${totalImpressions} impressions enregistrés.`,
+            ? 'Active GSC property (D+2). Googlebot discovery phase. ChatSEO matrix loaded.'
+            : `${totalClicks} clicks and ${totalImpressions} impressions recorded.`,
       },
       dailyMetrics: dailyMetrics.length > 0 ? dailyMetrics : [{ date: '2026-11-06', clicks: 0, impressions: 0 }],
       topQueries,

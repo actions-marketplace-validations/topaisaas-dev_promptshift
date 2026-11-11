@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       deviceType,
       socialNetwork,
       campaignOrPost,
-      actionStage: body.actionStage || (body.type === 'page_view' ? 'Visite simple' : body.type === 'conversion_completed' ? 'Conversion terminée' : body.type),
+      actionStage: body.actionStage || (body.type === 'page_view' ? 'Page Visit' : body.type === 'conversion_completed' ? 'Conversion Completed' : body.type),
       country:
         req.headers.get('x-vercel-ip-country') ||
         req.headers.get('cf-ipcountry') ||

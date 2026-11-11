@@ -272,14 +272,14 @@ export class AnalyticsAggregator {
       .filter((e) => e.type === 'page_view' || e.type === 'llms_crawl' || Boolean(e.botName))
       .slice(0, 40)
       .map((e) => {
-        let sourceName = 'Direct / Signet';
+        let sourceName = 'Direct / Bookmark';
         const d = (e.referrerDomain || '').toLowerCase();
         const utm = (e.utmSource || '').toLowerCase();
 
         if (e.botName) {
-          sourceName = `Crawler IA: ${e.botName}`;
+          sourceName = `AI Crawler: ${e.botName}`;
         } else if (e.type === 'llms_crawl') {
-          sourceName = 'Indexeur IA: Spécification LLM';
+          sourceName = 'AI Indexer: LLM Specification';
         } else if (d.includes('chatgpt') || utm.includes('chatgpt')) {
           sourceName = 'ChatGPT (SearchGPT / OpenAI)';
         } else if (d.includes('perplexity') || utm.includes('perplexity')) {
@@ -442,14 +442,14 @@ export class AnalyticsAggregator {
       }
 
       // Add to log entries
-      let actionLabel = ev.actionStage || 'Visite simple';
+      let actionLabel = ev.actionStage || 'Page Visit';
       if (!ev.actionStage) {
-        if (ev.type === 'page_view') actionLabel = 'Visite simple';
-        else if (ev.type === 'project_upload') actionLabel = 'Upload projet';
-        else if (ev.type === 'paywall_hit') actionLabel = 'Collision paywall 402';
-        else if (ev.type === 'checkout_initiated') actionLabel = 'Passage en caisse Polar';
-        else if (ev.type === 'conversion_completed') actionLabel = 'Conversion terminée';
-        else if (ev.type === 'payment_completed') actionLabel = `Achat validé ($${(ev.amountUsd || 1.99).toFixed(2)})`;
+        if (ev.type === 'page_view') actionLabel = 'Page Visit';
+        else if (ev.type === 'project_upload') actionLabel = 'Project Upload';
+        else if (ev.type === 'paywall_hit') actionLabel = 'Paywall Hit (402)';
+        else if (ev.type === 'checkout_initiated') actionLabel = 'Polar Checkout Initiated';
+        else if (ev.type === 'conversion_completed') actionLabel = 'Conversion Completed';
+        else if (ev.type === 'payment_completed') actionLabel = `Payment Completed ($${(ev.amountUsd || 1.99).toFixed(2)})`;
       }
 
       recentLogs.push({
@@ -458,7 +458,7 @@ export class AnalyticsAggregator {
         socialNetwork: net,
         socialNetworkName: networksConfig[net].name,
         path: ev.path || '/',
-        campaignOrPost: ev.campaignOrPost || (ev.utmCampaign ? `${ev.utmCampaign}${ev.utmTerm ? ` (${ev.utmTerm})` : ''}` : 'Lien direct bio/post'),
+        campaignOrPost: ev.campaignOrPost || (ev.utmCampaign ? `${ev.utmCampaign}${ev.utmTerm ? ` (${ev.utmTerm})` : ''}` : 'Direct Bio / Post Link'),
         deviceType: ev.deviceType || 'desktop',
         actionTriggered: actionLabel,
         country: ev.country || 'US',
@@ -577,16 +577,16 @@ export class AnalyticsAggregator {
       id: 'arb-ecosystem',
       pillar: 'ecosystem',
       pillarLabel: 'Ecosystem & Market Demand',
-      observedMetric: totalConversions > 0 ? `Target Market Share toward ${topTgt}` : 'Traction Écosystèmes Cibles',
-      currentValue: totalConversions > 0 ? `${topPct}% des exports vers ${topTgt}` : '0 conversion sur la période',
+      observedMetric: totalConversions > 0 ? `Target Market Share toward ${topTgt}` : 'Target Ecosystem Traction',
+      currentValue: totalConversions > 0 ? `${topPct}% of exports toward ${topTgt}` : '0 conversions in this period',
       trend: totalConversions > 0 ? 'positive' : 'neutral',
       diagnostic: totalConversions > 0
-        ? `La demande vers ${topTgt} domine les flux de conversion réels (${Math.max(claudeCount, cursorCount)} projets).`
-        : 'Aucune conversion enregistrée sur cette période temporelle. Les 20 paires SEO et llms.txt sont prêtes à capter le flux.',
-      tradeoffA: 'Option A : Répartir les efforts marketing de manière égale entre les 20 couples de conversion.',
-      tradeoffB: 'Option B : Concentrer 80% des backlinks, registres MCP et posts X sur le pont #1 Cursor ➔ Claude et le nouveau pont Copilot.',
-      recommendedArbitrage: 'Agile Arbitrage B : Capitaliser sur la traction Cursor ➔ Claude / Copilot pour maximiser le taux de conversion immédiat.',
-      immediateAgileAction: 'Mettre en avant le badge "Vérifié Glama MCP" et pousser le mode CLI --watch auprès des utilisateurs Cursor.',
+        ? `Demand toward ${topTgt} dominates live conversion flows (${Math.max(claudeCount, cursorCount)} projects).`
+        : 'No conversions recorded in this time range. The 20 SEO pairs and llms.txt are ready to capture traffic.',
+      tradeoffA: 'Option A: Distribute marketing efforts equally across all 20 conversion pairs.',
+      tradeoffB: 'Option B: Concentrate 80% of backlinks, MCP registries, and X posts on the #1 Cursor ➔ Claude bridge and new Copilot bridge.',
+      recommendedArbitrage: 'Agile Arbitrage B: Capitalize on Cursor ➔ Claude / Copilot traction to maximize immediate conversion rate.',
+      immediateAgileAction: 'Highlight "Glama Verified MCP" badge and promote CLI --watch mode to active Cursor users.',
       urgency: 'high',
     });
 
@@ -599,16 +599,16 @@ export class AnalyticsAggregator {
       id: 'arb-pricing',
       pillar: 'pricing',
       pillarLabel: 'Pricing & Paywall Elasticity',
-      observedMetric: 'Projets dépassant le quota gratuit (≤ 2 fichiers)',
-      currentValue: totalFilesProjects > 0 ? `${paidPct}% éligibles au Single Pass ($1.99)` : '0 projet soumis sur la période',
+      observedMetric: 'Projects exceeding free quota (≤ 2 files)',
+      currentValue: totalFilesProjects > 0 ? `${paidPct}% eligible for Single Pass ($1.99)` : '0 projects submitted in this period',
       trend: totalFilesProjects > 0 ? 'positive' : 'neutral',
       diagnostic: totalFilesProjects > 0
-        ? `${over2Files} projets dépassent le seuil gratuit de 2 fichiers. Le modèle freemium fonctionne sans cannibaliser les ventes.`
-        : 'En attente de soumissions de projets volumineux. Le quota strict à ≤ 2 fichiers gratuits est en place en RAM.',
-      tradeoffA: 'Option A : Élargir le quota gratuit à 5 fichiers (plus de viralité, mais cannibalise les ventes du Single Pass $1.99).',
-      tradeoffB: 'Option B : Maintenir strictement le seuil de 2 fichiers et proposer le Single Pass $1.99 sans abonnement forcé.',
-      recommendedArbitrage: 'Agile Arbitrage B : Conserver le seuil strict de 2 fichiers. Les dépôts réels dépassent quasi systématiquement 3 règles.',
-      immediateAgileAction: 'Valoriser la suite 4-en-1 et les clés masquées au moment où la modale Polar 402 se déclenche.',
+        ? `${over2Files} projects exceed the free threshold of 2 files. The freemium model operates without cannibalizing sales.`
+        : 'Awaiting large project uploads. The strict ≤ 2 free files quota is securely enforced in RAM.',
+      tradeoffA: 'Option A: Expand free quota to 5 files (more viral reach, but cannibalizes $1.99 Single Pass conversions).',
+      tradeoffB: 'Option B: Maintain strict 2-file quota and offer Single Pass $1.99 with no forced subscriptions.',
+      recommendedArbitrage: 'Agile Arbitrage B: Retain strict 2-file limit. Real-world repositories almost systematically exceed 3 rules.',
+      immediateAgileAction: 'Promote the 4-in-1 universal suite and secret sanitization when Polar 402 modal opens.',
       urgency: 'high',
     });
 
@@ -617,14 +617,14 @@ export class AnalyticsAggregator {
       id: 'arb-channel',
       pillar: 'channel',
       pillarLabel: 'Distribution Channel (Web vs CLI/MCP)',
-      observedMetric: 'Adoption npx promptshift & Serveur MCP',
-      currentValue: 'Bi-modal actif (Web + Terminal CLI v1.2.0)',
+      observedMetric: 'npx promptshift & MCP Server Adoption',
+      currentValue: 'Bi-modal active (Web + CLI v1.2.0 Terminal)',
       trend: 'positive',
-      diagnostic: 'Le Web capte le trafic SEO et GEO (ChatGPT/Perplexity), tandis que le CLI npm et le serveur MCP capturent les développeurs au quotidien.',
-      tradeoffA: 'Option A : Se concentrer exclusivement sur l’interface web SaaS.',
-      tradeoffB: 'Option B : Accélérer la distribution locale en ligne de commande (npx promptshift --watch) et MCP.',
-      recommendedArbitrage: 'Agile Arbitrage B : Le Web sert d’entonnoir initial et d’autorité GEO, le CLI crée l’habitude quotidienne de synchronisation.',
-      immediateAgileAction: 'Documenter le flag --watch dans le README et dans les réponses aux développeurs X.',
+      diagnostic: 'The Web captures organic SEO and GEO traffic (ChatGPT/Perplexity), while npm CLI and MCP server capture developers daily in their IDE.',
+      tradeoffA: 'Option A: Focus exclusively on the SaaS web studio.',
+      tradeoffB: 'Option B: Accelerate local command-line distribution (npx promptshift --watch) and MCP server integration.',
+      recommendedArbitrage: 'Agile Arbitrage B: Web serves as initial funnel and GEO authority, CLI builds daily workflow retention.',
+      immediateAgileAction: 'Document --watch flag in README and in community replies to developers on X.',
       urgency: 'medium',
     });
 
@@ -633,16 +633,16 @@ export class AnalyticsAggregator {
       id: 'arb-security',
       pillar: 'security',
       pillarLabel: 'Security & In-RAM Compliance',
-      observedMetric: 'Secrets & clés API neutralisés en mémoire',
-      currentValue: `${totalSecrets} secrets masqués`,
+      observedMetric: 'Secrets & API keys sanitized in-RAM',
+      currentValue: `${totalSecrets} secrets redacted`,
       trend: totalSecrets > 0 ? 'positive' : 'neutral',
       diagnostic: totalSecrets > 0
-        ? `${totalSecrets} identifiants sensibles ont été masqués en RAM avant tout risque de fuite.`
-        : 'Bouclier anti-fuite actif en mémoire volatile (expressions régulières OWASP pour sk-*, AIza*, ghp_*, etc.).',
-      tradeoffA: 'Option A : Désactiver le scan de secrets pour économiser quelques millisecondes de CPU.',
-      tradeoffB: 'Option B : Maintenir le bouclier 100% In-RAM et certifier le Zero-Retention pour rassurer les équipes professionnelles.',
-      recommendedArbitrage: 'Agile Arbitrage B : La garantie "100% In-RAM Zero Retention" est l’argument numéro un levant tout frein à l’upload.',
-      immediateAgileAction: 'Afficher le compteur de secrets masqués en direct dès la fin de transpilation.',
+        ? `${totalSecrets} sensitive credentials sanitized in RAM before any leakage risk.`
+        : 'Zero-retention secret shield active in volatile RAM (OWASP regex rules for sk-*, AIza*, ghp_*, etc.).',
+      tradeoffA: 'Option A: Disable secret scanning to save a few milliseconds of CPU.',
+      tradeoffB: 'Option B: Maintain 100% In-RAM shield and certify Zero-Retention to reassure professional teams.',
+      recommendedArbitrage: 'Agile Arbitrage B: The "100% In-RAM Zero Retention" guarantee is the #1 objection remover for project uploads.',
+      immediateAgileAction: 'Display live count of redacted secrets right upon transpilation completion.',
       urgency: 'critical',
     });
 
@@ -651,14 +651,14 @@ export class AnalyticsAggregator {
       id: 'arb-infra',
       pillar: 'infra',
       pillarLabel: 'Infrastructure & Edge Execution Cost',
-      observedMetric: 'Taux de requêtes Edge servies à 0$ Egress',
+      observedMetric: 'Edge requests served at $0 Egress',
       currentValue: `${edge.cloudflareCacheHitRatio}% Edge Anycast`,
       trend: 'positive',
-      diagnostic: 'Cloudflare absorbe la bande passante et les requêtes des crawlers IA, maintenant le coût serveur Vercel à 0.00$.',
-      tradeoffA: 'Option A : Désactiver le cache pour forcer un re-rendu dynamique systématique.',
-      tradeoffB: 'Option B : Conserver la politique de cache Edge (s-maxage=3600) sur sitemap.xml, llms.txt et /convert/*.',
-      recommendedArbitrage: 'Agile Arbitrage B : Tirer parti du CDN Anycast gratuit pour servir le contenu mondialement avec 0$ de dépassement.',
-      immediateAgileAction: 'Maintenir les en-têtes RFC 8288 pour que ChatGPT et Perplexity lisent le cache instantanément.',
+      diagnostic: 'Cloudflare absorbs bandwidth and AI crawler requests, keeping Vercel compute spend at $0.00.',
+      tradeoffA: 'Option A: Disable cache to force dynamic re-rendering on every hit.',
+      tradeoffB: 'Option B: Maintain Edge caching policy (s-maxage=3600) on sitemap.xml, llms.txt, and /convert/*.',
+      recommendedArbitrage: 'Agile Arbitrage B: Leverage free Anycast CDN to distribute content globally with zero overage fees.',
+      immediateAgileAction: 'Maintain RFC 8288 headers so ChatGPT and Perplexity fetch cached content instantaneously.',
       urgency: 'medium',
     });
 
@@ -676,11 +676,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-zero-state',
         category: 'growth',
-        title: 'Moteur Télémétrique Souverain Actif — Données 100% Réelles',
-        description: 'Le moteur d’analytics en RAM est vierge de toute donnée fictive. Dès qu’un visiteur atterrit depuis ChatGPT, Perplexity, un réseau social ou convertit un projet, ses métriques réelles s’afficheront ici en temps réel.',
+        title: 'Sovereign Telemetry Engine Active — 100% Real Data',
+        description: 'The in-RAM analytics store is clean of any synthetic demo entries. As soon as visitors arrive from ChatGPT, Perplexity, social platforms, or convert a project, real-world metrics will appear here live.',
         impact: 'medium',
-        metricGrounding: '0 conversion enregistrée. État de vérité terrain garanti.',
-        actionableStep: 'Testez une conversion sur le site ou surveillez les clics entrants depuis les réseaux sociaux et moteurs IA.',
+        metricGrounding: '0 conversions recorded. Ground-truth baseline guaranteed.',
+        actionableStep: 'Test a project conversion in the studio or monitor inbound traffic from social networks and AI engines.',
       });
     }
 
@@ -695,11 +695,11 @@ export class AnalyticsAggregator {
         tips.push({
           id: 'tip-social-traction',
           category: 'marketing',
-          title: `Trafic Réseaux Sociaux : ${soc.totalSocialSessions} sessions (${topNet[1].name} en tête)`,
-          description: `${topNet[1].name} génère ${topNet[1].trafficSharePct}% de votre trafic social. Son taux CRO s'élève à ${topNet[1].croRatePct}%.`,
+          title: `Social Media Traffic: ${soc.totalSocialSessions} sessions (${topNet[1].name} leading)`,
+          description: `${topNet[1].name} generates ${topNet[1].trafficSharePct}% of your social traffic with a ${topNet[1].croRatePct}% CRO rate.`,
           impact: 'high',
-          metricGrounding: `${topNet[1].uniqueSessions} sessions uniques et ${topNet[1].ordersAttributed} commande(s) attribuée(s) à ${topNet[1].name}.`,
-          actionableStep: `Renforcez les publications avec liens directs ciblés vers les paires de migration sur ${topNet[1].name}.`,
+          metricGrounding: `${topNet[1].uniqueSessions} unique sessions and ${topNet[1].ordersAttributed} order(s) attributed to ${topNet[1].name}.`,
+          actionableStep: `Amplify posts with targeted direct links to conversion pairs on ${topNet[1].name}.`,
         });
       }
     }
@@ -711,11 +711,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-geo-inbound',
         category: 'marketing',
-        title: `Trafic Moteurs IA Détecté : ${totalAiClicks} clics entrants (ChatGPT / Perplexity / Claude)`,
-        description: `Les fiches d’autorité et llms.txt génèrent des visites qualifiées depuis les moteurs génératifs.`,
+        title: `AI Search Traffic Detected: ${totalAiClicks} inbound clicks (ChatGPT / Perplexity / Claude)`,
+        description: `Authority guides and llms.txt are successfully driving qualified developer visits from generative search engines.`,
         impact: 'critical',
         metricGrounding: `ChatGPT: ${geo.chatgptClicks} · Perplexity: ${geo.perplexityClicks} · Claude: ${geo.claudeClicks}.`,
-        actionableStep: `Renforcez les liens sur les pages de destination les plus visitées (ex: /convert/cursor-to-copilot).`,
+        actionableStep: `Strengthen internal links on the most frequented destination routes (e.g. /convert/cursor-to-copilot).`,
       });
     }
 
@@ -731,11 +731,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-dominant-target',
         category: 'marketing',
-        title: `Ciblage Prioritaire : ${formattedName} (${topPct}% des conversions réelles)`,
-        description: `La majorité des utilisateurs réels convertissent vers ${formattedName}.`,
+        title: `Priority Targeting: ${formattedName} (${topPct}% of real conversions)`,
+        description: `The vast majority of real-world users are migrating towards ${formattedName}.`,
         impact: 'high',
-        metricGrounding: `${targets[0][1]} / ${summary.totalConversions} conversions ciblent ${topTgt.toUpperCase()}.`,
-        actionableStep: `Mettez en avant le badge de compatibilité ${formattedName} dans le flux d'accueil.`,
+        metricGrounding: `${targets[0][1]} / ${summary.totalConversions} conversions target ${topTgt.toUpperCase()}.`,
+        actionableStep: `Showcase the ${formattedName} compatibility badge prominently in the onboarding studio.`,
       });
     }
 
@@ -744,11 +744,11 @@ export class AnalyticsAggregator {
       tips.push({
         id: 'tip-security-shield',
         category: 'security',
-        title: `Protection Anti-Fuite : ${summary.totalSecretsSanitized} secrets neutralisés`,
-        description: `Le filtre en mémoire volatile a intercepté des identifiants privés avant export de bundle.`,
+        title: `Leak Prevention: ${summary.totalSecretsSanitized} secrets neutralized`,
+        description: `The volatile memory scrubber intercepted private developer credentials before bundle export.`,
         impact: 'critical',
-        metricGrounding: `${summary.totalSecretsSanitized} clés API (OpenAI, Anthropic, AWS) masquées en RAM.`,
-        actionableStep: `Partagez ce chiffre sur les réseaux sociaux pour prouver la valeur sécurité de PromptShift.`,
+        metricGrounding: `${summary.totalSecretsSanitized} API keys (OpenAI, Anthropic, AWS) masked in RAM.`,
+        actionableStep: `Share this metric on developer networks to highlight PromptShift's enterprise security.`,
       });
     }
 

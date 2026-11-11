@@ -341,14 +341,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <label htmlFor="order-bump-checkbox" className="flex-1 cursor-pointer select-none">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-black text-amber-300 flex items-center gap-1.5">
-                    <span>⚡ OPTION RECOMMANDÉE : Pack 50+ Master Rules &amp; Prompts</span>
+                    <span>⚡ RECOMMENDED ADD-ON: 50+ Master Rules &amp; Prompts Vault</span>
                   </span>
                   <span className="text-xs font-mono font-black text-emerald-400 whitespace-nowrap bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
                     +{bumpPriceFormatted}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                  Débloquez l&apos;accès direct au coffre des 50+ règles d&apos;or de production (Next.js 15, Tailwind v4, Python FastAPI, Rust, Supabase RLS, Docker &amp; Guardrails Sécurité) testées et prêtes à l&apos;emploi pour Cursor, Claude Code, Copilot &amp; Windsurf.
+                  Unlock instant direct access to the 50+ battle-tested gold-standard production rules vault (Next.js 15, Tailwind v4, Python FastAPI, Rust, Supabase RLS, Docker &amp; Security Guardrails) ready-to-use for Cursor, Claude Code, Copilot &amp; Windsurf.
                 </p>
               </label>
             </div>
@@ -459,7 +459,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 hover:brightness-110 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all"
               >
                 <Download className="w-4 h-4" />
-                <span>Télécharger le Pack 50+ Master Rules &amp; Prompts (.ZIP)</span>
+                <span>Download 50+ Master Rules &amp; Prompts Vault (.ZIP)</span>
               </a>
 
               {lastInvoice && (

@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     configured: true,
     mode: 'gsc_csv_export',
-    message: 'Données Google Search Console synchronisées via export officiel CSV & Matrice ChatSEO active.',
+    message: 'Google Search Console data synchronized via official CSV export & ChatSEO Matrix active.',
     serviceAccount: null,
     gscReport: report,
   });
