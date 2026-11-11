@@ -14,12 +14,14 @@ import {
   Mail,
   Share2,
   UploadCloud,
+  Tag,
 } from 'lucide-react';
 import { ClientVault, VaultInvoice } from '@/lib/storage/clientVault';
 import { InvoiceGenerator } from '@/lib/invoices/invoiceGenerator';
 import { CurrencyManager, SupportedCurrency } from '@/lib/currency/currencyManager';
 import { AnalyticsTracker } from '@/lib/analytics/analyticsTracker';
 import { MonetizationManager } from '@/lib/config/monetizationConfig';
+import { PromoManager } from '@/lib/promo/promoManager';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -59,6 +61,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [emailError, setEmailError] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [includeOrderBump, setIncludeOrderBump] = useState(false);
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [promoError, setPromoError] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -174,6 +178,35 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       console.error('Polar checkout launch error:', err);
       setEmailError(err.message || 'Unable to open Polar secure checkout. Please try again.');
       setIsProcessing(false);
+    }
+  };
+
+  const handleApplyPromo = () => {
+    setPromoError('');
+    if (!promoCodeInput.trim()) {
+      setPromoError('Please enter a promo or admin code');
+      return;
+    }
+    const res = PromoManager.validate(promoCodeInput);
+    if (res.valid) {
+      PromoManager.activateVip(res.code);
+      ClientVault.setActivePlan('pro');
+      const cust = ClientVault.getCustomerInfo();
+      const invoice = ClientVault.saveInvoice({
+        orderId: `ADMIN-${res.code}-${Date.now().toString().slice(-6)}`,
+        planName: 'Pro Developer Subscription (Admin Smoketest Pass)',
+        amount: '0.00',
+        currency: 'USD',
+        paymentMethod: `Admin Code: ${res.code}`,
+        status: 'PAID',
+        customerName: cust.name || 'Admin Developer',
+        customerCompany: cust.company || 'Engineering Workspace',
+        customerEmail: isEmailValid ? trimmedEmail : cust.email || 'admin@promptshift.dev',
+      });
+      setLastInvoice(invoice);
+      setIsPaid(true);
+    } else {
+      setPromoError('Invalid promo code. For admin testing, use code: SMOKETEST');
     }
   };
 
@@ -412,6 +445,42 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               />
               {emailError && (
                 <span className="text-[11px] text-red-400 pl-1 font-semibold">{emailError}</span>
+              )}
+            </div>
+
+            {/* Promo / Admin Pass Code (100% Free VIP Access) */}
+            <div className="flex flex-col gap-1 text-left pt-2 border-t border-slate-800/80">
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5 font-semibold">
+                  <Tag className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Promo / Admin Test Code</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">e.g. SMOKETEST</span>
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <input
+                  type="text"
+                  value={promoCodeInput}
+                  onChange={(e) => {
+                    setPromoCodeInput(e.target.value);
+                    if (promoError) setPromoError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleApplyPromo();
+                  }}
+                  placeholder="Enter code (e.g. SMOKETEST)"
+                  className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-emerald-300 placeholder-slate-600 focus:outline-none focus:border-emerald-400 transition-colors uppercase font-mono tracking-wider font-bold"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyPromo}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-emerald-200 border border-emerald-500/40 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  Apply
+                </button>
+              </div>
+              {promoError && (
+                <span className="text-[11px] text-rose-400 pl-1 font-semibold">{promoError}</span>
               )}
             </div>
           </div>

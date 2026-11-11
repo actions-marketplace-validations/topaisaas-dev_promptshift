@@ -752,6 +752,19 @@ export class AnalyticsAggregator {
       });
     }
 
+    // 5. Monetization & Commercial Velocity
+    if (summary.totalConversions > 0) {
+      tips.push({
+        id: 'tip-monetization-velocity',
+        category: 'pricing',
+        title: `Commercial Velocity: ${summary.totalConversions} exports recorded`,
+        description: `Developers are converting their AI prompt architectures. Maintain frictionless 1-click checkout options across Single ($1.99) and Pro ($5.99/mo).`,
+        impact: 'high',
+        metricGrounding: `${summary.totalConversions} conversions recorded across ${summary.uniqueSessions} unique sessions.`,
+        actionableStep: `Monitor Polar.sh checkout completion rate and ensure order bump options are visible.`,
+      });
+    }
+
     return tips;
   }
 

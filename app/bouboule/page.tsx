@@ -56,6 +56,7 @@ import {
 } from '@/lib/analytics/analyticsTypes';
 import type { CheckCheckReport } from '@/lib/analytics/checkcheckService';
 import { CHAT_SEO_TARGET_MATRIX } from '@/lib/seo/gscParser';
+import { ClientVault } from '@/lib/storage/clientVault';
 
 const ADMIN_STORAGE_AUTH = 'promptshift_admin_session';
 
@@ -501,6 +502,29 @@ Try it with your project: https://promptshift.dev
               <Eye className="w-3.5 h-3.5 text-cyan-400" />
               <span>View Site</span>
             </Link>
+
+            <button
+              onClick={() => {
+                ClientVault.setActivePlan('pro');
+                window.open('/?checkout=success&plan=pro', '_blank');
+              }}
+              title="Test the website with full Pro Developer Pass unlocked (0€, no credit card required)"
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>⚡ Test Site (Free Pro)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                ClientVault.clearSessionData();
+                alert('Browser sandbox reset: you are now browsing as a 100% Free unauthenticated visitor.');
+              }}
+              title="Reset this browser to a 100% Free visitor (re-locks paywall for testing)"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <span>Reset to Free</span>
+            </button>
 
             <button
               onClick={handleLogout}
