@@ -1,6 +1,6 @@
 {
-  "lastRun": "2026-11-10T20:56:36.948Z",
-  "totalBroadcasts": 16,
+  "lastRun": "2026-11-11T21:29:20.744Z",
+  "totalBroadcasts": 17,
   "history": [
     {
       "id": "post-d001-morning",
@@ -143,6 +143,15 @@
       "postedAt": "2026-11-10T20:56:36.948Z",
       "mainTweetId": "2120259322785484982",
       "replyTweetId": "2120259334470775156",
+      "simulated": false,
+      "retweetedBy3K": true
+    },
+    {
+      "id": "post-d009-morning",
+      "category": "terminal",
+      "postedAt": "2026-11-11T21:29:20.744Z",
+      "mainTweetId": "2120629947165503746",
+      "replyTweetId": "2120629958863356222",
       "simulated": false,
       "retweetedBy3K": true
     }
