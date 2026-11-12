@@ -157,7 +157,7 @@ export class AnalyticsTracker {
     if (utmContent && utmContent.trim()) {
       return utmContent;
     }
-    return 'Lien direct bio/post';
+    return 'Direct Bio / Post Link';
   }
 
   /**
@@ -223,11 +223,11 @@ export class AnalyticsTracker {
       }
       return `Migration ${pairSlug}`;
     }
-    if (path === '/discover') return 'Guide Autorité Formats IA (GEO)';
-    if (path === '/cli') return 'Installation CLI npx & MCP';
-    if (path === '/privacy' || path === '/security') return 'Audit Sécurité & Zero-Retention';
-    if (path === '/terms') return 'Conditions & Licence';
-    if (path === '/') return 'Atterrissage Studio Universal';
+    if (path === '/discover') return 'AI Rules Authority Guide (GEO)';
+    if (path === '/cli') return 'CLI npx & MCP Server Setup';
+    if (path === '/privacy' || path === '/security') return 'Security & Zero-Retention Audit';
+    if (path === '/terms') return 'Terms & License';
+    if (path === '/') return 'Universal Studio Landing';
     return `Navigation ${path}`;
   }
 
@@ -383,7 +383,7 @@ export class AnalyticsTracker {
       socialNetwork: detectedSocial,
       deviceType,
       campaignOrPost,
-      actionStage: 'Visite simple',
+      actionStage: 'Page Visit',
     });
   }
 
@@ -402,7 +402,7 @@ export class AnalyticsTracker {
       fileCount: meta.fileCount,
       sizeBytes: meta.sizeBytes,
       sourcePlatform: meta.sourcePlatform,
-      actionStage: 'Upload projet',
+      actionStage: 'Project Upload',
     });
   }
 
@@ -422,7 +422,7 @@ export class AnalyticsTracker {
       sourcePlatform: meta.sourcePlatform,
       targetPlatform: meta.targetPlatform,
       planTier: 'single',
-      actionStage: 'Collision paywall 402',
+      actionStage: 'Paywall Hit (402)',
     });
   }
 
@@ -457,7 +457,7 @@ export class AnalyticsTracker {
       currency: meta.currency || 'USD',
       durationMs: meta.durationMs,
       secretsCount: meta.secretsCount,
-      actionStage: 'Conversion terminée',
+      actionStage: 'Conversion Completed',
     });
   }
 
@@ -476,7 +476,7 @@ export class AnalyticsTracker {
       planTier,
       amountUsd: finalAmount,
       currency: currency || 'USD',
-      actionStage: 'Passage en caisse Polar',
+      actionStage: 'Polar Checkout Initiated',
     });
   }
 
@@ -494,7 +494,7 @@ export class AnalyticsTracker {
       planTier: meta.planTier,
       amountUsd: meta.amountUsd,
       currency: meta.currency || 'USD',
-      actionStage: `Achat validé ($${meta.amountUsd.toFixed(2)})`,
+      actionStage: `Payment Completed ($${meta.amountUsd.toFixed(2)})`,
     });
   }
 
@@ -504,7 +504,7 @@ export class AnalyticsTracker {
       channel: 'web',
       promoCode,
       planTier: discountPercent === 100 ? 'vip' : 'pro',
-      actionStage: `Code Promo (${promoCode})`,
+      actionStage: `Promo Applied (${promoCode})`,
     });
   }
 
@@ -514,7 +514,7 @@ export class AnalyticsTracker {
       channel: 'web',
       projectTitleAnon: invoiceNumber,
       planTier,
-      actionStage: 'Facture téléchargée',
+      actionStage: 'Receipt Downloaded',
     });
   }
 
@@ -523,7 +523,7 @@ export class AnalyticsTracker {
       type: 'cli_token_copied',
       channel: 'cli',
       planTier,
-      actionStage: 'Clé CLI copiée',
+      actionStage: 'CLI Key Copied',
     });
   }
 

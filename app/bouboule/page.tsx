@@ -55,6 +55,8 @@ import {
   EventType,
 } from '@/lib/analytics/analyticsTypes';
 import type { CheckCheckReport } from '@/lib/analytics/checkcheckService';
+import { CHAT_SEO_TARGET_MATRIX } from '@/lib/seo/gscParser';
+import { ClientVault } from '@/lib/storage/clientVault';
 
 const ADMIN_STORAGE_AUTH = 'promptshift_admin_session';
 
@@ -126,9 +128,9 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       setSeoStatus(data);
       if (data.configured) {
-        setSeoFeedback(`Connecté au compte de service : ${data.serviceAccount}`);
+        setSeoFeedback(`Connected to service account: ${data.serviceAccount}`);
       } else {
-        setSeoFeedback(data.message || 'Compte de service non configuré.');
+        setSeoFeedback(data.message || 'Service account not configured.');
       }
     } catch (e: any) {
       setSeoFeedback(`Erreur : ${e.message}`);
@@ -474,11 +476,11 @@ Try it with your project: https://promptshift.dev
                 AnalyticsTracker.purgeSyntheticData();
                 loadData();
               }}
-              title="Purger toute donnée démo résiduelle et forcer la vérité terrain"
+              title="Purge residual demo data and enforce ground truth"
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Vérité Terrain 100%</span>
+              <span>100% Ground Truth</span>
             </button>
 
             <button
@@ -500,6 +502,29 @@ Try it with your project: https://promptshift.dev
               <Eye className="w-3.5 h-3.5 text-cyan-400" />
               <span>View Site</span>
             </Link>
+
+            <button
+              onClick={() => {
+                ClientVault.setActivePlan('pro');
+                window.open('/?checkout=success&plan=pro', '_blank');
+              }}
+              title="Test the website with full Pro Developer Pass unlocked (0€, no credit card required)"
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>⚡ Test Site (Free Pro)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                ClientVault.clearSessionData();
+                alert('Browser sandbox reset: you are now browsing as a 100% Free unauthenticated visitor.');
+              }}
+              title="Reset this browser to a 100% Free visitor (re-locks paywall for testing)"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <span>Reset to Free</span>
+            </button>
 
             <button
               onClick={handleLogout}
@@ -524,7 +549,7 @@ Try it with your project: https://promptshift.dev
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-base font-black text-white tracking-tight">
-                    Protocole Souverain (checkcheck) — Vérité Terrain Polar.sh ($ USD) &amp; Arbitrage Agile
+                    Sovereign Protocol (checkcheck) — Polar.sh Ground Truth ($ USD) &amp; Agile Arbitrage
                   </h2>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                     {checkcheckReport?.commercialTruthSource === 'polar_api_live'
@@ -536,7 +561,7 @@ Try it with your project: https://promptshift.dev
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Diagnostic unifié de <span className="text-cyan-300 font-mono">promptshift.dev</span> : 16 Lignes Catalogue &amp; Rails · 5 Canaux Agents US · Entonnoir 7 Étapes · Zéro vente fictive.
+                  Unified diagnostic for <span className="text-cyan-300 font-mono">promptshift.dev</span>: 16 Catalog Lines &amp; Rails · 5 US Agent Channels · 7-Step Funnel · Zero fake sales.
                 </p>
               </div>
             </div>
@@ -570,7 +595,7 @@ Try it with your project: https://promptshift.dev
                 onClick={() => setIsCheckcheckExpanded(!isCheckcheckExpanded)}
                 className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-semibold transition-all cursor-pointer"
               >
-                {isCheckcheckExpanded ? 'Masquer' : 'Déplier'}
+                {isCheckcheckExpanded ? 'Collapse' : 'Expand'}
               </button>
             </div>
           </div>
@@ -580,7 +605,7 @@ Try it with your project: https://promptshift.dev
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Ventes Réelles Payées (Polar)
+                  Real Paid Sales (Polar)
                 </div>
                 <div className="text-xl font-black text-white mt-1 font-mono">
                   {checkcheckReport.kpisGlobaux.ventesReellesPayees}{' '}
@@ -589,13 +614,13 @@ Try it with your project: https://promptshift.dev
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-500 mt-0.5">
-                  Hors {checkcheckReport.kpisGlobaux.commandesTestGratuitesPolar} commandes test à $0.00
+                  Excl. {checkcheckReport.kpisGlobaux.commandesTestGratuitesPolar} free test orders ($0.00)
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Sessions Polar Initiées
+                  Polar Sessions Initiated
                 </div>
                 <div className="text-xl font-black text-cyan-300 mt-1 font-mono">
                   {checkcheckReport.kpisGlobaux.sessionsCheckoutPolarInitiees}
@@ -615,33 +640,33 @@ Try it with your project: https://promptshift.dev
                   {checkcheckReport.kpisGlobaux.collisionsPaywall402}
                 </div>
                 <div className="text-[10px] text-slate-500 mt-0.5">
-                  Seuil strict &gt;{checkcheckReport.studioHealth.freeTierMaxFiles} fichiers verrouillé
+                  Strict threshold &gt;{checkcheckReport.studioHealth.freeTierMaxFiles} files locked
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Rails Paiement &amp; Post-Unlock
+                  Payment Rails &amp; Post-Unlock
                 </div>
                 <div className="text-sm font-black text-emerald-400 mt-1.5 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>HTTP 307 + Auto-ZIP</span>
                 </div>
                 <div className="text-[10px] text-slate-500 mt-1">
-                  Bypass RAM fermé · Retour Polar vérifié
+                  In-RAM bypass closed · Polar return verified
                 </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-amber-300">
-                  Acquisition X Autopilot
+                  X Autopilot Acquisition
                 </div>
                 <div className="text-sm font-black text-amber-300 mt-1.5 flex items-center gap-1.5">
                   <AlertTriangle className="w-4 h-4" />
                   <span>X API HTTP 402</span>
                 </div>
                 <div className="text-[10px] text-slate-400 mt-1">
-                  {checkcheckReport.studioHealth.xAutopilotStatus.postsReadyInEnglish} posts EN prêts · Crédits X à activer
+                  {checkcheckReport.studioHealth.xAutopilotStatus.postsReadyInEnglish} US English posts ready · X API credits needed
                 </div>
               </div>
             </div>
@@ -652,9 +677,9 @@ Try it with your project: https://promptshift.dev
               {/* Sub-navigation Tabs */}
               <div className="flex flex-wrap items-center gap-2 bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800">
                 {[
-                  { id: 'catalog16', label: '2. Tableau Maître Commercial (16 Lignes)' },
-                  { id: 'radars5', label: '3. Radar 5 Canaux Agents US' },
-                  { id: 'funnel7', label: '4. Entonnoir 7 Étapes & Fuites' },
+                  { id: 'catalog16', label: '2. Commercial Master Board (16 Lines)' },
+                  { id: 'radars5', label: '3. 5 US Agent Channels Radar' },
+                  { id: 'funnel7', label: '4. 7-Step Funnel & Leaks' },
                   { id: 'health', label: '1. Studio Health Check' },
                 ].map((tab) => (
                   <button
@@ -678,16 +703,16 @@ Try it with your project: https://promptshift.dev
                     <thead>
                       <tr className="border-b border-slate-800 bg-slate-900/90 text-[10px] uppercase tracking-wider text-slate-400">
                         <th className="p-3">#</th>
-                        <th className="p-3">Offre / Rail Catalogue</th>
-                        <th className="p-3">Prix ($ USD)</th>
+                        <th className="p-3">Offer / Catalog Rail</th>
+                        <th className="p-3">Price ($ USD)</th>
                         <th className="p-3 text-right">Probes</th>
-                        <th className="p-3 text-right">Essais</th>
+                        <th className="p-3 text-right">Trials</th>
                         <th className="p-3 text-right">402/Paywall</th>
                         <th className="p-3 text-right">Checkouts</th>
-                        <th className="p-3 text-right">Ventes / CA</th>
-                        <th className="p-3 min-w-[240px]">Diagnostic 0 Vente</th>
+                        <th className="p-3 text-right">Sales / Rev</th>
+                        <th className="p-3 min-w-[240px]">Zero-Sale Diagnostic</th>
                         <th className="p-3 min-w-[300px] text-cyan-300">
-                          Signal &amp; Décision d&apos;Arbitrage Agile
+                          Signal &amp; Agile Arbitrage Decision
                         </th>
                       </tr>
                     </thead>
@@ -735,16 +760,16 @@ Try it with your project: https://promptshift.dev
                     <thead>
                       <tr className="border-b border-slate-800 bg-slate-900/90 text-[10px] uppercase tracking-wider text-slate-400">
                         <th className="p-3">ID</th>
-                        <th className="p-3">Canal Agent US</th>
-                        <th className="p-3">Statut</th>
+                        <th className="p-3">US Agent Channel</th>
+                        <th className="p-3">Status</th>
                         <th className="p-3 text-right">Probes</th>
-                        <th className="p-3 text-right">Outils</th>
+                        <th className="p-3 text-right">Tools</th>
                         <th className="p-3 text-right">402</th>
                         <th className="p-3 text-right">Checkouts</th>
-                        <th className="p-3 text-right">Ventes</th>
-                        <th className="p-3 min-w-[230px]">Diagnostic Friction</th>
+                        <th className="p-3 text-right">Sales</th>
+                        <th className="p-3 min-w-[230px]">Friction Diagnostic</th>
                         <th className="p-3 min-w-[300px] text-cyan-300">
-                          Signal &amp; Décision d&apos;Arbitrage Agile
+                          Signal &amp; Agile Arbitrage Decision
                         </th>
                       </tr>
                     </thead>
@@ -797,14 +822,14 @@ Try it with your project: https://promptshift.dev
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="border-b border-slate-800 bg-slate-900/90 text-[10px] uppercase tracking-wider text-slate-400">
-                        <th className="p-3">Étape</th>
-                        <th className="p-3">Intitulé Entonnoir</th>
-                        <th className="p-3 text-right">Volume Réel</th>
+                        <th className="p-3">Stage</th>
+                        <th className="p-3">Funnel Stage Title</th>
+                        <th className="p-3 text-right">Real Volume</th>
                         <th className="p-3 text-right">Passage</th>
-                        <th className="p-3 min-w-[220px]">Fuite Identifiée</th>
-                        <th className="p-3 min-w-[220px]">Correctif Déployé</th>
+                        <th className="p-3 min-w-[220px]">Identified Leak</th>
+                        <th className="p-3 min-w-[220px]">Deployed Fix</th>
                         <th className="p-3 min-w-[280px] text-cyan-300">
-                          Signal &amp; Décision d&apos;Arbitrage Agile
+                          Signal &amp; Agile Arbitrage Decision
                         </th>
                       </tr>
                     </thead>
@@ -838,34 +863,34 @@ Try it with your project: https://promptshift.dev
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2 text-xs">
                     <div className="font-black text-emerald-300 uppercase tracking-wider text-[11px]">
-                      Intégrité Moteur AST &amp; Monétisation Polar.sh
+                      AST Engine Integrity &amp; Polar.sh Monetization
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Statut Global Studio</span>
+                      <span className="text-slate-400">Overall Studio Status</span>
                       <span className="font-mono font-bold text-emerald-400">
                         {checkcheckReport.studioHealth.overallStatus}
                       </span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Parité Sémantique AST</span>
+                      <span className="text-slate-400">AST Semantic Parity</span>
                       <span className="font-mono text-white">
                         {checkcheckReport.studioHealth.astCompilerParity}
                       </span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Quota Gratuit Strict</span>
+                      <span className="text-slate-400">Strict Free Quota</span>
                       <span className="font-mono text-cyan-300">
-                        {checkcheckReport.studioHealth.freeTierMaxFiles} fichiers max (Zéro bypass RAM)
+                        {checkcheckReport.studioHealth.freeTierMaxFiles} files max (Zero RAM bypass)
                       </span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Liens Permanents Polar (HTTP 307)</span>
+                      <span className="text-slate-400">Permanent Polar Links (HTTP 307)</span>
                       <span className="font-mono text-emerald-400">
                         {checkcheckReport.studioHealth.polarCheckoutLinksVerified307 ? 'VERIFIED LIVE' : 'CHECK'}
                       </span>
                     </div>
                     <div className="flex justify-between py-1">
-                      <span className="text-slate-400">Vérification Retour &amp; Auto-ZIP 4-en-1</span>
+                      <span className="text-slate-400">Return Verification &amp; 4-in-1 Auto-ZIP</span>
                       <span className="font-mono text-emerald-400">
                         {checkcheckReport.studioHealth.postCheckoutAutoUnlockActive ? 'ACTIVE' : 'INACTIVE'}
                       </span>
@@ -874,23 +899,23 @@ Try it with your project: https://promptshift.dev
 
                   <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col gap-2 text-xs">
                     <div className="font-black text-amber-300 uppercase tracking-wider text-[11px]">
-                      Découverte Agentique US &amp; X Autopilot
+                      US Agentic Discovery &amp; X Autopilot
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Cartes MCP &amp; A2A (.well-known)</span>
+                      <span className="text-slate-400">MCP &amp; A2A Cards (.well-known)</span>
                       <span className="font-mono text-emerald-400">
                         {checkcheckReport.studioHealth.mcpAndAgentCardsLive ? 'LIVE + RFC 8288' : 'CHECK'}
                       </span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">File X Autopilot (US English)</span>
+                      <span className="text-slate-400">X Autopilot Queue (US English)</span>
                       <span className="font-mono text-white">
                         {checkcheckReport.studioHealth.xAutopilotStatus.postsReadyInEnglish} posts (
                         {checkcheckReport.studioHealth.xAutopilotStatus.dailyScheduleUtc})
                       </span>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-800/60">
-                      <span className="text-slate-400">Statut Cron GitHub Actions</span>
+                      <span className="text-slate-400">GitHub Actions Cron Status</span>
                       <span className="font-mono text-amber-300">
                         {checkcheckReport.studioHealth.xAutopilotStatus.status}
                       </span>
@@ -905,7 +930,7 @@ Try it with your project: https://promptshift.dev
           )}
         </section>
 
-        {/* Radar d'Acquisition Moteurs IA & Recherches Réelles (GEO / LLMO) */}
+        {/* Inbound AI Search Engines & Real Queries Radar (GEO / LLMO) */}
         <section className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-[#0d1627] to-slate-950 border border-emerald-500/30 shadow-2xl flex flex-col gap-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
@@ -915,18 +940,18 @@ Try it with your project: https://promptshift.dev
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-base font-black text-white">
-                    Télémétrie Moteurs IA &amp; Recherches Réelles (GEO / LLMO)
+                    AI Engines &amp; Real Search Queries Telemetry (GEO / LLMO)
                   </h2>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    100% VÉRITÉ TERRAIN
+                    100% GROUND TRUTH
                   </span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                    Traçabilité Inbound
+                    Inbound Traceability
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Suivi direct des clics et indexations provenant de ChatGPT, Perplexity, Claude, Google Search, X.com et crawlers IA.
+                  Live tracking of clicks and indexing from ChatGPT, Perplexity, Claude, Google Search, X.com, and AI crawlers.
                 </p>
               </div>
             </div>
@@ -938,7 +963,7 @@ Try it with your project: https://promptshift.dev
                   summary.geoSearchInbound.claudeClicks +
                   summary.geoSearchInbound.googleSearchClicks +
                   summary.geoSearchInbound.xSocialClicks}{' '}
-                Clics Moteurs &amp; Réseaux
+                Engine &amp; Social Clicks
               </span>
             </div>
           </div>
@@ -1023,7 +1048,7 @@ Try it with your project: https://promptshift.dev
             {/* 6. Crawlers IA */}
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-purple-500/30 flex flex-col justify-between">
               <div className="flex items-center justify-between text-textMuted mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Indexeurs IA</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">AI Indexers</span>
                 <Activity className="w-3.5 h-3.5 text-purple-400" />
               </div>
               <div className="flex items-baseline gap-1 mt-1">
@@ -1040,10 +1065,10 @@ Try it with your project: https://promptshift.dev
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                Journal des Clics &amp; Intentions de Recherche Réelles (Période : {period})
+                Real Inbound Clicks &amp; Search Intent Log (Period: {period})
               </span>
               <span className="text-[11px] font-mono text-slate-400">
-                {summary.geoSearchInbound.recentReferrals.length} arrivées répertoriées
+                {summary.geoSearchInbound.recentReferrals.length} inbound visits recorded
               </span>
             </div>
 
@@ -1051,19 +1076,19 @@ Try it with your project: https://promptshift.dev
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
                   <tr>
-                    <th className="p-3">Horodatage</th>
-                    <th className="p-3">Moteur Source</th>
-                    <th className="p-3">Page d&apos;Atterrissage</th>
-                    <th className="p-3 min-w-[220px]">Intention Déduite de la Recherche</th>
-                    <th className="p-3 text-center">Pays</th>
-                    <th className="p-3">User-Agent / Contexte</th>
+                    <th className="p-3">Timestamp</th>
+                    <th className="p-3">Source Engine</th>
+                    <th className="p-3">Landing Page</th>
+                    <th className="p-3 min-w-[220px]">Inferred Search Intent</th>
+                    <th className="p-3 text-center">Country</th>
+                    <th className="p-3">User-Agent / Context</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
                   {summary.geoSearchInbound.recentReferrals.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-6 text-center text-textMuted">
-                        Aucun clic entrant enregistré sur cette période ({period}). Dès qu&apos;un utilisateur clique depuis ChatGPT, Perplexity ou Google, le log apparaîtra ici en direct.
+                        No inbound clicks recorded for this period ({period}). When a user clicks from ChatGPT, Perplexity, or Google, the log will appear here live.
                       </td>
                     </tr>
                   ) : (
@@ -1112,7 +1137,7 @@ Try it with your project: https://promptshift.dev
           </div>
         </section>
 
-        {/* Radar d'Acquisition Réseaux Sociaux & Conversion CRO (8 Réseaux) */}
+        {/* Social Media Acquisition & CRO Conversion Radar (8 Networks) */}
         <section className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-[#0e1726] to-slate-950 border border-indigo-500/30 shadow-2xl flex flex-col gap-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
             <div className="flex items-center gap-3">
@@ -1122,18 +1147,18 @@ Try it with your project: https://promptshift.dev
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-base font-black text-white">
-                    Radar d&apos;Acquisition Réseaux Sociaux &amp; Conversion CRO (8 Réseaux)
+                    Social Acquisition Radar &amp; CRO Conversion (8 Networks)
                   </h2>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    TEMPS RÉEL
+                    REAL TIME
                   </span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold">
-                    Attribution Sociale &amp; CRO
+                    Social Attribution &amp; CRO
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Suivi unitaire des sessions, part de trafic, commandes et CA TTC (€ / $) attribués par réseau social.
+                  Unit tracking of sessions, traffic share, orders, and gross revenue ($ / €) attributed per social network.
                 </p>
               </div>
             </div>
@@ -1141,15 +1166,15 @@ Try it with your project: https://promptshift.dev
             {/* Global Social Summary Badges */}
             <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
               <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                <span className="text-slate-400 text-[11px]">Sessions :</span>
+                <span className="text-slate-400 text-[11px]">Sessions:</span>
                 <span className="text-white font-bold">{summary.socialTraffic?.totalSocialSessions ?? 0}</span>
               </div>
               <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                <span className="text-slate-400 text-[11px]">Commandes :</span>
+                <span className="text-slate-400 text-[11px]">Orders:</span>
                 <span className="text-emerald-400 font-bold">{summary.socialTraffic?.totalSocialOrders ?? 0}</span>
               </div>
               <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2">
-                <span className="text-slate-400 text-[11px]">CA TTC :</span>
+                <span className="text-slate-400 text-[11px]">Revenue:</span>
                 <span className="text-cyan-300 font-bold">
                   {(summary.socialTraffic?.totalSocialRevenueEur ?? 0).toFixed(2)} €
                 </span>
@@ -1158,7 +1183,7 @@ Try it with your project: https://promptshift.dev
                 </span>
               </div>
               <div className="px-3 py-1 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-center gap-2">
-                <span className="text-indigo-300 text-[11px]">CRO Global :</span>
+                <span className="text-indigo-300 text-[11px]">Global CRO:</span>
                 <span className="text-indigo-200 font-bold">
                   {(summary.socialTraffic?.overallSocialCroPct ?? 0).toFixed(1)}%
                 </span>
@@ -1264,7 +1289,7 @@ Try it with your project: https://promptshift.dev
                       <div className="text-xl font-black text-white font-mono">{stat.uniqueSessions}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Part Trafic</div>
+                      <div className="text-[10px] uppercase font-bold text-slate-400 font-mono">Traffic Share</div>
                       <div className="text-xl font-black text-indigo-300 font-mono">
                         {stat.trafficSharePct.toFixed(1)}%
                       </div>
@@ -1281,19 +1306,19 @@ Try it with your project: https://promptshift.dev
 
                   <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
                     <div>
-                      <span className="text-slate-500">Cmds : </span>
+                      <span className="text-slate-500">Orders: </span>
                       <span className={`font-bold ${stat.ordersAttributed > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
                         {stat.ordersAttributed}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">CA : </span>
+                      <span className="text-slate-500">Rev: </span>
                       <span className={`font-bold ${stat.revenueAttributedEur > 0 ? 'text-cyan-300' : 'text-slate-400'}`}>
                         {stat.revenueAttributedEur.toFixed(2)} €
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">CRO : </span>
+                      <span className="text-slate-500">CRO: </span>
                       <span className={`font-bold ${stat.croRatePct > 0 ? 'text-emerald-300' : 'text-slate-400'}`}>
                         {stat.croRatePct.toFixed(1)}%
                       </span>
@@ -1308,13 +1333,13 @@ Try it with your project: https://promptshift.dev
           <div className="flex flex-col gap-2 mt-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-                <span>Journal Horodaté des Arrivées Réseaux Sociaux</span>
+                <span>Timestamped Social Arrivals Log</span>
                 <span className="text-[10px] text-slate-400 font-normal">
-                  (Période : {period})
+                  (Period: {period})
                 </span>
               </span>
               <span className="text-[11px] font-mono text-slate-400">
-                {(summary.socialTraffic?.recentLogs ?? []).length} arrivées répertoriées
+                {(summary.socialTraffic?.recentLogs ?? []).length} arrivals recorded
               </span>
             </div>
 
@@ -1322,22 +1347,22 @@ Try it with your project: https://promptshift.dev
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
                   <tr>
-                    <th className="p-3">Date &amp; Heure</th>
-                    <th className="p-3">Réseau d&apos;Origine</th>
-                    <th className="p-3">Page Atterrissage Cible</th>
-                    <th className="p-3">Campagne / Post Spécifique</th>
-                    <th className="p-3 text-center">Type d&apos;Appareil</th>
-                    <th className="p-3">Action Client Déclenchée</th>
+                    <th className="p-3">Date &amp; Time</th>
+                    <th className="p-3">Origin Network</th>
+                    <th className="p-3">Target Landing Page</th>
+                    <th className="p-3">Specific Campaign / Post</th>
+                    <th className="p-3 text-center">Device Type</th>
+                    <th className="p-3">Customer Action Triggered</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
                   {(summary.socialTraffic?.recentLogs ?? []).length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-6 text-center text-textMuted">
-                        Aucun visiteur en provenance des 8 réseaux sociaux sur cette période ({period}).
+                        No visitors from the 8 social networks recorded for this period ({period}).
                         <br />
                         <span className="text-[10px] text-slate-500 mt-1 inline-block">
-                          Dès qu&apos;un internaute clique sur un lien de post ou de bio (X, Insta, TikTok, LinkedIn, YouTube, Facebook, Threads, Pinterest), la ligne s&apos;affiche ici en temps réel.
+                          As soon as a user clicks a post or bio link (X, Insta, TikTok, LinkedIn, YouTube, Facebook, Threads, Pinterest), the row appears here in real time.
                         </span>
                       </td>
                     </tr>
@@ -1408,7 +1433,7 @@ Try it with your project: https://promptshift.dev
                           <td className="p-3">
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 ${
-                                entry.actionTriggered === 'Achat validé'
+                                entry.actionTriggered.includes('Payment Completed') || entry.actionTriggered === 'Achat validé'
                                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                                   : entry.actionTriggered === 'Passage en caisse'
                                   ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
@@ -1441,9 +1466,9 @@ Try it with your project: https://promptshift.dev
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-sm font-bold text-white">Filtre Télémétrie Multidimensionnel</h2>
+                  <h2 className="text-sm font-bold text-white">Multidimensional Telemetry Filter</h2>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
-                    {filteredEvents.length} / {periodTotalEvents.length} événements
+                    {filteredEvents.length} / {periodTotalEvents.length} events
                   </span>
                   {activeFiltersCount > 0 && (
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
@@ -1607,7 +1632,7 @@ Try it with your project: https://promptshift.dev
               <div className="flex flex-col justify-end">
                 <div className="p-2 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
                   <span className="font-mono text-[11px]">
-                    Sélection : <strong className="text-cyan-400">{filteredEvents.length}</strong> evts
+                    Selection: <strong className="text-cyan-400">{filteredEvents.length}</strong> evts
                   </span>
                   {activeFiltersCount > 0 ? (
                     <button
@@ -1701,11 +1726,11 @@ Try it with your project: https://promptshift.dev
                   {summary.totalConversions > 0 ? `${summary.averageParityScore}%` : '100%'}
                 </span>
                 <span className="text-[10px] text-cyan-300 font-bold">
-                  {summary.totalConversions > 0 ? 'vérifié' : 'prêt'}
+                  {summary.totalConversions > 0 ? 'verified' : 'ready'}
                 </span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                {summary.totalConversions > 0 ? 'Zero structural hallucination' : 'Moteur déterministe en veille'}
+                {summary.totalConversions > 0 ? 'Zero structural hallucination' : 'Deterministic engine standing by'}
               </p>
             </div>
 
@@ -1739,18 +1764,18 @@ Try it with your project: https://promptshift.dev
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-black text-white">Matrice d'Arbitrage Décisionnel Agile</h2>
+                  <h2 className="text-base font-black text-white">Strategic Agile Arbitrage Matrix</h2>
                   <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Sprint Decision Matrix
                   </span>
                 </div>
                 <p className="text-xs text-textMuted mt-0.5">
-                  Analyse des signaux réels, arbitrage des dilemmes A vs B et déclenchement d'actions agiles concrètes.
+                  Real signal analysis, A vs B trade-off arbitrage, and execution of agile action steps.
                 </p>
               </div>
             </div>
             <span className="text-xs font-mono text-cyan-400 self-start md:self-auto">
-              5 Axes Stratégiques Calibrés
+              5 Calibrated Strategic Pillars
             </span>
           </div>
 
@@ -1759,7 +1784,7 @@ Try it with your project: https://promptshift.dev
               <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
                 <tr>
                   <th className="py-3 px-4 w-[16%]">Axe / Pilier</th>
-                  <th className="py-3 px-4 w-[14%]">Métrique Observée</th>
+                  <th className="py-3 px-4 w-[14%]">Observed Metric</th>
                   <th className="py-3 px-4 w-[20%]">Signal & Diagnostic</th>
                   <th className="py-3 px-4 w-[22%]">Dilemme (Option A vs B)</th>
                   <th className="py-3 px-4 w-[20%]">Arbitrage Agile & Action</th>
@@ -1825,13 +1850,13 @@ Try it with your project: https://promptshift.dev
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-bold text-white">Télémétrie Edge Infrastructure (Cloudflare Anycast + Vercel Analytics)</h2>
+                  <h2 className="text-base font-bold text-white">Edge Infrastructure Telemetry (Cloudflare Anycast + Vercel Analytics)</h2>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
                     100% GRATUIT & SOUVERAIN
                   </span>
                 </div>
                 <p className="text-xs text-textMuted mt-0.5">
-                  Surveillance des performances CDN, économie de bande passante et bots IA autorisés
+                  CDN performance monitoring, bandwidth savings, and authorized AI crawlers
                 </p>
               </div>
             </div>
@@ -1883,7 +1908,7 @@ Try it with your project: https://promptshift.dev
                 <span className="text-[10px] text-textMuted font-mono">in-RAM</span>
               </div>
               <p className="text-[10px] text-textMuted mt-1">
-                {summary.edgeStats.vercelServerlessInvocations} exécutions • 0$ de dépassement
+                {summary.edgeStats.vercelServerlessInvocations} invocations • $0 overage
               </p>
             </div>
 
@@ -2205,7 +2230,7 @@ Try it with your project: https://promptshift.dev
               </p>
             </div>
             <span className="text-xs font-mono text-cyan-400">
-              {conversionEventsFiltered.length} conversion{conversionEventsFiltered.length > 1 ? 's' : ''} filtrée{conversionEventsFiltered.length > 1 ? 's' : ''}
+              {conversionEventsFiltered.length} filtered conversion{conversionEventsFiltered.length > 1 ? 's' : ''}
             </span>
           </div>
 
@@ -2227,7 +2252,7 @@ Try it with your project: https://promptshift.dev
                 {conversionEventsFiltered.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-6 text-center text-textMuted">
-                      Aucune conversion ne correspond aux critères de filtrage actifs ({period}).
+                      No conversions match the active filter criteria ({period}).
                     </td>
                   </tr>
                 ) : (
@@ -2290,11 +2315,11 @@ Try it with your project: https://promptshift.dev
                 <h2 className="text-sm font-extrabold text-white flex items-center gap-2">
                   Google Search Console & Indexation Autonome (API)
                   <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
-                    Propriété Déployée
+                    Property Deployed
                   </span>
                 </h2>
                 <p className="text-xs text-textMuted mt-0.5">
-                  Vérification de propriété HTML, soumission automatisée de sitemaps et requêtes d'indexation instantanée Google.
+                  HTML property verification, automated sitemap submission, and instant Google indexing requests.
                 </p>
               </div>
             </div>
@@ -2325,14 +2350,14 @@ Try it with your project: https://promptshift.dev
                 /google195fa2438b836f4f.html
               </div>
               <div className="text-[10px] text-textMuted">
-                Fichier de validation officiel à la racine de promptshift.dev.
+                Official verification file at the root of promptshift.dev.
               </div>
             </div>
 
             {/* Vector 2: Sitemap prefix */}
             <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col justify-between gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-slate-400">Vecteur 2 : Préfixe Sitemap</span>
+                <span className="text-[10px] font-mono text-slate-400">Vector 2: Sitemap Prefix</span>
                 <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5" /> En ligne
                 </span>
@@ -2341,7 +2366,7 @@ Try it with your project: https://promptshift.dev
                 /sitemap.xml/google...html
               </div>
               <div className="text-[10px] text-textMuted">
-                Couvre l'URL-préfixe de validation si configuré sous ce chemin.
+                Covers URL-prefix verification if configured under this path.
               </div>
             </div>
 
@@ -2357,19 +2382,19 @@ Try it with your project: https://promptshift.dev
                 &lt;meta google-site-verification&gt;
               </div>
               <div className="text-[10px] text-textMuted">
-                Présente dans le code HTML statique servi par Vercel Edge.
+                Present in the static HTML code served by Vercel Edge.
               </div>
             </div>
           </div>
 
-          {/* GSC Performance Baseline (Données Export CSV 08/11/2026) */}
+          {/* GSC Performance Baseline (CSV Export Data 2026-11-08) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
               <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Clics Organiques GSC</span>
               <div className="text-xl font-black text-white font-mono mt-1">
                 {seoStatus?.gscReport?.summary?.totalClicks ?? 0}
               </div>
-              <span className="text-[10px] text-slate-500 mt-1">Données réelles GSC (J+2)</span>
+              <span className="text-[10px] text-slate-500 mt-1">Real GSC Data (D+2)</span>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
@@ -2392,23 +2417,23 @@ Try it with your project: https://promptshift.dev
               <span className="text-[10px] uppercase font-bold text-emerald-400 font-mono">Statut Indexation</span>
               <div className="text-xs font-bold text-emerald-300 font-mono mt-1 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Propriété Validée J+2</span>
+                <span>Property Validated (D+2)</span>
               </div>
               <span className="text-[10px] text-slate-400 mt-1">Googlebot actif sur sitemap</span>
             </div>
           </div>
 
-          {/* Matrice des Mots-Clés Cibles ChatSEO (Playbook Antigravity - Section 3) */}
+          {/* ChatSEO Target Keywords Matrix (Antigravity Playbook - Section 3) */}
           <div className="flex flex-col gap-3">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-cyan-400" />
                 <h3 className="text-xs font-extrabold uppercase tracking-wider text-white font-mono">
-                  Matrice des Mots-Clés Cibles ChatSEO (Top 10 Requêtes Commerciales Prioritaires)
+                  ChatSEO Target Keywords Matrix (Top 10 Priority Commercial Queries)
                 </h3>
               </div>
               <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/50 px-2 py-0.5 rounded-md border border-cyan-500/30 font-bold">
-                Playbook Antigravity : Accélération Commerciale
+                Antigravity Playbook: Commercial Acceleration
               </span>
             </div>
 
@@ -2416,118 +2441,17 @@ Try it with your project: https://promptshift.dev
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-900/90 text-textMuted uppercase font-mono text-[10px] border-b border-slate-800">
                   <tr>
-                    <th className="p-3">Requête Cible</th>
-                    <th className="p-3">Intention</th>
-                    <th className="p-3 text-center">Pos. Visée</th>
-                    <th className="p-3">Page d&apos;Atterrissage</th>
-                    <th className="p-3 text-center">Volume Est.</th>
-                    <th className="p-3">Statut Télémétrie / SEO</th>
-                    <th className="p-3">Action Recommandée</th>
+                    <th className="p-3">Target Query</th>
+                    <th className="p-3">Intent</th>
+                    <th className="p-3 text-center">Target Pos.</th>
+                    <th className="p-3">Landing Page</th>
+                    <th className="p-3 text-center">Est. Volume</th>
+                    <th className="p-3">Telemetry / SEO Status</th>
+                    <th className="p-3">Recommended Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                  {((seoStatus?.gscReport?.chatSeoMatrix as any[]) || [
-                    {
-                      id: 'kw-1',
-                      keyword: 'cursor to claude rules converter',
-                      searchIntent: 'Transactionnelle',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/cursor-to-claude',
-                      monthlySearchVolumeEst: 2400,
-                      status: 'IndexNow Pingé',
-                      actionRecommended: 'Paire #1 la plus demandée. Maintenir le maillage interne et citer promptshift.dev sur X/Reddit.',
-                    },
-                    {
-                      id: 'kw-2',
-                      keyword: 'convert .cursorrules to CLAUDE.md',
-                      searchIntent: 'Transactionnelle',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/cursor-to-claude',
-                      monthlySearchVolumeEst: 1900,
-                      status: 'Schéma Déployé',
-                      actionRecommended: 'Requête à très haute intention technique. Couverte par balise SoftwareApplication et FAQ Schema.',
-                    },
-                    {
-                      id: 'kw-3',
-                      keyword: 'gemini to cursor rules converter',
-                      searchIntent: 'Commerciale',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/gemini-to-cursor',
-                      monthlySearchVolumeEst: 1100,
-                      status: 'llms.txt En Ligne',
-                      actionRecommended: 'Indexée dans llms-full.txt et citée pour l’écosystème Google Antigravity & Gemini CLI.',
-                    },
-                    {
-                      id: 'kw-4',
-                      keyword: 'cursor rules library',
-                      searchIntent: 'Informationnelle',
-                      targetPosition: '#2',
-                      targetUrl: '/rules-library',
-                      monthlySearchVolumeEst: 3600,
-                      status: 'Schéma Déployé',
-                      actionRecommended: 'Pousser le pack 50+ règles d’or en Order Bump et backlinks vers /rules-library.',
-                    },
-                    {
-                      id: 'kw-5',
-                      keyword: 'claude code to copilot instructions',
-                      searchIntent: 'Commerciale',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/claude-to-copilot',
-                      monthlySearchVolumeEst: 850,
-                      status: 'IndexNow Pingé',
-                      actionRecommended: 'Capture les équipes d’entreprises passant de Claude 3.7 à GitHub Copilot Enterprise.',
-                    },
-                    {
-                      id: 'kw-6',
-                      keyword: 'windsurf to cursor rules converter',
-                      searchIntent: 'Commerciale',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/windsurf-to-cursor',
-                      monthlySearchVolumeEst: 920,
-                      status: 'IndexNow Pingé',
-                      actionRecommended: 'Migrateurs de Cascade Windsurf vers Cursor. Fiche pSEO dédiée prête avec CLI sync.',
-                    },
-                    {
-                      id: 'kw-7',
-                      keyword: 'ai coding rules converter',
-                      searchIntent: 'Commerciale',
-                      targetPosition: '#1-3',
-                      targetUrl: '/',
-                      monthlySearchVolumeEst: 4200,
-                      status: 'Schéma Déployé',
-                      actionRecommended: 'Terme générique majeur. Page d’accueil optimisée pour RankBrain et Answer Engine Optimization.',
-                    },
-                    {
-                      id: 'kw-8',
-                      keyword: 'promptshift dev',
-                      searchIntent: 'Navigationnelle',
-                      targetPosition: '#1',
-                      targetUrl: '/',
-                      monthlySearchVolumeEst: 650,
-                      status: 'llms.txt En Ligne',
-                      actionRecommended: 'Marque officielle. Entity graph SameAs relié à GitHub, Glama MCP et npm.',
-                    },
-                    {
-                      id: 'kw-9',
-                      keyword: 'convert copilot-instructions.md to cursorrules',
-                      searchIntent: 'Transactionnelle',
-                      targetPosition: '#1',
-                      targetUrl: '/convert/copilot-to-cursor',
-                      monthlySearchVolumeEst: 1350,
-                      status: 'IndexNow Pingé',
-                      actionRecommended: 'Conversion réciproque inverse validée dans le moteur AST sans perte de négations.',
-                    },
-                    {
-                      id: 'kw-10',
-                      keyword: 'mcp server rules converter promptshift',
-                      searchIntent: 'Transactionnelle',
-                      targetPosition: '#1',
-                      targetUrl: '/cli',
-                      monthlySearchVolumeEst: 750,
-                      status: 'llms.txt En Ligne',
-                      actionRecommended: 'Cible les devs intégrant PromptShift en STDIO / SSE dans Cursor ou Claude Code.',
-                    },
-                  ]).map((item: any) => (
+                  {((seoStatus?.gscReport?.chatSeoMatrix as any[]) || CHAT_SEO_TARGET_MATRIX).map((item: any) => (
                     <tr key={item.id} className="hover:bg-slate-900/40 transition-colors">
                       <td className="p-3 text-white font-bold font-sans">{item.keyword}</td>
                       <td className="p-3">
@@ -2571,7 +2495,7 @@ Try it with your project: https://promptshift.dev
                 disabled={seoLoading}
                 className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono text-xs font-semibold border border-slate-700 transition-colors cursor-pointer disabled:opacity-50"
               >
-                {seoLoading ? 'Vérification...' : '🔍 Tester Connexion API Search Console'}
+                {seoLoading ? 'Testing...' : '🔍 Test Search Console API Connection'}
               </button>
 
               <button

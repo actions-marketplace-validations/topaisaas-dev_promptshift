@@ -19,7 +19,7 @@ export interface CheckCheckCatalogRow {
   ligne: number;
   id_rail: string;
   offre_ou_rail: string;
-  categorie: 'Offre Commerciale Polar' | 'Rail Agentique & CLI' | 'Pont SEO Programmatique';
+  categorie: 'Polar Commercial Offer' | 'Agentic & CLI Rail' | 'Programmatic SEO Bridge' | 'Offre Commerciale Polar' | 'Rail Agentique & CLI' | 'Pont SEO Programmatique';
   url_cible: string;
   prix_usd: string;
   statut_rail: 'VERROUILLE_ACTIF' | 'OPTIMISE_LIVE' | 'PRIORITE_SCALE' | 'MAINTIEN_ORGANIQUE';
@@ -108,84 +108,84 @@ const ORDERED_12_PAIRS: {
     code: 'PS-05-CUR-CLA',
     tierPriority: 'TIER_1_HERO',
     arbitrage:
-      'SIGNAL FORT (Pont #1 du marché US) -> Concentrer 40% des backlinks (awesome-cursorrules, r/Cursor, r/ClaudeAI) et des threads X sur ".cursorrules/.mdc -> CLAUDE.md". CTA direct branché sur #dropzone + Express Checkout $1.99.',
+      'STRONG SIGNAL (#1 Bridge in US Market) -> Focus 40% of backlinks (awesome-cursorrules, r/Cursor, r/ClaudeAI) and X threads on ".cursorrules/.mdc -> CLAUDE.md". Direct CTA routed to #dropzone + $1.99 Express Checkout.',
   },
   {
     slug: 'claude-to-cursor',
     code: 'PS-06-CLA-CUR',
     tierPriority: 'TIER_1_HERO',
     arbitrage:
-      'SIGNAL FORT (Pont #2 bi-IDE) -> Mettre en avant la génération simultanée .cursor/rules/*.mdc + .windsurfrules en 1 clic ($1.99 Suite 4-en-1) pour capter les devs Claude Code basculant sur Cursor/Windsurf.',
+      'STRONG SIGNAL (#2 Bi-IDE Bridge) -> Highlight 1-click simultaneous generation of .cursor/rules/*.mdc + .windsurfrules ($1.99 4-in-1 Suite) to capture Claude Code devs switching to Cursor/Windsurf.',
   },
   {
     slug: 'antigravity-to-claude',
     code: 'PS-07-AGY-CLA',
     tierPriority: 'TIER_1_HERO',
     arbitrage:
-      'SIGNAL DIFFÉRENCIANT (Océan Bleu) -> Zéro concurrent sur la compilation AGENTS.md / GEMINI.md vers <autonomy_policy> Claude XML. Pousser ce pont dans les communautés Google Antigravity & Claude Code.',
+      'DIFFERENTIATING SIGNAL (Blue Ocean) -> Zero competitors compiling AGENTS.md / GEMINI.md to Claude <autonomy_policy> XML. Promote this bridge in Google Antigravity & Claude Code communities.',
   },
   {
     slug: 'antigravity-to-cursor',
     code: 'PS-08-AGY-CUR',
     tierPriority: 'TIER_1_HERO',
     arbitrage:
-      'SIGNAL DIFFÉRENCIANT (Océan Bleu) -> Valoriser le découpage automatique de .agents/rules/*.md en règles .cursor/rules/*.mdc (>2 fichiers = déclenchement naturel du Pass $1.99).',
+      'DIFFERENTIATING SIGNAL (Blue Ocean) -> Promote automatic splitting of .agents/rules/*.md into .cursor/rules/*.mdc rules (>2 files = natural trigger for $1.99 Single Pass).',
   },
   {
     slug: 'gemini-to-claude',
     code: 'PS-09-GEM-CLA',
     tierPriority: 'TIER_2_GROWTH',
     arbitrage:
-      'ARBITRAGE CROISSANCE -> Capter les équipes migrant leurs instructions Gemini AI Studio vers Claude Code CLI avec pré-configuration automatique de .claude/mcp.json et masquage des clés AIza*.',
+      'GROWTH ARBITRAGE -> Capture teams migrating Gemini AI Studio instructions to Claude Code CLI with automatic .claude/mcp.json pre-configuration and AIza* key sanitization.',
   },
   {
     slug: 'gemini-to-cursor',
     code: 'PS-10-GEM-CUR',
     tierPriority: 'TIER_2_GROWTH',
     arbitrage:
-      'ARBITRAGE CROISSANCE -> Indexer via IndexNow (Bing/ChatGPT) et lier vers le Dropzone pré-paramétré (?source=gemini&target=cursor#dropzone) pour déclencher le test immédiat en RAM.',
+      'GROWTH ARBITRAGE -> Index via IndexNow (Bing/ChatGPT) and link to pre-configured Dropzone (?source=gemini&target=cursor#dropzone) to trigger immediate in-RAM testing.',
   },
   {
     slug: 'cursor-to-gemini',
     code: 'PS-11-CUR-GEM',
     tierPriority: 'TIER_2_GROWTH',
     arbitrage:
-      'ARBITRAGE CROISSANCE -> Capter l’adoption montante de Google Antigravity 2.0 chez les utilisateurs Cursor multi-règles (.mdc > 2 fichiers -> conversion directe en Pass $1.99).',
+      'GROWTH ARBITRAGE -> Capture rising Google Antigravity 2.0 adoption among multi-rule Cursor users (.mdc > 2 files -> direct $1.99 Single Pass conversion).',
   },
   {
     slug: 'claude-to-antigravity',
     code: 'PS-12-CLA-AGY',
     tierPriority: 'TIER_2_GROWTH',
     arbitrage:
-      'ARBITRAGE CROISSANCE -> Servir de passerelle sans friction entre Claude Code et Antigravity IDE (génération conjointe GEMINI.md + AGENTS.md). Maintenir à coût serveur $0.00.',
+      'GROWTH ARBITRAGE -> Serve as frictionless bridge between Claude Code and Antigravity IDE (joint GEMINI.md + AGENTS.md generation). Maintain at $0.00 server cost.',
   },
   {
     slug: 'openai-to-claude',
     code: 'PS-13-OAI-CLA',
     tierPriority: 'TIER_2_GROWTH',
     arbitrage:
-      'ARBITRAGE B2B -> Capter les créateurs de Custom GPTs / Assistants v2 migrant vers Claude Projects XML ; le bouclier anti-fuite sk-proj-* justifie immédiatement l’achat impulsif à $1.99.',
+      'B2B ARBITRAGE -> Capture Custom GPTs / Assistants v2 creators migrating to Claude Projects XML; the sk-proj-* secret shield immediately justifies the $1.99 impulse purchase.',
   },
   {
     slug: 'openai-to-cursor',
     code: 'PS-14-OAI-CUR',
     tierPriority: 'TIER_3_LONGTAIL',
     arbitrage:
-      'MAINTIEN LONGUE TRAÎNE ($0 Coût) -> Garder la page statique SSG en cache Cloudflare Edge (s-maxage=3600) avec cartes tarifaires désormais cliquables vers Polar Express Checkout.',
+      'LONG-TAIL RETENTION ($0 Cost) -> Keep static SSG page cached on Cloudflare Edge (s-maxage=3600) with pricing cards directly wired to Polar Express Checkout.',
   },
   {
     slug: 'cursor-to-openai',
     code: 'PS-15-CUR-OAI',
     tierPriority: 'TIER_3_LONGTAIL',
     arbitrage:
-      'MAINTIEN LONGUE TRAÎNE ($0 Coût) -> Conserver comme produit inclus dans le "Universal 4-in-1 Suite ($1.99)" plutôt que de dépenser du budget d’acquisition dédié.',
+      'LONG-TAIL RETENTION ($0 Cost) -> Maintain as included format within the "Universal 4-in-1 Suite ($1.99)" rather than spending dedicated acquisition budget.',
   },
   {
     slug: 'claude-to-openai',
     code: 'PS-16-CLA-OAI',
     tierPriority: 'TIER_3_LONGTAIL',
     arbitrage:
-      'MAINTIEN LONGUE TRAÎNE ($0 Coût) -> Acquisition SEO passive 100% gratuite ; rediriger l’utilisateur vers le bundle 4-en-1 ($1.99) pour synchroniser tous ses assistants d’un coup.',
+      'LONG-TAIL RETENTION ($0 Cost) -> 100% free passive SEO acquisition; route user to the 4-in-1 bundle ($1.99) to sync all assistants at once.',
   },
 ];
 
@@ -254,7 +254,7 @@ export class CheckCheckService {
         ligne: 1,
         id_rail: 'PS-01-SINGLE',
         offre_ou_rail: 'Single Migration Pass — Universal 4-in-1 Suite',
-        categorie: 'Offre Commerciale Polar',
+        categorie: 'Polar Commercial Offer',
         url_cible: PolarService.getPermanentCheckoutLink('single'),
         prix_usd: '$1.99 (One-Time)',
         statut_rail: 'PRIORITE_SCALE',
@@ -265,15 +265,15 @@ export class CheckCheckService {
         ventes_confirmees: singleSales,
         ca_net_usd: `$${polar.byPlan.single.grossRevenueUsd.toFixed(2)}`,
         diagnostic_zero_vente:
-          `${singleCheckouts} sessions Polar ouvertes mais 0 vente payée : (1) ancien bouton "Unlock All" dans Dropzone débloquait >2 fichiers gratuitement sans passer par Polar, (2) email obligatoire bloquait la modale avant Apple/Google Pay, (3) ?checkout=success ne restaurait pas le ZIP au retour.`,
+          `${singleCheckouts} Polar sessions initiated but 0 paid sales: (1) legacy "Unlock All" button in Dropzone unblocked >2 files locally for free without Polar, (2) mandatory email input blocked checkout before Apple/Google Pay, (3) ?checkout=success failed to restore ZIP on return.`,
         signal_et_decision_arbitrage:
-          'PRODUIT HÉROS D’IMPULSION (#1 LEVIER DE CA IMMÉDIAT) -> Bypass gratuit fermé, email rendu optionnel (1-Click Apple Pay / Google Pay), sauvegarde sessionStorage + auto-téléchargement du ZIP 4-en-1 (Cursor+Claude+OpenAI+Gemini) dès le retour Polar.',
+          'HERO IMPULSE PRODUCT (#1 IMMEDIATE REVENUE LEVER) -> Free bypass closed, email made optional (1-Click Apple Pay / Google Pay), sessionStorage backup + auto-download of 4-in-1 ZIP (Cursor+Claude+OpenAI+Gemini) upon Polar return.',
       },
       {
         ligne: 2,
         id_rail: 'PS-02-PRO',
         offre_ou_rail: 'Pro Developer Pass — Unlimited Repos + CLI & MCP Key',
-        categorie: 'Offre Commerciale Polar',
+        categorie: 'Polar Commercial Offer',
         url_cible: PolarService.getPermanentCheckoutLink('pro'),
         prix_usd: '$5.99/mo',
         statut_rail: 'OPTIMISE_LIVE',
@@ -284,15 +284,15 @@ export class CheckCheckService {
         ventes_confirmees: proSales,
         ca_net_usd: `$${polar.byPlan.pro.grossRevenueUsd.toFixed(2)}`,
         diagnostic_zero_vente:
-          `${proCheckouts} sessions Polar ouvertes, 0 abonné : l’onglet "Pro Developer" du Dropzone activait le mode Pro gratuit en 1 clic et le CLI/MCP acceptait n’importe quelle chaîne comme clé tout en renvoyant une URL Polar 404.`,
+          `${proCheckouts} Polar sessions initiated, 0 subscribers: "Pro Developer" tab in Dropzone activated free Pro mode in 1 click and CLI/MCP accepted any string as key while printing a 404 Polar URL.`,
         signal_et_decision_arbitrage:
-          'LEVIER MRR RÉCURRENT -> Onglet Pro du Dropzone verrouillé sur Polar Checkout, validation stricte du format de clé (UUID Polar / polar_*) sur CLI & MCP, et positionnement en upsell naturel après un 1er achat Single Pass ($1.99).',
+          'RECURRING MRR LEVER -> Dropzone Pro tab locked to Polar Checkout, strict key format validation (Polar UUID / polar_*) on CLI & MCP, and natural upsell positioning after initial $1.99 Single Pass purchase.',
       },
       {
         ligne: 3,
         id_rail: 'PS-03-TEAM',
         offre_ou_rail: 'Team & Agency Pass — 5 Seats + GitHub CI/CD Guard + DPA',
-        categorie: 'Offre Commerciale Polar',
+        categorie: 'Polar Commercial Offer',
         url_cible: PolarService.getPermanentCheckoutLink('team'),
         prix_usd: '$19.99/mo',
         statut_rail: 'OPTIMISE_LIVE',
@@ -303,15 +303,15 @@ export class CheckCheckService {
         ventes_confirmees: teamSales,
         ca_net_usd: `$${polar.byPlan.team.grossRevenueUsd.toFixed(2)}`,
         diagnostic_zero_vente:
-          `${teamCheckouts} sessions Polar ouvertes, 0 vente : l’offre Team ($19.99/mo) n’apparaissait même pas dans la grille Pricing de la page d’accueil (qui n’affichait que 3 colonnes : $0 / $1.99 / $5.99) !`,
+          `${teamCheckouts} Polar sessions initiated, 0 sales: Team tier ($19.99/mo) was missing entirely from homepage Pricing grid (which only showed 3 columns: $0 / $1.99 / $5.99)!`,
         signal_et_decision_arbitrage:
-          'ANCRAGE PRIX & B2B -> 4e colonne "Team & Agency ($19.99/mo)" ajoutée sur la Landing Page : crée un effet d’ancrage psychologique qui rend le Pass $1.99 ultra-accessible tout en monétisant les équipes GitHub Actions CI/CD.',
+          'PRICE ANCHORING & B2B -> 4th "Team & Agency ($19.99/mo)" column added to Landing Page: creates psychological price anchoring making the $1.99 pass ultra-accessible while monetizing GitHub Actions CI/CD engineering teams.',
       },
       {
         ligne: 4,
         id_rail: 'PS-04-AGENT402',
         offre_ou_rail: 'Autonomous Agent & CLI Rail (npx promptshift + /api/mcp + HTTP 402)',
-        categorie: 'Rail Agentique & CLI',
+        categorie: 'Agentic & CLI Rail',
         url_cible: 'https://promptshift.dev/api/mcp',
         prix_usd: '$0.00 (≤2f) -> $1.99 / $5.99',
         statut_rail: 'VERROUILLE_ACTIF',
@@ -323,9 +323,9 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_zero_vente:
-          'CRITIQUE RÉSOLU : /api/mcp, /api/convert (HTTP 402) et packages/cli/bin/promptshift.js renvoyaient tous "https://polar.sh/checkout/<product_id>" qui retournait HTTP 404 Not Found ! Aucun agent ni dev CLI ne pouvait payer.',
+          'CRITICAL RESOLVED: /api/mcp, /api/convert (HTTP 402) and packages/cli/bin/promptshift.js were printing "https://polar.sh/checkout/<product_id>" which returned HTTP 404 Not Found! No agent or CLI dev could pay.',
         signal_et_decision_arbitrage:
-          'DÉBLOCAGE IMMÉDIAT DU RAIL MACHINE -> Remplacement intégral des URLs 404 par les liens vérifiés buy.polar.sh (HTTP 307) + /api/checkout/express?channel=mcp|cli et publication sur Smithery.ai / Glama.ai via /.well-known/mcp/server-card.json.',
+          'IMMEDIATE MACHINE RAIL UNLOCK -> Fully replaced 404 URLs with verified buy.polar.sh (HTTP 307) links + /api/checkout/express?channel=mcp|cli and published on Smithery.ai / Glama.ai via /.well-known/mcp/server-card.json.',
       },
     ];
 
@@ -345,7 +345,7 @@ export class CheckCheckService {
         ligne: 5 + idx,
         id_rail: item.code,
         offre_ou_rail: `${pairData?.sourceName || item.slug} -> ${pairData?.targetName || ''} (/convert/${item.slug})`,
-        categorie: 'Pont SEO Programmatique',
+        categorie: 'Programmatic SEO Bridge',
         url_cible: `https://promptshift.dev/convert/${item.slug}`,
         prix_usd: '$0.00 (≤2f) / $1.99 (>2f)',
         statut_rail:
@@ -361,7 +361,7 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_zero_vente:
-          'Les 3 cartes de prix ($0 / $1.99 / $5.99) en bas de /convert/[pair] étaient des <div> non cliquables, et le bouton CTA pointait vers /?source=...&target=... mais app/page.tsx ignorait ces paramètres URL et cachait le Dropzone !',
+          'The 3 pricing cards ($0 / $1.99 / $5.99) at the bottom of /convert/[pair] were non-clickable <div> elements, and CTA button pointed to /?source=...&target=... but app/page.tsx ignored URL params and hid the Dropzone!',
         signal_et_decision_arbitrage: item.arbitrage,
       });
     });
@@ -384,14 +384,14 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_friction:
-          '1) Lien Polar 404 dans PAYMENT_REQUIRED_402 sur /api/mcp (corrigé -> buy.polar.sh 307). 2) Absence de /.well-known/mcp/server-card.json standard 2026 (créé). 3) Outil promptshift_validate_ast déclaré dans mcp-schema mais absent de /api/mcp (aligné 3/3 outils).',
+          '1) Broken Polar 404 link in PAYMENT_REQUIRED_402 on /api/mcp (fixed -> buy.polar.sh 307). 2) Missing standard 2026 /.well-known/mcp/server-card.json (created). 3) promptshift_validate_ast declared in mcp-schema but missing in /api/mcp (aligned 3/3 tools).',
         signal_et_decision_arbitrage:
-          'DÉCISION AGILE #1 -> Soumettre immédiatement https://promptshift.dev/.well-known/mcp/server-card.json sur Smithery.ai, Glama.ai et Official MCP Registry : chaque repo US >2 règles appelé via Claude/Cursor déclenche un checkout 402 fonctionnel à $1.99.',
+          'AGILE DECISION #1 -> Immediately submit https://promptshift.dev/.well-known/mcp/server-card.json to Smithery.ai, Glama.ai, and Official MCP Registry: every US repo >2 rules called via Claude/Cursor triggers a functional $1.99 402 checkout.',
       },
       {
         id_radar: 'RADAR-02-LLMO',
         canal_agent_us:
-          'Crawlers IA Génératifs & A2A Discovery (ChatGPT Search, Perplexity, ClaudeBot, Google AI)',
+          'Generative AI Crawlers & A2A Discovery (ChatGPT Search, Perplexity, ClaudeBot, Google AI)',
         surfaces_techniques:
           '/llms.txt • /llms-full.txt • /api/llms/schema • /.well-known/agent.json • /api/openapi.json • Header HTTP Link RFC 8288',
         statut: 'CORRIGE_307_OK',
@@ -402,14 +402,14 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_friction:
-          '1) llms-full.txt annonçait encore "Free Pro Pass Available (Public Beta)" aux LLMs US ! 2) /api/llms/schema indiquait file_limit: 5 au lieu de 2. 3) Les 3 liens d’achat dans llms.txt étaient en 404. 4) Aucun header HTTP Link rel="llms-txt". Tout est corrigé.',
+          '1) llms-full.txt was advertising "Free Pro Pass Available (Public Beta)" to US LLMs! 2) /api/llms/schema indicated file_limit: 5 instead of 2. 3) The 3 purchase links in llms.txt were 404. 4) Missing RFC 8288 HTTP Link rel="llms-txt" header. All resolved.',
         signal_et_decision_arbitrage:
-          'DÉCISION AGILE #2 -> Avec le header Link RFC 8288 actif sur chaque réponse Edge + /.well-known/agent.json + tarifs USD cohérents (≤2 gratuits, $1.99 Pass), pousser un ping IndexNow après déploiement pour rafraîchir le cache Perplexity & SearchGPT.',
+          'AGILE DECISION #2 -> With active RFC 8288 Link header on every Edge response + /.well-known/agent.json + coherent USD pricing (≤2 free, $1.99 Pass), trigger IndexNow ping post-deploy to refresh Perplexity & SearchGPT cache.',
       },
       {
         id_radar: 'RADAR-03-CLI-CI',
         canal_agent_us:
-          'Terminal Développeur & GitHub Actions Drift Guard (npx promptshift & action.yml)',
+          'Developer Terminal & GitHub Actions Drift Guard (npx promptshift & action.yml)',
         surfaces_techniques:
           'packages/cli/bin/promptshift.js • action.yml • /cli • /api/badge?score=98.5',
         statut: 'CORRIGE_307_OK',
@@ -420,9 +420,9 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_friction:
-          'Le binaire CLI affichait l’encadré jaune IN-FLOW QUOTA COLLISION (>2 fichiers) mais imprimait l’URL Polar en HTTP 404 et acceptait n’importe quel texte via --key=test ! Corrigé avec URL buy.polar.sh + validation stricte isValidLicenseKey().',
+          'CLI binary printed yellow IN-FLOW QUOTA COLLISION (>2 files) box but printed HTTP 404 Polar URL and accepted any text via --key=test! Fixed with buy.polar.sh URL + strict isValidLicenseKey() validation.',
         signal_et_decision_arbitrage:
-          'DÉCISION AGILE #3 -> Publier la mise à jour v1.2.1 du package npm "promptshift" (npm publish dans packages/cli) pour que "npx promptshift" dans les terminaux US affiche les nouveaux liens buy.polar.sh ($1.99 / $5.99) et diffuse le badge README viral.',
+          'AGILE DECISION #3 -> Publish v1.2.1 npm update for "promptshift" (npm publish in packages/cli) so "npx promptshift" in US developer terminals displays new buy.polar.sh links ($1.99 / $5.99) and promotes viral README badge.',
       },
       {
         id_radar: 'RADAR-04-PSEO',
@@ -438,9 +438,9 @@ export class CheckCheckService {
         ventes_confirmees: 0,
         ca_net_usd: '$0.00',
         diagnostic_friction:
-          'Pages indexables mais tunnel cassé à l’arrivée : cliquer sur un pont SEO n’ouvrait pas le Dropzone ni le couple source->target choisi, et les cartes de prix SEO n’étaient pas cliquables. Désormais branchées en 1 clic sur #dropzone et /api/checkout/express.',
+          'Pages indexable but broken funnel on landing: clicking a programmatic SEO bridge failed to open Dropzone or select the requested pair, and SEO pricing cards were not clickable. Now 1-click routed to #dropzone and /api/checkout/express.',
         signal_et_decision_arbitrage:
-          'DÉCISION AGILE #4 -> Déclencher le ping IndexNow + soumission Sitemap GSC et déposer les 3 PRs DoFollow gratuites préparées (awesome-cursorrules, cursor.directory, awesome-claude) en ciblant prioritairement /convert/cursor-to-claude.',
+          'AGILE DECISION #4 -> Trigger IndexNow ping + GSC Sitemap submission and submit 3 free DoFollow PRs (awesome-cursorrules, cursor.directory, awesome-claude) targeting /convert/cursor-to-claude.',
       },
       {
         id_radar: 'RADAR-05-X402',
@@ -456,9 +456,9 @@ export class CheckCheckService {
         ventes_confirmees: paidSales,
         ca_net_usd: `$${netRevenueUsd.toFixed(2)}`,
         diagnostic_friction:
-          'ALERTE ACQUISITION : Les 5 derniers runs quotidiens GitHub Actions (26-30 oct.) de x-autopilot.ts ont échoué avec HTTP 402 CreditsDepleted sur l’API X.com -> 0 tweet publié sur les 730 prêts, donc 0 trafic social US entrant.',
+          'ACQUISITION ALERT: Prior GitHub Actions runs of x-autopilot.ts hit HTTP 402 CreditsDepleted on X.com API -> 0 tweets published of the 730 ready, resulting in 0 inbound US social traffic.',
         signal_et_decision_arbitrage:
-          'DÉCISION AGILE #5 (ACTION 60 SECONDES) -> Activer le crédit gratuit de $20 + permissions Read & Write sur https://console.x.com pour débloquer les 2 posts US/jour automatisés, et doubler en parallèle sur Reddit (r/Cursor, r/ClaudeAI) + GitHub Awesome PRs à $0.',
+          'AGILE DECISION #5 (60-SECOND ACTION) -> Enable free $20 credit + Read & Write permissions on https://console.x.com to unblock 2 automated US posts/day, while cross-posting on Reddit (r/Cursor, r/ClaudeAI) + GitHub Awesome PRs at $0.',
       },
     ];
 
@@ -486,93 +486,93 @@ export class CheckCheckService {
       {
         etape: 1,
         code_etape: 'FUNNEL-01-DISCOVERY',
-        intitule_etape: '1. Visites Humaines & Probes Agents US (Web, pSEO, MCP, llms.txt)',
+        intitule_etape: '1. Human Visits & US Agent Probes (Web, pSEO, MCP, llms.txt)',
         volume_reel: stage1Discovery,
         taux_passage_pct: '100.0%',
         fuite_identifiee:
-          'Zéro trafic social X.com (API X bloquée en HTTP 402) et absence de server-card MCP standardisée.',
+          'Zero X.com social traffic (X API blocked on HTTP 402) and lack of standardized MCP server-card.',
         correctif_deploye:
-          'Ajout /.well-known/mcp/server-card.json + /.well-known/agent.json + Header Link RFC 8288 + diagnostic clair X API.',
+          'Added /.well-known/mcp/server-card.json + /.well-known/agent.json + RFC 8288 Link Header + clear X API diagnostic.',
         signal_et_decision_arbitrage:
-          'OUVRIR LES VANNES HAUT DE TUNNEL -> Débloquer console.x.com ($20 offerts) + soumettre le serveur MCP sur Smithery/Glama + publier 3 PRs GitHub Awesome pour injecter un flux continu de développeurs US qualifiés.',
+          'OPEN TOP-OF-FUNNEL GATES -> Unlock console.x.com ($20 credit) + submit MCP server to Smithery/Glama + submit 3 GitHub Awesome PRs to drive continuous qualified US developer traffic.',
       },
       {
         etape: 2,
         code_etape: 'FUNNEL-02-SANDBOX',
-        intitule_etape: '2. Essais Interactifs & Inspections AST en RAM (Presets & Diff Live)',
+        intitule_etape: '2. Interactive Sandbox & AST In-RAM Inspections (Presets & Live Diff)',
         volume_reel: stage2Sandbox,
         taux_passage_pct: pct(stage2Sandbox, stage1Discovery),
         fuite_identifiee:
-          'Sur la Landing Page, l’utilisateur voyait les presets statiques mais le vrai Dropzone d’upload était caché derrière un petit bouton secondaire.',
+          'On the Landing Page, visitors saw static presets but the real upload Dropzone was tucked away behind a small secondary button.',
         correctif_deploye:
-          'Dropzone d’upload mis au premier plan dans #sandbox juste au-dessus des presets 1-clic, avec lecture directe de ?source=&target=.',
+          'Upload Dropzone brought front and center in #sandbox right above 1-click presets, with direct ?source=&target= query parsing.',
         signal_et_decision_arbitrage:
-          'INVERSER DEMO vs UPLOAD RÉEL -> Faire déposer le vrai fichier du visiteur en moins de 5 secondes : personne ne paie $1.99 pour télécharger un preset de démo, tout se joue sur le dépôt du repo personnel.',
+          'FLIP DEMO vs REAL REPO -> Have visitor drop their real project in under 5 seconds: nobody pays $1.99 to download a demo preset, conversion hinges on their personal codebase.',
       },
       {
         etape: 3,
         code_etape: 'FUNNEL-03-REPO-UPLOAD',
-        intitule_etape: '3. Dépôts de Projets Réels (Dropzone Dossier/.ZIP, CLI & MCP Calls)',
+        intitule_etape: '3. Real Project Uploads (Folder/.ZIP Dropzone, CLI & MCP Calls)',
         volume_reel: stage3CustomUploads,
         taux_passage_pct: pct(stage3CustomUploads, Math.max(1, stage1Discovery)),
         fuite_identifiee:
-          'L’input fichier n’acceptait que .zip (rejetant un simple fichier CLAUDE.md ou .mdc sélectionné au clic) et ne traçait pas systématiquement l’upload.',
+          'File input only accepted .zip (rejecting single CLAUDE.md or .mdc files) and failed to systematically record upload telemetry.',
         correctif_deploye:
-          'Sélecteur élargi (.zip, .md, .mdc, .cursorrules, dossiers complets) + télémétrie project_upload + compteur temps réel de secrets masqués.',
+          'Broadened selector (.zip, .md, .mdc, .cursorrules, full folders) + project_upload telemetry + live sanitized secrets counter.',
         signal_et_decision_arbitrage:
-          'MAXIMISER L’EFFET "AHA!" EN RAM -> Afficher immédiatement le score AST (98.5%) et le nombre de clés API neutralisées en mémoire pour prouver la valeur avant même de demander $1.99.',
+          'MAXIMIZE IN-RAM "AHA!" MOMENT -> Immediately display AST parity score (98.5%) and number of credentials neutralized in volatile RAM before requesting $1.99.',
       },
       {
         etape: 4,
         code_etape: 'FUNNEL-04-PAYWALL-402',
-        intitule_etape: '4. Collisions Paywall >2 Fichiers & Appels Machine HTTP 402',
+        intitule_etape: '4. Paywall Collisions >2 Files & HTTP 402 Machine Calls',
         volume_reel: stage4PaywallHits,
         taux_passage_pct: pct(stage4PaywallHits, Math.max(1, stage3CustomUploads)),
         fuite_identifiee:
-          'FUITE FATALE #1 : Dans Dropzone.tsx, cliquer sur "Unlock Full Repository ($1.99)" ou sur l’onglet "Pro Developer" débloquait tous les fichiers gratuitement en local sans jamais ouvrir Polar !',
+          'FATAL LEAK #1: In Dropzone.tsx, clicking "Unlock Full Repository ($1.99)" or "Pro Developer" unblocked all files locally for free without ever opening Polar!',
         correctif_deploye:
-          'Verrouillage hermétique sur ClientVault.getActivePlan() : tout repo >2 fichiers sans licence ouvre la preuve de valeur (X fichiers + secrets masqués + 4-en-1) et lance Polar Checkout.',
+          'Airtight lock via ClientVault.getActivePlan(): any unauthenticated repo >2 files triggers value proof modal (X files + redacted secrets + 4-in-1) and launches Polar Checkout.',
         signal_et_decision_arbitrage:
-          'GARDER LE SEUIL À ≤2 FICHIERS GRATUITS -> 1 fichier sert à prouver la qualité gratuitement ; dès qu’un vrai projet Cursor (.cursor/rules/*.mdc) ou Antigravity contient 3+ fichiers, la collision convertit naturellement à $1.99.',
+          'MAINTAIN STRICT ≤2 FREE FILES THRESHOLD -> 1-2 files prove quality for free; as soon as a real Cursor (.cursor/rules/*.mdc) or Antigravity project has 3+ files, collision naturally converts at $1.99.',
       },
       {
         etape: 5,
         code_etape: 'FUNNEL-05-CONTACT-INTENT',
-        intitule_etape: '5. Prises de Contact, Captures Email Pré-Checkout & Clés CLI Copiées',
+        intitule_etape: '5. Contact Inquiries, Pre-Checkout Email Captures & CLI Keys Copied',
         volume_reel: stage5ContactsAndVault,
         taux_passage_pct: pct(stage5ContactsAndVault, Math.max(1, stage1Discovery)),
         fuite_identifiee:
-          'FUITE FATALE #2 : PaymentModal exigeait la saisie manuelle d’un email AVANT d’autoriser la redirection vers Polar, créant une double saisie bloquante avant Apple Pay / Google Pay.',
+          'FATAL LEAK #2: PaymentModal required manual email input BEFORE allowing redirect to Polar, causing a friction double-entry barrier ahead of Apple/Google Pay.',
         correctif_deploye:
-          'Champ email passé en pré-remplissage OPTIONNEL dans PaymentModal : le bouton "1-Click Express Checkout ($1.99)" ouvre Polar immédiatement (où Apple Pay / Google Pay / Link fournit l’email en 1 tap).',
+          'Email field set to OPTIONAL prefill in PaymentModal: "1-Click Express Checkout ($1.99)" opens Polar immediately (where Apple Pay / Google Pay / Link supplies email in 1 biometric tap).',
         signal_et_decision_arbitrage:
-          'ZÉRO FRICTION PRÉ-PAIEMENT -> Laisser Polar.sh (Merchant of Record) capter l’email en 1 clic biométrique lors du paiement Apple/Google Pay plutôt que de bloquer l’acheteur dans notre modale.',
+          'ZERO PRE-PAYMENT FRICTION -> Let Polar.sh (Merchant of Record) capture email seamlessly via Apple/Google Pay rather than blocking the buyer in our frontend modal.',
       },
       {
         etape: 6,
         code_etape: 'FUNNEL-06-POLAR-CHECKOUT',
-        intitule_etape: '6. Sessions Polar.sh Express Initiées ($1.99 / $5.99 / $19.99)',
+        intitule_etape: '6. Polar.sh Express Sessions Initiated ($1.99 / $5.99 / $19.99)',
         volume_reel: stage6PolarCheckouts,
         taux_passage_pct: pct(stage6PolarCheckouts, Math.max(1, stage1Discovery)),
         fuite_identifiee:
-          `${polar.byPlan.single.checkoutsExpired} sessions Single Pass expirées sur Polar (ex: 28 oct.) : les visiteurs cliquaient sur "$1.99" avec un simple preset de démo chargé, ou tombaient sur une erreur 404 depuis MCP/CLI/llms.txt.`,
+          `${polar.byPlan.single.checkoutsExpired} Single Pass sessions expired on Polar: visitors clicked "$1.99" with only a demo preset loaded, or landed on 404 errors from MCP/CLI/llms.txt.`,
         correctif_deploye:
-          'Liens 404 remplacés partout par buy.polar.sh (HTTP 307) + /api/checkout/express avec attribution (channel, pair) + ancrage sur le vrai repo uploadé du client.',
+          'Replaced all 404 links with buy.polar.sh (HTTP 307) + /api/checkout/express with attribution (channel, pair) + anchored to client\'s staged in-RAM files.',
         signal_et_decision_arbitrage:
-          'CONVERTIR LES SESSIONS OUVERTES EN VENTES -> Associer systématiquement le checkout à l’archive 4-en-1 prête en mémoire ("Your X files are staged in RAM — auto-download starts immediately after $1.99 Apple/Google Pay").',
+          'CONVERT OPEN SESSIONS TO SALES -> Systematically anchor checkout to the staged 4-in-1 bundle in memory ("Your X files are staged in RAM — auto-download starts immediately after $1.99 Apple/Google Pay").',
       },
       {
         etape: 7,
         code_etape: 'FUNNEL-07-PAID-UNLOCK',
-        intitule_etape: '7. Ventes Payées Confirmées (Polar MoR) & Auto-Download Suite 4-en-1',
+        intitule_etape: '7. Confirmed Paid Sales (Polar MoR) & 4-in-1 Suite Auto-Download',
         volume_reel: stage7PaidOrders,
         taux_passage_pct: pct(stage7PaidOrders, Math.max(1, stage6PolarCheckouts)),
         fuite_identifiee:
-          'FUITE FATALE #3 : app/page.tsx n’avait aucun listener sur ?checkout=success ! Après paiement Polar, l’acheteur revenait sur "/" avec son repo effacé par la redirection et zéro ZIP téléchargé.',
+          'FATAL LEAK #3: app/page.tsx had no listener for ?checkout=success! After Polar payment, buyer returned to "/" with their repo erased by page reload and zero ZIP downloaded.',
         correctif_deploye:
-          'Sauvegarde éphémère sessionStorage avant redirection + vérification /api/payments/polar/verify au retour + activation ClientVault + facture PDF + téléchargement automatique du .zip 4-en-1 !',
+          'Ephemeral sessionStorage backup before redirect + /api/payments/polar/verify return verification + ClientVault activation + PDF receipt + automatic 4-in-1 .zip download!',
         signal_et_decision_arbitrage:
-          'BOUCLE DE MONÉTISATION & VIRALITÉ BOUCLÉE -> Dès la 1re vente à $1.99, l’acheteur reçoit automatiquement son bundle 4-en-1 + bouton de partage X pré-rempli + upsell naturel vers Pro ($5.99/mo) pour le CLI/MCP.',
+          'MONETIZATION & VIRALITY LOOP COMPLETE -> Upon 1st $1.99 purchase, customer immediately receives 4-in-1 bundle + pre-filled X share prompt + natural upsell to Pro ($5.99/mo) for CLI/MCP.',
       },
     ];
 

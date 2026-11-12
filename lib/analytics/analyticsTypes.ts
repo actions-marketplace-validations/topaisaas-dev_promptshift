@@ -136,8 +136,8 @@ export interface SocialNetworkStat {
   badgeBorder: string;
   uniqueSessions: number;
   totalPageViews: number;
-  trafficSharePct: number; // Part du trafic social (%)
-  ordersAttributed: number; // Commandes clients attribuées
+  trafficSharePct: number; // Social traffic share (%)
+  ordersAttributed: number; // Customer orders attributed
   revenueAttributedUsd: number; // Chiffre d'affaires ($)
   revenueAttributedEur: number; // Chiffre d'affaires (€)
   croRatePct: number; // Taux de conversion CRO (%)
@@ -151,7 +151,7 @@ export interface SocialInboundLogEntry {
   path: string;
   campaignOrPost: string;
   deviceType: DeviceType;
-  actionTriggered: string; // Visite simple, Upload projet, Collision paywall 402, Passage en caisse, Achat validé
+  actionTriggered: string; // Page Visit, Project Upload, Paywall Hit (402), Polar Checkout Initiated, Payment Completed
   country?: string;
   amountUsd?: number;
   rawReferrer?: string;
